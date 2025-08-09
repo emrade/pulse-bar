@@ -16,18 +16,22 @@ struct MetricRowView: View {
     var action: (() -> Void)? = nil
     
     var body: some View {
-        HStack(spacing: 12) {
-            // Icon
-            Image(systemName: icon)
-                .frame(width: 24, height: 24)
-                .foregroundColor(.primary)
-            
-            // Title and detail
-            VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 3) {
+            // Top row: Icon, Title, and Detail
+            HStack(spacing: 12) {
+                // Icon
+                Image(systemName: icon)
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(.primary)
+                
+                // Title
                 Text(title)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.primary)
                 
+                Spacer()
+                
+                // Detail (if exists)
                 if let detail = detail {
                     Text(detail)
                         .font(.system(size: 11))
@@ -35,20 +39,28 @@ struct MetricRowView: View {
                 }
             }
             
-            Spacer()
-            
-            // Value or button
-            if isButton {
-                Button(value) {
-                    action?()
+            // Bottom row: Value or button (indented to align with title)
+            HStack {
+                Spacer()
+                    .frame(width: 32) // Space for icon + spacing
+                
+                if isButton {
+                    Button(value) {
+                        action?()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    
+                    Spacer()
+                } else {
+                    Text(value)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    Spacer()
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-            } else {
-                Text(value)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.trailing)
             }
         }
         .padding(.vertical, 4)

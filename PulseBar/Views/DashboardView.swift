@@ -10,7 +10,7 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject private var systemMonitor = SystemMonitor.shared
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             // Header
             HStack {
                 Image(systemName: "waveform.path.ecg")
@@ -20,13 +20,13 @@ struct DashboardView: View {
                     .fontWeight(.semibold)
                 Spacer()
             }
-            .padding(.horizontal)
-            .padding(.top)
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
             
             Divider()
             
             // Metric rows with real data
-            VStack(spacing: 8) {
+            VStack(spacing: 10) {
                 MetricRowView(
                     icon: "cpu",
                     title: "CPU",
@@ -37,7 +37,7 @@ struct DashboardView: View {
                 MetricRowView(
                     icon: "memorychip",
                     title: "Memory",
-                    value: systemMonitor.snapshot.memory.formattedUsed,
+                    value: systemMonitor.snapshot.memory.formattedUsedWithAvailable,
                     detail: systemMonitor.snapshot.memory.formattedTotal
                 )
                 
@@ -86,9 +86,9 @@ struct DashboardView: View {
                     detail: nil
                 )
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 16)
             
-            Spacer()
+            Spacer(minLength: 4)
             
             // Footer
             Divider()
@@ -115,10 +115,10 @@ struct DashboardView: View {
                 .buttonStyle(.plain)
                 .foregroundColor(.secondary)
             }
-            .padding(.horizontal)
-            .padding(.bottom)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 12)
         }
-        .frame(width: 320, height: 400)
+        .frame(width: 360, height: 520)
         .background(Color(NSColor.windowBackgroundColor))
     }
 }

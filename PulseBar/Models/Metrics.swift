@@ -97,6 +97,17 @@ struct MemoryMetrics {
         return ByteCountFormatter.string(fromByteCount: Int64(totalBytes), countStyle: .binary)
     }
     
+    var formattedAvailable: String {
+        let availableBytes = freeBytes + cachedBytes // Free + reclaimable memory
+        return ByteCountFormatter.string(fromByteCount: Int64(availableBytes), countStyle: .binary)
+    }
+    
+    var formattedUsedWithAvailable: String {
+        if isLoading { return "Loading..." }
+        if error != nil { return "Error" }
+        return "\(formattedUsed) used • \(formattedAvailable) available"
+    }
+    
     var usagePercentage: Double {
         guard totalBytes > 0 else { return 0.0 }
         return Double(usedBytes) / Double(totalBytes)
