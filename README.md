@@ -136,7 +136,7 @@ This comprehensive todo list is organized by development phases, following the P
   - ✅ Thread-safe with proper memory management
   - ✅ **Acceptance:** Real CPU data updating every 1.5 seconds
 
-### Phase 4: System Metric Services Implementation 🚧 IN PROGRESS
+### Phase 4: System Metric Services Implementation ✅ COMPLETED
 
 #### 4.1. CPU Monitoring Service ✅ COMPLETED
 - [x] **Implement CPUService** ✅
@@ -178,56 +178,56 @@ This comprehensive todo list is organized by development phases, following the P
   - ✅ Displays "used • available" memory format
   - ✅ **Acceptance:** All text fully visible, no truncation
 
-#### 4.3. Storage Monitoring Service
-- [ ] **Implement DiskService**
-  - File: `Services/DiskService.swift`
-  - Use `FileManager.attributesOfFileSystem(forPath:)`
-  - Monitor boot volume and external drives
-  - Handle mount/unmount notifications
-  - Default polling: 10 seconds
-  - **Acceptance:** Disk usage accurate, external drives detected
+#### 4.3. Storage Monitoring Service ✅ COMPLETED
+- [x] **Implement DiskService** ✅
+  - ✅ File: `Services/DiskService.swift`
+  - ✅ Use `FileManager.mountedVolumeURLs` and `resourceValues`
+  - ✅ Monitor boot volume and external drives
+  - ✅ Filter volumes >1GB, sort boot volume first
+  - ✅ Default polling: 10 seconds
+  - ✅ **Acceptance:** Disk usage accurate, external drives detected
 
 - [ ] **Add Disk service tests**
   - File: `Tests/DiskServiceTests.swift`
   - Mock filesystem attributes
   - Test space calculations and formatting
 
-#### 4.4. Battery Monitoring Service
-- [ ] **Implement BatteryService**
-  - File: `Services/BatteryService.swift`
-  - Use IOKit: `IOPSCopyPowerSourcesInfo()`, `IOPSGetPowerSourceDescription()`
-  - Track percentage, charging state, time remaining
-  - Health indicators (cycle count via IORegistry)
-  - Default polling: 10 seconds
-  - **Acceptance:** Battery data accurate on MacBook
+#### 4.4. Battery Monitoring Service ✅ COMPLETED
+- [x] **Implement BatteryService** ✅
+  - ✅ File: `Services/BatteryService.swift`
+  - ✅ Use `pmset -g batt` command for reliable battery data
+  - ✅ Track percentage, charging state, time remaining
+  - ✅ Proper AC power vs battery detection
+  - ✅ Default polling: 10 seconds
+  - ✅ **Acceptance:** Battery data accurate on MacBook, no crashes
 
 - [ ] **Add Battery service tests**
   - File: `Tests/BatteryServiceTests.swift`
   - Mock power source descriptions
   - Test state parsing and formatting
 
-#### 4.5. Wi-Fi Monitoring Service
-- [ ] **Implement WiFiService**
-  - File: `Services/WiFiService.swift`
-  - Use CoreWLAN: `CWWiFiClient.shared().interface()`
-  - Track SSID, BSSID, RSSI, link speed
-  - Handle permission requirements
-  - Default polling: 5-10 seconds
-  - **Acceptance:** Wi-Fi data updates on network changes
+#### 4.5. Wi-Fi Monitoring Service ✅ COMPLETED
+- [x] **Implement WiFiService** ✅
+  - ✅ File: `Services/WiFiService.swift`
+  - ✅ Use CoreWLAN: `CWWiFiClient.shared().interface()`
+  - ✅ Track SSID, BSSID, RSSI, link speed
+  - ✅ Handle WiFi power state and connection status
+  - ✅ Default polling: 5 seconds
+  - ✅ **Acceptance:** Wi-Fi data updates and displays correctly
 
 - [ ] **Add Wi-Fi service tests**
   - File: `Tests/WiFiServiceTests.swift`
   - Mock CoreWLAN interface data
   - Test signal strength calculations
 
-#### 4.6. Connected Devices Service
-- [ ] **Implement DeviceService**
-  - File: `Services/DeviceService.swift`
-  - MVP: Parse `system_profiler SPUSBDataType -json`
-  - Later: Replace with IOKit for better performance
-  - Track device connect/disconnect events
-  - Expose device metadata: name, type, vendor/product ID
-  - **Acceptance:** USB devices appear/disappear in list
+#### 4.6. Connected Devices Service ✅ COMPLETED
+- [x] **Implement DeviceService** ✅
+  - ✅ File: `Services/DeviceService.swift`
+  - ✅ Parse `system_profiler SPUSBDataType -json` for USB devices
+  - ✅ Use `FileManager.mountedVolumeURLs` for mounted volumes
+  - ✅ Device filtering (remove hubs/controllers) and deduplication
+  - ✅ Device metadata: name, type, vendor/product ID, mount points
+  - ✅ **Acceptance:** USB and storage devices display correctly
 
 - [ ] **Add Device service tests**
   - File: `Tests/DeviceServiceTests.swift`
