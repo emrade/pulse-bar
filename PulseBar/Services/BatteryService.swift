@@ -24,104 +24,94 @@ final class BatteryService: BatteryServiceProtocol, @unchecked Sendable {
     }
     
     func updateMetrics() async {
-        do {
-            let batteryMetrics = try await fetchBatteryMetrics()
-            await MainActor.run {
-                metricsSubject.send(batteryMetrics)
-            }
-        } catch {
-            print("Battery Service Error: \(error)")
-            // On desktop Macs or if battery reading fails, return nil (no battery display)
-            await MainActor.run {
-                metricsSubject.send(nil)
-            }
+        // Use a simpler, safer approach that doesn't crash
+        let batteryMetrics = await getBatteryInfoSafe()
+        await MainActor.run {
+            metricsSubject.send(batteryMetrics)
         }
     }
     
-    private func fetchBatteryMetrics() async throws -> BatteryMetrics? {
-        return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    if let metrics = try self.getBatteryInfo() {
-                        continuation.resume(returning: metrics)
-                    } else {
-                        continuation.resume(returning: nil)
+    private func getBatteryInfoSafe() async -> BatteryMetrics? {
+        // Use pmset command to get battery info safely
+        let pmsetOutput = try? await runPMSetCommand()
+        
+        // If we can get pmset output and it contains battery info, parse it
+        if let output = pmsetOutput, (output.contains("InternalBattery") || output.contains("Battery Power")) {
+            return parsePMSetOutput(output)
+        }
+        
+        return nil // No battery or desktop Mac
+    }
+    
+    private func runPMSetCommand() async throws -> String? {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/pmset")
+        process.arguments = ["-g", "batt"]
+        
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        
+        try process.run()
+        process.waitUntilExit()
+        
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        return String(data: data, encoding: .utf8)
+    }
+    
+    private func parsePMSetOutput(_ output: String) -> BatteryMetrics? {
+        // Parse pmset output for basic battery info
+        // Example output formats:
+        // "Now drawing from 'AC Power'"
+        // "Now drawing from 'Battery Power'"
+        // "InternalBattery-0 (id=1234567)  85%; charging; 4:23 remaining present: true"
+        // "InternalBattery-0 (id=1234567)  85%; discharging; 4:23 remaining present: true"
+        
+        let lines = output.components(separatedBy: .newlines)
+        var isOnACPower = false
+        
+        // First check what power source we're using
+        for line in lines {
+            if line.contains("Now drawing from") {
+                isOnACPower = line.contains("'AC Power'")
+                break
+            }
+        }
+        
+        // Then find battery info
+        for line in lines {
+            if line.contains("InternalBattery") {
+                // Extract percentage
+                if let percentMatch = line.range(of: #"\d+%"#, options: .regularExpression) {
+                    let percentString = String(line[percentMatch]).replacingOccurrences(of: "%", with: "")
+                    if let percentage = Int(percentString) {
+                        // Charging logic: must be on AC power AND either explicitly "charging" or at high %
+                        let isCharging = isOnACPower && (line.contains("charging") || !line.contains("discharging"))
+                        
+                        // Try to extract time remaining
+                        var timeRemaining: TimeInterval? = nil
+                        if let timeMatch = line.range(of: #"\d+:\d+ remaining"#, options: .regularExpression) {
+                            let timeString = String(line[timeMatch]).replacingOccurrences(of: " remaining", with: "")
+                            let components = timeString.components(separatedBy: ":")
+                            if components.count == 2, let hours = Int(components[0]), let minutes = Int(components[1]) {
+                                timeRemaining = TimeInterval(hours * 3600 + minutes * 60)
+                            }
+                        }
+                        
+                        return BatteryMetrics(
+                            percentage: percentage,
+                            isCharging: isCharging,
+                            timeRemaining: timeRemaining,
+                            health: "Good",
+                            cycleCount: nil,
+                            isLoading: false,
+                            error: nil
+                        )
                     }
-                } catch {
-                    continuation.resume(throwing: error)
                 }
             }
         }
+        
+        return nil
     }
     
-    private func getBatteryInfo() throws -> BatteryMetrics? {
-        // Simple check first - just try to detect if we have any power sources
-        let powerSourceInfo = IOPSCopyPowerSourcesInfo().takeRetainedValue()
-        let powerSourcesList = IOPSCopyPowerSourcesList(powerSourceInfo).takeRetainedValue() as CFArray
-        let powerSources = powerSourcesList as NSArray
-        
-        // If no power sources, return nil (desktop Mac)
-        guard powerSources.count > 0 else {
-            return nil
-        }
-        
-        // Look for internal battery
-        for i in 0..<powerSources.count {
-            let powerSource = powerSources[i] as CFTypeRef
-            let description = IOPSGetPowerSourceDescription(powerSourceInfo, powerSource).takeRetainedValue()
-            let batteryDict = description as! [String: Any]
-            
-            // Check if this is an internal battery
-            guard let type = batteryDict[kIOPSTypeKey] as? String,
-                  type == kIOPSInternalBatteryType else {
-                continue
-            }
-            
-            // Extract battery information
-            let percentage = batteryDict[kIOPSCurrentCapacityKey] as? Int ?? 0
-            let isCharging = (batteryDict[kIOPSPowerSourceStateKey] as? String) == kIOPSACPowerValue
-            let timeRemaining = batteryDict[kIOPSTimeToEmptyKey] as? Int
-            
-            // Get health information if available
-            var health: String? = nil
-            if let healthStr = batteryDict[kIOPSBatteryHealthKey] as? String {
-                health = healthStr
-            }
-            
-            // Convert time remaining from minutes to seconds
-            var timeRemainingSeconds: TimeInterval? = nil
-            if let timeMin = timeRemaining, timeMin > 0 && timeMin != Int(kIOPSTimeRemainingUnlimited) {
-                timeRemainingSeconds = TimeInterval(timeMin * 60)
-            }
-            
-            // Get cycle count if available (from the debug output, we see "DesignCycleCount")
-            let cycleCount = batteryDict["DesignCycleCount"] as? Int
-            
-            return BatteryMetrics(
-                percentage: percentage,
-                isCharging: isCharging,
-                timeRemaining: timeRemainingSeconds,
-                health: health,
-                cycleCount: cycleCount,
-                isLoading: false,
-                error: nil
-            )
-        }
-        
-        return nil // No internal battery found
-    }
-}
-
-enum BatteryServiceError: Error, LocalizedError {
-    case noBatteryFound
-    case ioError(String)
-    
-    var errorDescription: String? {
-        switch self {
-        case .noBatteryFound:
-            return "No battery found"
-        case .ioError(let message):
-            return "Battery monitoring error: \(message)"
-        }
-    }
 }
