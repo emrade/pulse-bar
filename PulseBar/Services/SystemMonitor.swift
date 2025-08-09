@@ -275,7 +275,6 @@ class SystemMonitor: ObservableObject {
         if snapshot.wifi.isConnected {
             return .wifi
         }
-        
         // Check for active ethernet connection (simplified)
         // In a real implementation, we'd check ethernet interfaces for active connections
         return .ethernet

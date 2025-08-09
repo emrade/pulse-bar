@@ -349,8 +349,12 @@ struct NetworkSpeedTest {
         if let errorMessage = error {
             return "Error: \(errorMessage)"
         }
-        if let download = downloadSpeed, let upload = uploadSpeed {
-            return "↓ \(String(format: "%.0f", download)) Mbps ↑ \(String(format: "%.0f", upload)) Mbps"
+        if let download = downloadSpeed {
+            if let upload = uploadSpeed {
+                return "↓ \(String(format: "%.0f", download)) Mbps ↑ \(String(format: "%.0f", upload)) Mbps"
+            } else {
+                return "↓ \(String(format: "%.0f", download)) Mbps"
+            }
         }
         return "Test Speed"
     }

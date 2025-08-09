@@ -92,7 +92,8 @@ Signal Quality Guide:
 
 Better signal = faster speeds and more reliable connection.
 """ : nil,
-                    secondaryButtonText: systemMonitor.networkSpeedTest.isRunning ? "Cancel Test" : "Test Speed",
+                    secondaryButtonText: systemMonitor.networkSpeedTest.isRunning ? 
+                        "Testing... \(Int(systemMonitor.networkSpeedTest.progress * 100))%" : "Test Speed",
                     secondaryAction: {
                         if systemMonitor.networkSpeedTest.isRunning {
                             systemMonitor.cancelSpeedTest()

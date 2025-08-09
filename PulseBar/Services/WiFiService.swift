@@ -30,7 +30,6 @@ final class WiFiService: WiFiServiceProtocol, @unchecked Sendable {
                 metricsSubject.send(wifiMetrics)
             }
         } catch {
-            print("WiFi Service Error: \(error)")
             let errorMetrics = WiFiMetrics(
                 ssid: nil,
                 bssid: nil,
@@ -60,14 +59,9 @@ final class WiFiService: WiFiServiceProtocol, @unchecked Sendable {
     }
     
     private func getWiFiInfo() throws -> WiFiMetrics {
-        // Try CoreWLAN first
-        do {
-            return try getCoreWLANInfo()
-        } catch {
-            print("CoreWLAN failed: \(error), trying command line approach...")
-            // Fallback to command-line approach - doesn't throw errors
-            return getWiFiInfoViaCommands()
-        }
+        // For sandboxed apps, CoreWLAN often fails to get SSID without location permissions
+        // Use system_profiler directly which works reliably
+        return getWiFiInfoViaCommands()
     }
     
     private func getCoreWLANInfo() throws -> WiFiMetrics {
@@ -115,15 +109,12 @@ final class WiFiService: WiFiServiceProtocol, @unchecked Sendable {
             
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             guard let output = String(data: data, encoding: .utf8) else {
-                print("WiFi Debug: No output from system_profiler command")
                 return createNotConnectedWiFiMetrics()
             }
             
-            print("WiFi Debug: Parsing system_profiler output...")
             return parseSystemProfilerWiFiOutput(output)
             
         } catch {
-            print("WiFi Debug: system_profiler execution failed: \(error)")
             return createNotConnectedWiFiMetrics()
         }
     }
@@ -144,31 +135,29 @@ final class WiFiService: WiFiServiceProtocol, @unchecked Sendable {
             if trimmedLine.hasPrefix("Status: ") {
                 let status = trimmedLine.replacingOccurrences(of: "Status: ", with: "")
                 isConnected = status.contains("Connected")
-                print("WiFi Debug: WiFi status: \(status)")
                 continue
             }
             
             // Look for "Current Network Information:"
             if trimmedLine == "Current Network Information:" {
                 inCurrentNetworkInfo = true
-                print("WiFi Debug: Found Current Network Information section")
                 continue
             }
             
-            // Reset flag when we exit current network info section
-            if inCurrentNetworkInfo && !line.hasPrefix("            ") && !line.hasPrefix("          Current Network Information:") {
+            // Reset flag when we exit current network info section (based on indentation)
+            if inCurrentNetworkInfo && !line.hasPrefix("            ") && !line.hasPrefix("          Current Network Information:") && !trimmedLine.isEmpty {
                 inCurrentNetworkInfo = false
             }
             
             // Look for network name when in current network info section
-            if inCurrentNetworkInfo && trimmedLine.hasSuffix(":") && !trimmedLine.contains(" ") && !trimmedLine.isEmpty {
+            // Network names have specific indentation and end with ":"
+            if inCurrentNetworkInfo && line.hasPrefix("            ") && trimmedLine.hasSuffix(":") && !trimmedLine.contains(" ") {
                 ssid = String(trimmedLine.dropLast())
-                print("WiFi Debug: Found network name: \(ssid ?? "nil")")
                 continue
             }
             
-            // Look for Signal / Noise information (only when connected)
-            if isConnected && trimmedLine.hasPrefix("Signal / Noise: ") {
+            // Look for Signal / Noise information (only when connected and we have found an SSID)
+            if isConnected && ssid != nil && trimmedLine.hasPrefix("Signal / Noise: ") {
                 let signalInfo = trimmedLine.replacingOccurrences(of: "Signal / Noise: ", with: "")
                 // Format: "-53 dBm / -96 dBm"
                 let components = signalInfo.components(separatedBy: " / ")
@@ -176,21 +165,18 @@ final class WiFiService: WiFiServiceProtocol, @unchecked Sendable {
                     let rssiString = firstComponent.replacingOccurrences(of: " dBm", with: "")
                     rssi = Int(rssiString)
                 }
-                print("WiFi Debug: Found signal strength: \(rssi ?? 0) dBm")
                 continue
             }
             
-            // Look for Transmit Rate (only when connected)
-            if isConnected && trimmedLine.hasPrefix("Transmit Rate: ") {
+            // Look for Transmit Rate (only when connected and we have found an SSID)
+            if isConnected && ssid != nil && trimmedLine.hasPrefix("Transmit Rate: ") {
                 let rateString = trimmedLine.replacingOccurrences(of: "Transmit Rate: ", with: "")
                 linkSpeed = Double(rateString)
-                print("WiFi Debug: Found transmit rate: \(linkSpeed ?? 0) Mbps")
                 continue
             }
         }
         
         if isConnected && ssid != nil {
-            print("WiFi Debug: Successfully parsed WiFi connection - SSID: \(ssid!), RSSI: \(rssi ?? 0), Speed: \(linkSpeed ?? 0)")
             return WiFiMetrics(
                 ssid: ssid,
                 bssid: nil,
@@ -201,7 +187,6 @@ final class WiFiService: WiFiServiceProtocol, @unchecked Sendable {
                 error: nil
             )
         } else {
-            print("WiFi Debug: No active WiFi connection found (Connected: \(isConnected), SSID: \(ssid ?? "nil"))")
             return createNotConnectedWiFiMetrics()
         }
     }
