@@ -44,8 +44,8 @@ struct DashboardView: View {
                 MetricRowView(
                     icon: "internaldrive",
                     title: "Storage",
-                    value: systemMonitor.snapshot.disk.formattedBootFree,
-                    detail: systemMonitor.snapshot.disk.bootVolume?.name
+                    value: systemMonitor.snapshot.disk.formattedBootUsage,
+                    detail: "\(systemMonitor.snapshot.disk.bootVolume?.name ?? "Unknown") • \(systemMonitor.snapshot.disk.formattedBootTotal)"
                 )
                 
                 if let battery = systemMonitor.snapshot.battery {

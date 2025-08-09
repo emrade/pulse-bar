@@ -140,6 +140,20 @@ struct DiskMetrics {
         guard let boot = bootVolume else { return "No boot volume" }
         return ByteCountFormatter.string(fromByteCount: Int64(boot.freeBytes), countStyle: .binary) + " free"
     }
+    
+    var formattedBootUsage: String {
+        if isLoading { return "Loading..." }
+        if error != nil { return "Error" }
+        guard let boot = bootVolume else { return "No boot volume" }
+        let usedFormatted = ByteCountFormatter.string(fromByteCount: Int64(boot.usedBytes), countStyle: .binary)
+        let freeFormatted = ByteCountFormatter.string(fromByteCount: Int64(boot.freeBytes), countStyle: .binary)
+        return "\(usedFormatted) used • \(freeFormatted) free"
+    }
+    
+    var formattedBootTotal: String {
+        guard let boot = bootVolume else { return "" }
+        return ByteCountFormatter.string(fromByteCount: Int64(boot.totalBytes), countStyle: .binary)
+    }
 }
 
 struct VolumeInfo {

@@ -154,19 +154,29 @@ This comprehensive todo list is organized by development phases, following the P
   - Test percentage calculation accuracy
   - **Acceptance:** Unit tests pass with synthetic data
 
-#### 4.2. Memory Monitoring Service
-- [ ] **Implement MemoryService**
-  - File: `Services/MemoryService.swift`
-  - Use `host_statistics64` with `vm_statistics64_data_t`
-  - Calculate used, free, cached memory
-  - Format with `ByteCountFormatter`
-  - Default polling: 2 seconds
-  - **Acceptance:** Memory data matches Activity Monitor
+#### 4.2. Memory Monitoring Service ✅ COMPLETED
+- [x] **Implement MemoryService** ✅
+  - ✅ File: `Services/MemoryService.swift`
+  - ✅ Use `host_statistics64` with `vm_statistics64_data_t`
+  - ✅ Calculate used, free, cached memory with proper page calculations
+  - ✅ Use `sysctlbyname("hw.memsize")` for total physical memory
+  - ✅ Format with `ByteCountFormatter` showing used and available memory
+  - ✅ Thread-safe async implementation
+  - ✅ Default polling: 2 seconds
+  - ✅ **Acceptance:** Real memory data displaying correctly
 
 - [ ] **Add Memory service tests**
   - File: `Tests/MemoryServiceTests.swift`
   - Mock vm statistics structures
   - Test memory calculations and formatting
+
+#### 4.2.1. UI Improvements ✅ COMPLETED
+- [x] **Enhanced metric display layout** ✅
+  - ✅ Two-row design prevents text truncation
+  - ✅ Better visual hierarchy with proper spacing
+  - ✅ Wider popover (360px) for improved readability
+  - ✅ Displays "used • available" memory format
+  - ✅ **Acceptance:** All text fully visible, no truncation
 
 #### 4.3. Storage Monitoring Service
 - [ ] **Implement DiskService**
