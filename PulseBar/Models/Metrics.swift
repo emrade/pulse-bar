@@ -355,3 +355,10 @@ struct NetworkSpeedTest {
         return "Test Speed"
     }
 }
+
+// MARK: - Network Connection Types
+enum NetworkConnectionType {
+    case wifi
+    case ethernet  
+    case other
+}

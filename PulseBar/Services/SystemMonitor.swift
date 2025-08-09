@@ -269,6 +269,41 @@ class SystemMonitor: ObservableObject {
         )
     }
     
+    // MARK: - Network Connection Detection
+    var activeConnectionType: NetworkConnectionType {
+        // Check if WiFi is connected and active
+        if snapshot.wifi.isConnected {
+            return .wifi
+        }
+        
+        // Check for active ethernet connection (simplified)
+        // In a real implementation, we'd check ethernet interfaces for active connections
+        return .ethernet
+    }
+    
+    var networkDisplayInfo: (icon: String, title: String, connectionDetail: String?) {
+        switch activeConnectionType {
+        case .wifi:
+            return (
+                icon: snapshot.wifi.isConnected ? "wifi" : "wifi.slash",
+                title: "Network",
+                connectionDetail: snapshot.wifi.isConnected ? "Wi-Fi" : nil
+            )
+        case .ethernet:
+            return (
+                icon: "ethernet",
+                title: "Network", 
+                connectionDetail: "Ethernet"
+            )
+        case .other:
+            return (
+                icon: "network",
+                title: "Network",
+                connectionDetail: nil
+            )
+        }
+    }
+    
     // MARK: - Public Methods
     func runSpeedTest() {
         Task {

@@ -14,10 +14,16 @@ struct MetricRowView: View {
     let detail: String?
     var isButton: Bool = false
     var action: (() -> Void)? = nil
+    var showInfoButton: Bool = false
+    var infoContent: String? = nil
+    var secondaryButtonText: String? = nil
+    var secondaryAction: (() -> Void)? = nil
+    
+    @State private var showingInfoPopover = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            // Top row: Icon, Title, and Detail
+            // Top row: Icon, Title, Info Button, and Detail
             HStack(spacing: 12) {
                 // Icon
                 Image(systemName: icon)
@@ -29,6 +35,29 @@ struct MetricRowView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.primary)
                 
+                // Info button (if enabled)
+                if showInfoButton {
+                    Button(action: {
+                        showingInfoPopover = true
+                    }) {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $showingInfoPopover) {
+                        if let infoContent = infoContent {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text(infoContent)
+                                    .font(.system(size: 13))
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .padding(16)
+                            .frame(maxWidth: 300)
+                        }
+                    }
+                }
+                
                 Spacer()
                 
                 // Detail (if exists)
@@ -39,26 +68,46 @@ struct MetricRowView: View {
                 }
             }
             
-            // Bottom row: Value or button (indented to align with title)
+            // Bottom row: Value and/or buttons (indented to align with title)
             HStack {
                 Spacer()
                     .frame(width: 32) // Space for icon + spacing
                 
                 if isButton {
-                    Button(value) {
-                        action?()
+                    HStack(spacing: 8) {
+                        Button(value) {
+                            action?()
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        
+                        // Secondary button (if exists)
+                        if let secondaryButtonText = secondaryButtonText {
+                            Button(secondaryButtonText) {
+                                secondaryAction?()
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                    
                     Spacer()
                 } else {
-                    Text(value)
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                    
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(value)
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        
+                        // Secondary button below value (if exists)
+                        if let secondaryButtonText = secondaryButtonText {
+                            Button(secondaryButtonText) {
+                                secondaryAction?()
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
+                    }
                     Spacer()
                 }
             }

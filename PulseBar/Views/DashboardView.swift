@@ -58,19 +58,42 @@ struct DashboardView: View {
                 }
                 
                 MetricRowView(
-                    icon: systemMonitor.snapshot.wifi.isConnected ? "wifi" : "wifi.slash",
-                    title: "Wi-Fi",
-                    value: systemMonitor.snapshot.wifi.formattedStatus,
-                    detail: systemMonitor.snapshot.wifi.isConnected ? systemMonitor.snapshot.wifi.signalQuality : nil
-                )
-                
-                MetricRowView(
-                    icon: "network",
-                    title: "Network",
-                    value: systemMonitor.networkSpeedTest.formattedResult,
-                    detail: nil,
-                    isButton: !systemMonitor.networkSpeedTest.isRunning,
-                    action: {
+                    icon: systemMonitor.networkDisplayInfo.icon,
+                    title: systemMonitor.networkDisplayInfo.title,
+                    value: systemMonitor.activeConnectionType == .wifi ? 
+                        systemMonitor.snapshot.wifi.formattedStatus :
+                        "Connected via \(systemMonitor.networkDisplayInfo.connectionDetail ?? "Network")",
+                    detail: {
+                        switch systemMonitor.activeConnectionType {
+                        case .wifi:
+                            if systemMonitor.snapshot.wifi.isConnected {
+                                let speedTestResult = systemMonitor.networkSpeedTest.formattedResult != "Test Speed" && !systemMonitor.networkSpeedTest.isRunning ? 
+                                    " • \(systemMonitor.networkSpeedTest.formattedResult)" : ""
+                                return "\(systemMonitor.snapshot.wifi.signalQuality)\(speedTestResult)"
+                            }
+                            return nil
+                        case .ethernet, .other:
+                            return systemMonitor.networkSpeedTest.formattedResult != "Test Speed" && !systemMonitor.networkSpeedTest.isRunning ? 
+                                systemMonitor.networkSpeedTest.formattedResult : nil
+                        }
+                    }(),
+                    showInfoButton: systemMonitor.activeConnectionType == .wifi,
+                    infoContent: systemMonitor.activeConnectionType == .wifi ? """
+WiFi Signal Strength (dBm):
+
+dBm measures radio signal power. Higher numbers = weaker signal.
+
+Signal Quality Guide:
+• -30 to -50 dBm: Excellent (very close to router)
+• -50 to -60 dBm: Good (same room as router) 
+• -60 to -70 dBm: Fair (different room, some walls)
+• -70 to -80 dBm: Weak (far from router, obstacles)
+• -80 to -90 dBm: Very weak (barely usable)
+
+Better signal = faster speeds and more reliable connection.
+""" : nil,
+                    secondaryButtonText: systemMonitor.networkSpeedTest.isRunning ? "Cancel Test" : "Test Speed",
+                    secondaryAction: {
                         if systemMonitor.networkSpeedTest.isRunning {
                             systemMonitor.cancelSpeedTest()
                         } else {
