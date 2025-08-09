@@ -106,7 +106,7 @@ Better signal = faster speeds and more reliable connection.
                 MetricRowView(
                     icon: "externaldrive.connected.to.line.below",
                     title: "Devices",
-                    value: systemMonitor.snapshot.devices.formattedCount,
+                    value: systemMonitor.snapshot.devices.formattedDetails,
                     detail: nil
                 )
             }

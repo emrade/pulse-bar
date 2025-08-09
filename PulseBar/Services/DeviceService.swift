@@ -89,6 +89,7 @@ final class DeviceService: DeviceServiceProtocol, @unchecked Sendable {
         devices = devices.filter { device in
             !device.name.contains("Hub") &&
             !device.name.contains("Controller") &&
+            !device.name.contains("Bus") &&
             !device.name.isEmpty
         }
         

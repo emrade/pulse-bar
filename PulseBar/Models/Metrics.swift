@@ -289,6 +289,16 @@ struct DeviceMetrics {
         if error != nil { return "Error" }
         return "\(devices.count) connected"
     }
+
+    var formattedDetails: String {
+        if isLoading { return "Loading..." }
+        if error != nil { return "Error" }
+        if devices.isEmpty { return "No devices connected" }
+
+        return devices.map { device in
+            "\(device.name) (\(device.type.displayName))"
+        }.joined(separator: "\n")
+    }
 }
 
 struct ConnectedDevice {
