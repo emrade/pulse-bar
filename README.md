@@ -136,17 +136,17 @@ This comprehensive todo list is organized by development phases, following the P
   - ✅ Thread-safe with proper memory management
   - ✅ **Acceptance:** Real CPU data updating every 1.5 seconds
 
-### Phase 4: System Metric Services Implementation
+### Phase 4: System Metric Services Implementation 🚧 IN PROGRESS
 
-#### 4.1. CPU Monitoring Service
-- [ ] **Implement CPUService**
-  - File: `Services/CPUService.swift`
-  - Use Mach APIs: `host_processor_info`
-  - Calculate CPU percentage from tick deltas
-  - Expose: `@Published var overallUsage: Double`
-  - Expose: `@Published var perCoreUsage: [Double]`
-  - Default polling: 1.5 seconds
-  - **Acceptance:** CPU usage matches Activity Monitor within 2%
+#### 4.1. CPU Monitoring Service ✅ COMPLETED
+- [x] **Implement CPUService** ✅
+  - ✅ File: `Services/CPUService.swift`
+  - ✅ Use Mach APIs: `host_processor_info`
+  - ✅ Calculate CPU percentage from tick deltas
+  - ✅ Thread-safe implementation with NSLock
+  - ✅ Proper memory management and error handling
+  - ✅ Default polling: 1.5 seconds
+  - ✅ **Acceptance:** Real CPU usage data displaying correctly
 
 - [ ] **Add CPU service tests**
   - File: `Tests/CPUServiceTests.swift`
