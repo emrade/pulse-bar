@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct DashboardView: View {
+    @StateObject private var systemMonitor = SystemMonitor.shared
     var body: some View {
         VStack(spacing: 12) {
             // Header
@@ -24,55 +25,64 @@ struct DashboardView: View {
             
             Divider()
             
-            // Metric rows (placeholders for now)
+            // Metric rows with real data
             VStack(spacing: 8) {
                 MetricRowView(
                     icon: "cpu",
                     title: "CPU",
-                    value: "Loading...",
-                    detail: nil
+                    value: systemMonitor.snapshot.cpu.formattedOverallUsage,
+                    detail: systemMonitor.snapshot.cpu.perCoreUsage.isEmpty ? nil : "\(systemMonitor.snapshot.cpu.perCoreUsage.count) cores"
                 )
                 
                 MetricRowView(
                     icon: "memorychip",
                     title: "Memory",
-                    value: "Loading...",
-                    detail: "16 GB"
+                    value: systemMonitor.snapshot.memory.formattedUsed,
+                    detail: systemMonitor.snapshot.memory.formattedTotal
                 )
                 
                 MetricRowView(
                     icon: "internaldrive",
                     title: "Storage",
-                    value: "Loading...",
-                    detail: "512 GB SSD"
+                    value: systemMonitor.snapshot.disk.formattedBootFree,
+                    detail: systemMonitor.snapshot.disk.bootVolume?.name
                 )
                 
-                MetricRowView(
-                    icon: "battery.100",
-                    title: "Battery",
-                    value: "Loading...",
-                    detail: nil
-                )
+                if let battery = systemMonitor.snapshot.battery {
+                    MetricRowView(
+                        icon: battery.isCharging ? "battery.100.bolt" : "battery.100",
+                        title: "Battery",
+                        value: battery.formattedStatus,
+                        detail: nil
+                    )
+                }
                 
                 MetricRowView(
-                    icon: "wifi",
+                    icon: systemMonitor.snapshot.wifi.isConnected ? "wifi" : "wifi.slash",
                     title: "Wi-Fi",
-                    value: "Loading...",
-                    detail: nil
+                    value: systemMonitor.snapshot.wifi.formattedStatus,
+                    detail: systemMonitor.snapshot.wifi.isConnected ? systemMonitor.snapshot.wifi.signalQuality : nil
                 )
                 
                 MetricRowView(
                     icon: "network",
                     title: "Network",
-                    value: "Test Speed",
+                    value: systemMonitor.networkSpeedTest.formattedResult,
                     detail: nil,
-                    isButton: true
+                    isButton: !systemMonitor.networkSpeedTest.isRunning,
+                    action: {
+                        if systemMonitor.networkSpeedTest.isRunning {
+                            systemMonitor.cancelSpeedTest()
+                        } else {
+                            systemMonitor.runSpeedTest()
+                        }
+                    }
                 )
                 
                 MetricRowView(
                     icon: "externaldrive.connected.to.line.below",
                     title: "Devices",
-                    value: "Loading...",
+                    value: systemMonitor.snapshot.devices.formattedCount,
                     detail: nil
                 )
             }

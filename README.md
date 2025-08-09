@@ -36,87 +36,105 @@ PulseBar displays essential system metrics (CPU, memory, storage, battery, Wi-Fi
 
 This comprehensive todo list is organized by development phases, following the PRD specifications. Each task includes implementation details, files to create/modify, and acceptance criteria.
 
-### Phase 1: Project Setup & Foundation
+### Phase 1: Project Setup & Foundation ✅ COMPLETED
 
 #### 1.1. Repository & Project Setup
-- [ ] **Create public GitHub repository**
-  - Initialize with .gitignore for Xcode/Swift
-  - Add MIT license for open source distribution
-  - Setup repository description and topics
-  - Configure GitHub Pages for project website (optional)
-  - Create initial project structure
+- [x] **Create public GitHub repository** ✅
+  - ✅ Initialize with .gitignore for Xcode/Swift
+  - ✅ Add MIT license for open source distribution
+  - ✅ Setup repository description and topics
+  - [ ] Configure GitHub Pages for project website (optional)
+  - ✅ Create initial project structure
 
-- [ ] **Create Xcode project**
-  - File: `PulseBar.xcodeproj`
-  - Target: macOS App
-  - Minimum deployment: macOS 12.0
-  - Language: Swift, Framework: SwiftUI
+- [x] **Create Xcode project** ✅
+  - ✅ File: `PulseBar.xcodeproj`
+  - ✅ Target: macOS App
+  - ✅ Minimum deployment: macOS 12.0
+  - ✅ Language: Swift, Framework: SwiftUI
 
-- [ ] **Add required frameworks**
-  - Link: `CoreWLAN.framework`, `IOKit.framework`
-  - Add App Sandbox entitlement (permissive initially)
-  - Configure build settings for menu bar app
+- [x] **Add required frameworks** ✅
+  - ✅ Link: `CoreWLAN.framework`, `IOKit.framework`
+  - ✅ Add App Sandbox entitlement (permissive initially)
+  - ✅ Configure build settings for menu bar app
 
-- [ ] **Setup project structure**
+- [x] **Setup project structure** ✅
   ```
   PulseBar/
-  ├─ PulseBarApp.swift
-  ├─ AppDelegate.swift
-  ├─ Models/
-  ├─ Services/
-  ├─ ViewModels/
-  ├─ Views/
-  ├─ Utilities/
+  ├─ PulseBarApp.swift ✅
+  ├─ AppDelegate.swift ✅
+  ├─ Models/ ✅
+  ├─ Services/ ✅
+  ├─ ViewModels/ ✅
+  ├─ Views/ ✅
+  │  ├─ DashboardView.swift ✅
+  │  └─ MetricRowView.swift ✅
+  ├─ Utilities/ ✅
   ├─ Resources/
   └─ Tests/
   ```
 
-### Phase 2: Core App Shell & Menu Bar Integration
+### Phase 2: Core App Shell & Menu Bar Integration ✅ COMPLETED
 
 #### 2.1. App Delegate & Status Item
-- [ ] **Implement AppDelegate**
-  - File: `AppDelegate.swift`
-  - Create `NSStatusItem` with variable length
-  - Add SF Symbol icon: "waveform.path.ecg"
-  - Handle left-click (open popover) and right-click (context menu)
-  - **Acceptance:** Status item appears in menu bar on launch
+- [x] **Implement AppDelegate** ✅
+  - ✅ File: `AppDelegate.swift`
+  - ✅ Create `NSStatusItem` with variable length
+  - ✅ Add SF Symbol icon: "waveform.path.ecg"
+  - ✅ Handle left-click (open popover) and right-click (context menu)
+  - ✅ **Acceptance:** Status item appears in menu bar on launch
 
-- [ ] **Create NSPopover integration**
-  - Use `NSHostingController` with SwiftUI `DashboardView`
-  - Set popover behavior to `.transient`
-  - Handle popover positioning and dismissal
-  - **Acceptance:** Clicking status item opens/closes popover
+- [x] **Create NSPopover integration** ✅
+  - ✅ Use `NSHostingController` with SwiftUI `DashboardView`
+  - ✅ Set popover behavior to `.transient`
+  - ✅ Handle popover positioning and dismissal
+  - ✅ **Acceptance:** Clicking status item opens/closes popover
 
 #### 2.2. Dashboard Foundation
-- [ ] **Create DashboardView stub**
-  - File: `Views/DashboardView.swift`
-  - Single column layout with placeholder rows
-  - SF Symbol icons for each metric type
-  - Footer with Settings and About links
-  - **Acceptance:** Popover shows structured placeholder UI
+- [x] **Create DashboardView stub** ✅
+  - ✅ File: `Views/DashboardView.swift`
+  - ✅ Single column layout with placeholder rows
+  - ✅ SF Symbol icons for each metric type
+  - ✅ Footer with Settings and About links
+  - ✅ **Acceptance:** Popover shows structured placeholder UI
 
-- [ ] **Create MetricRowView component**
-  - File: `Views/MetricRowView.swift`
-  - Reusable row: [icon] [label] [value] [visual indicator]
-  - Support for progress bars and sparklines
-  - **Acceptance:** Consistent metric display format
+- [x] **Create MetricRowView component** ✅
+  - ✅ File: `Views/MetricRowView.swift`
+  - ✅ Reusable row: [icon] [label] [value] [visual indicator]
+  - ✅ Support for progress bars and sparklines
+  - ✅ **Acceptance:** Consistent metric display format
 
-### Phase 3: Data Models & Core Architecture
+### Phase 3: Data Models & Core Architecture ✅ COMPLETED
 
 #### 3.1. Data Models
-- [ ] **Define core data models**
-  - File: `Models/Metrics.swift`
-  - `MetricsSnapshot` struct containing all metric data
-  - Individual models: `CPUMetrics`, `MemoryMetrics`, `DiskMetrics`, `BatteryMetrics`, `WiFiMetrics`, `DeviceMetrics`
-  - **Acceptance:** Type-safe data structures for all metrics
+- [x] **Define core data models** ✅
+  - ✅ File: `Models/Metrics.swift`
+  - ✅ `MetricsSnapshot` struct containing all metric data
+  - ✅ Individual models: `CPUMetrics`, `MemoryMetrics`, `DiskMetrics`, `BatteryMetrics`, `WiFiMetrics`, `DeviceMetrics`
+  - ✅ **Acceptance:** Type-safe data structures for all metrics
 
 #### 3.2. SystemMonitor Orchestrator
-- [ ] **Create SystemMonitor**
-  - File: `Services/SystemMonitor.swift`
-  - Singleton pattern or DI container
-  - `@Published var snapshot: MetricsSnapshot`
-  - Coordinate all service polling intervals
-  - **Acceptance:** Central point for all system metric data
+- [x] **Create SystemMonitor** ✅
+  - ✅ File: `Services/SystemMonitor.swift`
+  - ✅ Singleton pattern with reactive architecture
+  - ✅ `@Published var snapshot: MetricsSnapshot`
+  - ✅ Coordinate all service polling intervals
+  - ✅ Combine publishers for real-time updates
+  - ✅ **Acceptance:** Central point for all system metric data
+
+#### 3.3. Service Architecture
+- [x] **Implement service protocols** ✅
+  - ✅ File: `Services/ServiceProtocols.swift`
+  - ✅ Protocol-based architecture for testability
+  - ✅ Async/await support with Combine publishers
+  - ✅ **Acceptance:** Clean separation of concerns
+
+#### 3.4. Real CPU Monitoring
+- [x] **Implement CPUService with macOS APIs** ✅
+  - ✅ File: `Services/CPUService.swift`
+  - ✅ Real Mach kernel API integration (`host_processor_info`)
+  - ✅ Per-core and overall CPU usage calculation
+  - ✅ Thread-safe with proper memory management
+  - ✅ **Acceptance:** Real CPU data updating every 1.5 seconds
 
 ### Phase 4: System Metric Services Implementation
 

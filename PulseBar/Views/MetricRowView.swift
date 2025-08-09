@@ -13,6 +13,7 @@ struct MetricRowView: View {
     let value: String
     let detail: String?
     var isButton: Bool = false
+    var action: (() -> Void)? = nil
     
     var body: some View {
         HStack(spacing: 12) {
@@ -39,7 +40,7 @@ struct MetricRowView: View {
             // Value or button
             if isButton {
                 Button(value) {
-                    // TODO: Handle button action
+                    action?()
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
