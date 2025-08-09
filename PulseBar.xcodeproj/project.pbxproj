@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F96E9C292E47C0950062B8AF /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F96E9C282E47C0950062B8AF /* CoreWLAN.framework */; };
+		F96E9C2B2E47C0A90062B8AF /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F96E9C2A2E47C0A90062B8AF /* IOKit.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		F96E9C002E471C580062B8AF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +32,8 @@
 		F96E9BF12E471C570062B8AF /* PulseBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PulseBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F96E9BFF2E471C580062B8AF /* PulseBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PulseBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F96E9C092E471C580062B8AF /* PulseBarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PulseBarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F96E9C282E47C0950062B8AF /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
+		F96E9C2A2E47C0A90062B8AF /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +59,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F96E9C2B2E47C0A90062B8AF /* IOKit.framework in Frameworks */,
+				F96E9C292E47C0950062B8AF /* CoreWLAN.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +87,7 @@
 				F96E9BF32E471C570062B8AF /* PulseBar */,
 				F96E9C022E471C580062B8AF /* PulseBarTests */,
 				F96E9C0C2E471C580062B8AF /* PulseBarUITests */,
+				F96E9C272E47C0940062B8AF /* Frameworks */,
 				F96E9BF22E471C570062B8AF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +100,15 @@
 				F96E9C092E471C580062B8AF /* PulseBarUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F96E9C272E47C0940062B8AF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F96E9C2A2E47C0A90062B8AF /* IOKit.framework */,
+				F96E9C282E47C0950062B8AF /* CoreWLAN.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
