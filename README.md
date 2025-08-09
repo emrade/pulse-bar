@@ -138,6 +138,8 @@ This comprehensive todo list is organized by development phases, following the P
 
 ### Phase 4: System Metric Services Implementation ✅ COMPLETED
 
+**Status:** All core system monitoring services implemented with real-time data collection, robust error handling, and sandbox-compatible operation. Network speed testing and WiFi detection fully functional with enhanced UI integration.
+
 #### 4.1. CPU Monitoring Service ✅ COMPLETED
 - [x] **Implement CPUService** ✅
   - ✅ File: `Services/CPUService.swift`
@@ -209,11 +211,21 @@ This comprehensive todo list is organized by development phases, following the P
 #### 4.5. Wi-Fi Monitoring Service ✅ COMPLETED
 - [x] **Implement WiFiService** ✅
   - ✅ File: `Services/WiFiService.swift`
-  - ✅ Use CoreWLAN: `CWWiFiClient.shared().interface()`
+  - ✅ CoreWLAN integration with system_profiler fallback
   - ✅ Track SSID, BSSID, RSSI, link speed
   - ✅ Handle WiFi power state and connection status
+  - ✅ Robust sandbox-compatible implementation (system_profiler primary)
+  - ✅ Location permission entitlement for CoreWLAN access
   - ✅ Default polling: 5 seconds
   - ✅ **Acceptance:** Wi-Fi data updates and displays correctly
+
+- [x] **WiFi Detection & UI Enhancement** ✅
+  - ✅ Fixed network connection type detection (WiFi vs Ethernet)
+  - ✅ Added informational dBm signal strength explanation
+  - ✅ Integrated speed test functionality into WiFi row
+  - ✅ Added loading indicators and progress reporting
+  - ✅ Real-time connection type switching based on actual network state
+  - ✅ **Acceptance:** Correctly shows "Wi-Fi" when connected via WiFi
 
 - [ ] **Add Wi-Fi service tests**
   - File: `Tests/WiFiServiceTests.swift`
@@ -234,19 +246,33 @@ This comprehensive todo list is organized by development phases, following the P
   - Mock system_profiler output
   - Test device parsing and change detection
 
-#### 4.7. Network Speed Test Service
-- [ ] **Implement NetworkService**
-  - File: `Services/NetworkService.swift`
-  - Manual-trigger only (no auto-testing)
-  - Timed download test (5-10MB file)
-  - Calculate Mbps: `(bytes * 8) / seconds / 1e6`
-  - Include progress reporting and cancellation
-  - **Acceptance:** Speed test runs and produces reasonable results
+#### 4.7. Network Speed Test Service ✅ COMPLETED
+- [x] **Implement NetworkService** ✅
+  - ✅ File: `Services/NetworkService.swift`
+  - ✅ Manual-trigger only (no auto-testing)
+  - ✅ Real HTTP download test with multiple endpoints
+  - ✅ Calculate Mbps with latency measurement
+  - ✅ Progress reporting and cancellation support
+  - ✅ Network client entitlement configured for sandboxed operation
+  - ✅ **Acceptance:** Speed test runs and produces reasonable results
 
 - [ ] **Add Network service tests**
   - File: `Tests/NetworkServiceTests.swift`
   - Mock network responses
   - Test speed calculations and cancellation
+
+#### 4.8. Recent Technical Improvements ✅ COMPLETED
+- [x] **WiFi Detection Fix** ✅
+  - ✅ **Issue:** CoreWLAN failing in sandboxed environment, causing incorrect "Ethernet" display
+  - ✅ **Root Cause:** CoreWLAN requires location permissions for SSID access in sandboxed apps
+  - ✅ **Solution:** Prioritized system_profiler approach for reliable WiFi detection
+  - ✅ **Result:** Accurate network connection type detection (WiFi vs Ethernet)
+
+- [x] **Enhanced User Experience** ✅
+  - ✅ dBm signal strength information panel with quality explanations
+  - ✅ Integrated speed test within network row (no separate row)
+  - ✅ Real-time loading indicators for network operations
+  - ✅ Contextual network information display based on connection type
 
 ### Phase 5: ViewModels & UI Integration
 
