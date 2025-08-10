@@ -29,64 +29,33 @@ final class ProcessService: ProcessServiceProtocol, @unchecked Sendable {
     }
     
     private func fetchTopProcesses(limit: Int) -> [ProcessMemoryInfo] {
-        var processes: [ProcessMemoryInfo] = []
+    var processes: [ProcessMemoryInfo] = []
+
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/bin/ps")
+    task.arguments = ["-ax", "-o", "pid,rss,comm", "-r"]
+
+    let pipe = Pipe()
+    task.standardOutput = pipe
+
+    do {
+        try task.run()
         
-        print("ProcessService: Starting fetchTopProcesses with limit \(limit)")
-        
-        // Use the ps command to get process information
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/ps")
-        task.arguments = ["-ax", "-o", "pid,rss,comm", "-r"] // Sort by RSS (memory)
-        
-        print("ProcessService: Configured ps command: \(task.executableURL?.path ?? "nil") \(task.arguments?.joined(separator: " ") ?? "nil")")
-        
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        
-        do {
-            print("ProcessService: Executing ps command...")
-            try task.run()
-            
-            // Add a timeout mechanism
-            let startTime = Date()
-            let timeout: TimeInterval = 10.0 // 10 seconds timeout
-            
-            while task.isRunning && Date().timeIntervalSince(startTime) < timeout {
-                Thread.sleep(forTimeInterval: 0.1)
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        task.waitUntilExit()
+
+        if task.terminationStatus == 0 {
+            if let output = String(data: data, encoding: .utf8) {
+                processes = parseProcessOutput(output, limit: limit)
             }
-            
-            if task.isRunning {
-                print("ProcessService: Command timed out, terminating...")
-                task.terminate()
-                task.waitUntilExit()
-                print("ProcessService: Command terminated due to timeout")
-                return processes
-            }
-            
-            print("ProcessService: ps completed with exit code: \(task.terminationStatus)")
-            
-            if task.terminationStatus == 0 {
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                print("ProcessService: Read \(data.count) bytes of output")
-                
-                if let output = String(data: data, encoding: .utf8) {
-                    print("ProcessService: Successfully decoded output (\(output.count) characters)")
-                    print("ProcessService: First 500 characters of output:\n\(String(output.prefix(500)))")
-                    processes = parseProcessOutput(output, limit: limit)
-                    print("ProcessService: parseProcessOutput returned \(processes.count) processes")
-                } else {
-                    print("ProcessService: Failed to decode output as UTF-8")
-                }
-            } else {
-                print("ProcessService: ps command failed with exit code: \(task.terminationStatus)")
-            }
-        } catch {
-            print("ProcessService: Failed to run ps command: \(error)")
         }
-        
-        print("ProcessService: fetchTopProcesses returning \(processes.count) processes")
-        return processes
+    } catch {
+        print("ProcessService: Failed to run ps command: \(error)")
     }
+
+    return processes
+}
+
     
     private func parseProcessOutput(_ output: String, limit: Int) -> [ProcessMemoryInfo] {
         let lines = output.components(separatedBy: .newlines)
