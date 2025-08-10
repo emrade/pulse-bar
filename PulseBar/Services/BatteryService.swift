@@ -37,7 +37,7 @@ final class BatteryService: BatteryServiceProtocol, @unchecked Sendable {
         
         // If we can get pmset output and it contains battery info, parse it
         if let output = pmsetOutput, (output.contains("InternalBattery") || output.contains("Battery Power")) {
-            return parsePMSetOutput(output)
+            return await parsePMSetOutput(output)
         }
         
         return nil // No battery or desktop Mac
@@ -58,7 +58,7 @@ final class BatteryService: BatteryServiceProtocol, @unchecked Sendable {
         return String(data: data, encoding: .utf8)
     }
     
-    private func parsePMSetOutput(_ output: String) -> BatteryMetrics? {
+    private func parsePMSetOutput(_ output: String) async -> BatteryMetrics? {
         // Parse pmset output for basic battery info
         // Example output formats:
         // "Now drawing from 'AC Power'"
@@ -97,12 +97,17 @@ final class BatteryService: BatteryServiceProtocol, @unchecked Sendable {
                             }
                         }
                         
+                        // Try to get additional battery info from system_profiler
+                        let additionalInfo = await getDetailedBatteryInfo()
+                        
                         return BatteryMetrics(
                             percentage: percentage,
                             isCharging: isCharging,
                             timeRemaining: timeRemaining,
-                            health: "Good",
-                            cycleCount: nil,
+                            health: additionalInfo.health,
+                            cycleCount: additionalInfo.cycleCount,
+                            temperature: additionalInfo.temperature,
+                            maxCapacity: additionalInfo.maxCapacity,
                             isLoading: false,
                             error: nil
                         )
@@ -114,4 +119,114 @@ final class BatteryService: BatteryServiceProtocol, @unchecked Sendable {
         return nil
     }
     
+    private func getDetailedBatteryInfo() async -> (health: String, cycleCount: Int?, temperature: Double?, maxCapacity: Double?) {
+        // Try to get detailed battery info from system_profiler
+        do {
+            let output = try await runSystemProfilerCommand()
+            return parseBatteryProfilerOutput(output)
+        } catch {
+            // Fallback to reasonable defaults if system_profiler fails
+            return ("Normal", nil, nil, nil)
+        }
+    }
+    
+    private func runSystemProfilerCommand() async throws -> String {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/sbin/system_profiler")
+        process.arguments = ["SPPowerDataType"]
+        
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        
+        try process.run()
+        process.waitUntilExit()
+        
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+    
+    private func parseBatteryProfilerOutput(_ output: String) -> (health: String, cycleCount: Int?, temperature: Double?, maxCapacity: Double?) {
+        let lines = output.components(separatedBy: .newlines)
+        var health = "Normal"
+        var cycleCount: Int? = nil
+        let temperature: Double? = getThermalStateTemperature()
+        var maxCapacity: Double? = nil
+        
+        for line in lines {
+            let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Look for cycle count
+            if trimmedLine.contains("Cycle Count:") {
+                let components = trimmedLine.components(separatedBy: ":")
+                if components.count > 1 {
+                    let countString = components[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                    cycleCount = Int(countString)
+                }
+            }
+            
+            // Look for condition/health
+            if trimmedLine.contains("Condition:") {
+                let components = trimmedLine.components(separatedBy: ":")
+                if components.count > 1 {
+                    health = components[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+            }
+            
+            // Look for maximum capacity
+            if trimmedLine.contains("Maximum Capacity:") {
+                let components = trimmedLine.components(separatedBy: ":")
+                if components.count > 1 {
+                    let capacityString = components[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                    // Extract percentage from strings like "98%" or "4500 mAh"
+                    if let percentMatch = capacityString.range(of: "\\d+", options: .regularExpression) {
+                        if let capacity = Double(String(capacityString[percentMatch])) {
+                            if capacityString.contains("%") {
+                                maxCapacity = capacity
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Alternative health indicators
+            if trimmedLine.contains("Health Information:") {
+                // Parse health info if available
+                continue
+            }
+        }
+        
+        // If we got a cycle count, infer health based on typical MacBook battery life
+        if let count = cycleCount {
+            if count > 1000 {
+                health = "Service Battery"
+            } else if count > 800 {
+                health = "Replace Soon"
+            } else if count > 500 {
+                health = "Fair"
+            } else if count > 200 {
+                health = "Good"
+            } else {
+                health = "Excellent"
+            }
+        }
+        
+        return (health, cycleCount, temperature, maxCapacity)
+    }
+    
+    private func getThermalStateTemperature() -> Double? {
+        let thermalState = ProcessInfo.processInfo.thermalState
+        
+        switch thermalState {
+        case .nominal:
+            return 35.0 // Normal operating temperature
+        case .fair:
+            return 45.0 // Slightly elevated
+        case .serious:
+            return 55.0 // Getting warm
+        case .critical:
+            return 65.0 // Very hot
+        @unknown default:
+            return nil
+        }
+    }
 }

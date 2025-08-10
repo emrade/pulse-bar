@@ -18,7 +18,6 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
     }
     
     private var memoryBreakdown: [ChartDataPoint] {
-        let totalBytes = Double(metricData.totalBytes)
         let usedBytes = Double(metricData.usedBytes)
         let cachedBytes = Double(metricData.cachedBytes)
         let freeBytes = Double(metricData.freeBytes)
@@ -37,16 +36,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
         ]
     }
     
-    private var topProcesses: [(name: String, usage: Double)] {
-        // Simulated top processes - in real implementation would use ActivityMonitor APIs
-        return [
-            ("Claude Code", 1.2),
-            ("Xcode", 0.8),
-            ("System Preferences", 0.3),
-            ("WindowServer", 0.2),
-            ("Dock", 0.1)
-        ]
-    }
+    @State private var topProcesses: [(name: String, usage: Double)] = []
     
     private var memoryPressure: (level: String, color: Color, description: String) {
         let usagePercentage = metricData.usagePercentage
@@ -91,6 +81,22 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
             }
         }
         .frame(width: 360, height: 620)
+        .task {
+            await loadTopProcesses()
+        }
+    }
+    
+    private func loadTopProcesses() async {
+        let processInfos = await SystemMonitor.shared.memoryService.processService.getTopMemoryProcesses(limit: 5)
+        
+        let processData = processInfos.map { info in
+            let usageGB = Double(info.memoryUsage) / (1024 * 1024 * 1024) // Convert bytes to GB
+            return (name: info.name, usage: usageGB)
+        }
+        
+        await MainActor.run {
+            topProcesses = processData
+        }
     }
     
     private var memoryBreakdownSection: some View {

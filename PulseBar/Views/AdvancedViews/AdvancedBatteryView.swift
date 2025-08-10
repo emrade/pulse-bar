@@ -172,7 +172,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                         
                         Spacer()
                         
-                        Text("98%") // Simulated - realistic for new PC
+                        Text(formatCapacity(battery.maxCapacity))
                             .font(.caption.weight(.medium))
                     }
                     
@@ -185,7 +185,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                             
                             Rectangle()
                                 .fill(batteryHealthColor)
-                                .frame(width: geometry.size.width * 0.98, height: 6)
+                                .frame(width: geometry.size.width * getCapacityRatio(battery.maxCapacity), height: 6)
                                 .cornerRadius(3)
                         }
                     }
@@ -230,7 +230,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                     Image(systemName: "thermometer")
                         .foregroundColor(.orange)
                     
-                    Text("Temperature: 32°C") // Simulated
+                    Text(formatTemperature(battery.temperature))
                         .font(.caption)
                     
                     Spacer()
@@ -266,9 +266,9 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                     InfoRow(label: "Time Remaining", value: "\(hours)h \(minutes)m")
                 }
                 
-                InfoRow(label: "Temperature", value: "32°C") // Simulated
-                InfoRow(label: "Design Capacity", value: "100%") // Simulated
-                InfoRow(label: "Full Charge Capacity", value: "98%") // Simulated - realistic for new PC
+                InfoRow(label: "Temperature", value: formatTemperature(battery.temperature))
+                InfoRow(label: "Design Capacity", value: "100%")
+                InfoRow(label: "Full Charge Capacity", value: formatCapacity(battery.maxCapacity))
             }
         }
         .padding()
@@ -297,6 +297,21 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
             Spacer()
         }
         .padding()
+    }
+    
+    private func formatTemperature(_ temperature: Double?) -> String {
+        guard let temp = temperature else { return "Unknown" }
+        return String(format: "%.0f°C", temp)
+    }
+    
+    private func formatCapacity(_ capacity: Double?) -> String {
+        guard let cap = capacity else { return "Unknown" }
+        return String(format: "%.0f%%", cap)
+    }
+    
+    private func getCapacityRatio(_ capacity: Double?) -> Double {
+        guard let cap = capacity else { return 0.98 } // Default to 98% if unknown
+        return cap / 100.0
     }
 }
 

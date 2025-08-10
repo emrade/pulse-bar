@@ -20,18 +20,8 @@ struct AdvancedNetworkUsageView: View {
     }
     
     private var usageHistory: [NetworkUsagePoint] {
-        // Simulated hourly usage data for today
-        var history: [NetworkUsagePoint] = []
-        let currentHour = Calendar.current.component(.hour, from: Date())
-        
-        for hour in 0...currentHour {
-            let time = Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: Date()) ?? Date()
-            let download = Double.random(in: 50...500) * 1024 * 1024 // MB in bytes
-            let upload = Double.random(in: 10...100) * 1024 * 1024   // MB in bytes
-            history.append(NetworkUsagePoint(timestamp: time, downloaded: download, uploaded: upload))
-        }
-        
-        return history
+        // Get real hourly usage data from SystemMonitor
+        return SystemMonitor.shared.networkUsageService.getHourlyUsageHistory()
     }
     
     var body: some View {
@@ -205,7 +195,7 @@ struct AdvancedNetworkUsageView: View {
                 InfoRow(label: "Uploaded Today", value: formatBytes(metricData.uploaded))
                 InfoRow(label: "Total Usage", value: formatBytes(metricData.downloaded + metricData.uploaded))
                 InfoRow(label: "Average Per Hour", value: formatBytes((metricData.downloaded + metricData.uploaded) / UInt64(max(1, Calendar.current.component(.hour, from: Date())))))
-                InfoRow(label: "Peak Hour", value: "2:00 PM - 3:00 PM") // Simulated
+                InfoRow(label: "Peak Hour", value: getPeakHour())
                 InfoRow(label: "Last Reset", value: "Today at 12:00 AM")
             }
         }
@@ -258,13 +248,32 @@ struct AdvancedNetworkUsageView: View {
         formatter.countStyle = .file
         return formatter.string(fromByteCount: Int64(bytes))
     }
-}
-
-// MARK: - Supporting Data Structure
-struct NetworkUsagePoint {
-    let timestamp: Date
-    let downloaded: Double
-    let uploaded: Double
+    
+    private func getPeakHour() -> String {
+        let history = usageHistory
+        
+        guard !history.isEmpty else {
+            return "No data available"
+        }
+        
+        // Find the hour with the highest total usage
+        let peakUsage = history.max { first, second in
+            (first.downloaded + first.uploaded) < (second.downloaded + second.uploaded)
+        }
+        
+        if let peak = peakUsage {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "h:00 a"
+            let startTime = formatter.string(from: peak.timestamp)
+            
+            let endTime = Calendar.current.date(byAdding: .hour, value: 1, to: peak.timestamp)
+            let endTimeString = endTime.map { formatter.string(from: $0) } ?? ""
+            
+            return "\(startTime) - \(endTimeString)"
+        }
+        
+        return "No peak identified"
+    }
 }
 
 #Preview {

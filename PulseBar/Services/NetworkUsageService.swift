@@ -10,10 +10,17 @@ import Combine
 import Darwin
 import SystemConfiguration
 
+struct NetworkUsagePoint: Codable {
+    let timestamp: Date
+    let downloaded: Double
+    let uploaded: Double
+}
+
 protocol NetworkUsageServiceProtocol {
     var metricsPublisher: AnyPublisher<NetworkUsageMetrics, Never> { get }
     func updateMetrics() async
     func resetDailyUsage() async
+    func getHourlyUsageHistory() -> [NetworkUsagePoint]
 }
 
 final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendable {
@@ -29,6 +36,7 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
     private let lastSystemBytesOutKey = "lastSystemBytesOut"
     private let dailyDownloadedKey = "dailyDownloaded"
     private let dailyUploadedKey = "dailyUploaded"
+    private let hourlyUsageKey = "hourlyUsageHistory"
     
     init() {
         Task {
@@ -66,6 +74,9 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
         userDefaults.set(currentSystemUsage.bytesOut, forKey: lastSystemBytesOutKey)
         userDefaults.set(dailyDownloaded, forKey: dailyDownloadedKey)
         userDefaults.set(dailyUploaded, forKey: dailyUploadedKey)
+        
+        // Update hourly tracking
+        updateHourlyUsageHistory(downloaded: dailyDownloaded, uploaded: dailyUploaded)
         
         let metrics = NetworkUsageMetrics(downloaded: dailyDownloaded, uploaded: dailyUploaded, isLoading: false, error: nil)
         await MainActor.run {
@@ -138,5 +149,71 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
         }
 
         return globalState["PrimaryInterface"] as? String
+    }
+    
+    func getHourlyUsageHistory() -> [NetworkUsagePoint] {
+        guard let data = userDefaults.data(forKey: hourlyUsageKey) else {
+            return []
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let hourlyData = try decoder.decode([NetworkUsagePoint].self, from: data)
+            
+            // Filter to only today's data
+            let today = Calendar.current.startOfDay(for: Date())
+            return hourlyData.filter { point in
+                Calendar.current.isDate(point.timestamp, inSameDayAs: today)
+            }
+        } catch {
+            print("Failed to decode hourly usage history: \(error)")
+            return []
+        }
+    }
+    
+    private func updateHourlyUsageHistory(downloaded: UInt64, uploaded: UInt64) {
+        let now = Date()
+        let calendar = Calendar.current
+        let currentHour = calendar.component(.hour, from: now)
+        let hourStart = calendar.date(bySettingHour: currentHour, minute: 0, second: 0, of: now) ?? now
+        
+        var hourlyHistory = getHourlyUsageHistory()
+        
+        // Check if we already have an entry for this hour
+        if let existingIndex = hourlyHistory.firstIndex(where: { point in
+            calendar.component(.hour, from: point.timestamp) == currentHour &&
+            calendar.isDate(point.timestamp, inSameDayAs: now)
+        }) {
+            // Update existing entry
+            hourlyHistory[existingIndex] = NetworkUsagePoint(
+                timestamp: hourStart,
+                downloaded: Double(downloaded),
+                uploaded: Double(uploaded)
+            )
+        } else {
+            // Add new entry
+            hourlyHistory.append(NetworkUsagePoint(
+                timestamp: hourStart,
+                downloaded: Double(downloaded),
+                uploaded: Double(uploaded)
+            ))
+        }
+        
+        // Keep only today's data and sort by timestamp
+        let today = calendar.startOfDay(for: now)
+        hourlyHistory = hourlyHistory.filter { point in
+            calendar.isDate(point.timestamp, inSameDayAs: today)
+        }.sorted { $0.timestamp < $1.timestamp }
+        
+        // Save updated history
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            let data = try encoder.encode(hourlyHistory)
+            userDefaults.set(data, forKey: hourlyUsageKey)
+        } catch {
+            print("Failed to encode hourly usage history: \(error)")
+        }
     }
 }

@@ -15,13 +15,14 @@ class SystemMonitor: ObservableObject {
     
     // Service instances
     private let cpuService: CPUServiceProtocol
-    private let memoryService: MemoryServiceProtocol
+    let memoryService: MemoryServiceProtocol
     private let diskService: DiskServiceProtocol
     private let batteryService: BatteryServiceProtocol
     private let wifiService: WiFiServiceProtocol
     private let deviceService: DeviceServiceProtocol
     private let networkService: NetworkServiceProtocol
-    private let networkUsageService: NetworkUsageServiceProtocol
+    let networkUsageService: NetworkUsageServiceProtocol
+    let networkInfoService: NetworkInfoServiceProtocol
     
     // Timers for different polling intervals
     private var cpuTimer: Timer?
@@ -46,7 +47,8 @@ class SystemMonitor: ObservableObject {
         wifiService: WiFiServiceProtocol = WiFiService(),
         deviceService: DeviceServiceProtocol = DeviceService(),
         networkService: NetworkServiceProtocol = NetworkService(),
-        networkUsageService: NetworkUsageServiceProtocol = NetworkUsageService()
+        networkUsageService: NetworkUsageServiceProtocol = NetworkUsageService(),
+        networkInfoService: NetworkInfoServiceProtocol = NetworkInfoService()
     ) {
         self.cpuService = cpuService
         self.memoryService = memoryService
@@ -56,6 +58,7 @@ class SystemMonitor: ObservableObject {
         self.deviceService = deviceService
         self.networkService = networkService
         self.networkUsageService = networkUsageService
+        self.networkInfoService = networkInfoService
         
         setupSubscriptions()
         startPolling()
@@ -165,6 +168,7 @@ class SystemMonitor: ObservableObject {
         wifiTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
             Task {
                 await self.wifiService.updateMetrics()
+                await self.updateConnectionType()
             }
         }
         
@@ -185,6 +189,7 @@ class SystemMonitor: ObservableObject {
         // Initial update
         Task {
             await updateAllMetrics()
+            await updateConnectionType()
         }
     }
     
@@ -311,14 +316,91 @@ class SystemMonitor: ObservableObject {
     }
     
     // MARK: - Network Connection Detection
-    var activeConnectionType: NetworkConnectionType {
+    @Published var activeConnectionType: NetworkConnectionType = .other
+    
+    func updateConnectionType() async {
+        let connectionType: NetworkConnectionType
+        
         // Check if WiFi is connected and active
         if snapshot.wifi.isConnected {
-            return .wifi
+            connectionType = .wifi
+        } else {
+            // Check for active ethernet connection
+            let hasEthernet = await checkEthernetConnection()
+            connectionType = hasEthernet ? .ethernet : .other
         }
-        // Check for active ethernet connection (simplified)
-        // In a real implementation, we'd check ethernet interfaces for active connections
-        return .ethernet
+        
+        await MainActor.run {
+            activeConnectionType = connectionType
+        }
+    }
+    
+    private func checkEthernetConnection() async -> Bool {
+        do {
+            // First, get list of ethernet hardware ports
+            let ethernetInterfaces = try await getEthernetInterfaces()
+            
+            // Check if any ethernet interface is active
+            for interface in ethernetInterfaces {
+                let isActive = try await checkInterfaceStatus(interface)
+                if isActive {
+                    return true
+                }
+            }
+            
+            return false
+        } catch {
+            return false
+        }
+    }
+    
+    private func getEthernetInterfaces() async throws -> [String] {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/sbin/networksetup")
+        process.arguments = ["-listallhardwareports"]
+        
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        
+        try process.run()
+        process.waitUntilExit()
+        
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        guard let output = String(data: data, encoding: .utf8) else { return [] }
+        
+        var ethernetInterfaces: [String] = []
+        let lines = output.components(separatedBy: .newlines)
+        
+        for i in 0..<lines.count {
+            let line = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
+            if line.contains("Ethernet") && i + 1 < lines.count {
+                let deviceLine = lines[i + 1].trimmingCharacters(in: .whitespacesAndNewlines)
+                if deviceLine.hasPrefix("Device:") {
+                    let device = deviceLine.replacingOccurrences(of: "Device:", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    ethernetInterfaces.append(device)
+                }
+            }
+        }
+        
+        return ethernetInterfaces
+    }
+    
+    private func checkInterfaceStatus(_ interface: String) async throws -> Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/sbin/ifconfig")
+        process.arguments = [interface]
+        
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        
+        try process.run()
+        process.waitUntilExit()
+        
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        guard let output = String(data: data, encoding: .utf8) else { return false }
+        
+        // Check if interface is up and has an IP address
+        return output.contains("status: active") || (output.contains("UP") && output.contains("inet "))
     }
     
     var networkDisplayInfo: (icon: String, title: String, connectionDetail: String?) {

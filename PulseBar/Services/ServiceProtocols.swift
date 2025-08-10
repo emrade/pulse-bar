@@ -17,6 +17,7 @@ protocol CPUServiceProtocol {
 
 protocol MemoryServiceProtocol {
     var metricsPublisher: AnyPublisher<MemoryMetrics, Never> { get }
+    var processService: ProcessServiceProtocol { get }
     func updateMetrics() async
 }
 

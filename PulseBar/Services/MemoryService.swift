@@ -10,12 +10,14 @@ import Combine
 
 final class MemoryService: MemoryServiceProtocol, @unchecked Sendable {
     private let metricsSubject = CurrentValueSubject<MemoryMetrics, Never>(MemoryMetrics())
+    let processService: ProcessServiceProtocol
     
     var metricsPublisher: AnyPublisher<MemoryMetrics, Never> {
         metricsSubject.eraseToAnyPublisher()
     }
     
-    init() {
+    init(processService: ProcessServiceProtocol = ProcessService()) {
+        self.processService = processService
         // Initialize with first reading
         Task {
             await updateMetrics()

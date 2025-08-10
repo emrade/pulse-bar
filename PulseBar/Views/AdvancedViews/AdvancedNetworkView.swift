@@ -14,6 +14,8 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
     
     @State private var speedTestButtonText = "Test Speed"
     @State private var isSpeedTestRunning = false
+    @State private var networkConnectionInfo: NetworkConnectionInfo?
+    @State private var currentSpeedTest = NetworkSpeedTest()
     
     init(metricData: WiFiMetrics, onBack: @escaping () -> Void) {
         self.metricData = metricData
@@ -22,40 +24,12 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
     
     private func handleSpeedTest() {
         if !isSpeedTestRunning {
-            isSpeedTestRunning = true
-            speedTestButtonText = "Testing..."
-            
-            // Simulate speed test (in real implementation, would use SystemMonitor)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                speedTestButtonText = "Test Complete"
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    speedTestButtonText = "Test Speed"
-                    isSpeedTestRunning = false
-                }
-            }
+            SystemMonitor.shared.runSpeedTest()
         }
     }
     
-    private var networkSpeedData: [NetworkSpeedPoint] {
-        // Simulated network speed history - in real implementation would track actual speeds
-        var speedData: [NetworkSpeedPoint] = []
-        let baseDownload = 50.0 // Mbps
-        let baseUpload = 10.0   // Mbps
-        
-        for i in 0..<30 {
-            let time = Date().addingTimeInterval(-Double(29 - i) * 2) // Every 2 seconds
-            let downloadVariation = Double.random(in: -20...20)
-            let uploadVariation = Double.random(in: -3...3)
-            
-            speedData.append(NetworkSpeedPoint(
-                timestamp: time,
-                downloadSpeed: max(0, baseDownload + downloadVariation),
-                uploadSpeed: max(0, baseUpload + uploadVariation)
-            ))
-        }
-        
-        return speedData
+    private var hasSpeedTestResults: Bool {
+        currentSpeedTest.downloadSpeed != nil || currentSpeedTest.uploadSpeed != nil
     }
     
     private var signalQualityLevel: (level: String, color: Color, description: String) {
@@ -113,93 +87,135 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
             }
         }
         .frame(width: 360, height: 620)
+        .task {
+            await loadNetworkConnectionInfo()
+        }
+        .onReceive(SystemMonitor.shared.$networkSpeedTest) { speedTest in
+            currentSpeedTest = speedTest
+            
+            // Update button state based on test progress
+            if speedTest.isRunning {
+                if !isSpeedTestRunning {
+                    isSpeedTestRunning = true
+                    speedTestButtonText = "Testing..."
+                }
+            } else if isSpeedTestRunning {
+                // Test completed
+                if speedTest.downloadSpeed != nil {
+                    speedTestButtonText = "Test Complete"
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        speedTestButtonText = "Test Speed"
+                        isSpeedTestRunning = false
+                    }
+                } else if speedTest.error != nil {
+                    speedTestButtonText = "Test Failed"
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        speedTestButtonText = "Test Speed"
+                        isSpeedTestRunning = false
+                    }
+                }
+            }
+        }
+    }
+    
+    private func loadNetworkConnectionInfo() async {
+        let info = await SystemMonitor.shared.networkInfoService.getNetworkConnectionInfo()
+        await MainActor.run {
+            networkConnectionInfo = info
+        }
+    }
+    
+    private func formatSpeed(_ speed: Double?) -> String {
+        guard let speed = speed else { return "Unknown" }
+        return String(format: "%.1f Mbps", speed)
     }
     
     private var networkSpeedChartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Network Speed")
+            Text("Network Speed Test")
                 .font(.headline.weight(.semibold))
             
-            Chart {
-                ForEach(networkSpeedData, id: \.timestamp) { point in
-                    LineMark(
-                        x: .value("Time", point.timestamp),
-                        y: .value("Speed", point.downloadSpeed)
-                    )
-                    .foregroundStyle(.blue)
-                    .interpolationMethod(.catmullRom)
-                    .symbol(.circle)
+            if hasSpeedTestResults {
+                // Show current speed test results
+                VStack(spacing: 16) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Download")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Text(formatSpeed(currentSpeedTest.downloadSpeed))
+                                .font(.title2.weight(.bold))
+                                .foregroundColor(.blue)
+                        }
+                        
+                        Spacer()
+                        
+                        VStack(alignment: .trailing, spacing: 8) {
+                            Text("Upload")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Text(formatSpeed(currentSpeedTest.uploadSpeed))
+                                .font(.title2.weight(.bold))
+                                .foregroundColor(.green)
+                        }
+                    }
                     
-                    LineMark(
-                        x: .value("Time", point.timestamp),
-                        y: .value("Speed", point.uploadSpeed)
-                    )
-                    .foregroundStyle(.green)
-                    .interpolationMethod(.catmullRom)
-                    .symbol(.square)
-                }
-            }
-            .frame(height: 120)
-            .chartXAxis {
-                AxisMarks(values: .stride(by: 10)) { _ in
-                    AxisGridLine()
-                    AxisValueLabel(format: .dateTime.minute().second(), centered: true)
-                }
-            }
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisGridLine()
-                    AxisValueLabel {
-                        if let doubleValue = value.as(Double.self) {
-                            Text("\(Int(doubleValue))")
+                    if let latency = currentSpeedTest.latency {
+                        HStack {
+                            Text("Latency")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                            
+                            Text(String(format: "%.0f ms", latency))
+                                .font(.subheadline.weight(.medium))
+                                .foregroundColor(.orange)
                         }
                     }
                 }
-            }
-            .chartLegend(position: .bottom, alignment: .center) {
-                HStack(spacing: 20) {
-                    HStack(spacing: 4) {
-                        Circle()
-                            .fill(.blue)
-                            .frame(width: 8, height: 8)
-                        Text("Download")
-                            .font(.caption)
-                    }
+            } else {
+                // Show placeholder when no test results
+                VStack(spacing: 16) {
+                    Image(systemName: "speedometer")
+                        .font(.system(size: 40))
+                        .foregroundColor(.gray)
                     
-                    HStack(spacing: 4) {
-                        Rectangle()
-                            .fill(.green)
-                            .frame(width: 8, height: 8)
-                        Text("Upload")
-                            .font(.caption)
-                    }
+                    Text("No Speed Test Results")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(.secondary)
+                    
+                    Text("Run a speed test to see current network performance")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
                 }
+                .frame(height: 120)
             }
             
-            // Current speeds
+            // Speed Test Button
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Download")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text("45.2 Mbps")
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(.blue)
-                }
-                
                 Spacer()
-                
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("Upload")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text("8.7 Mbps")
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(.green)
+                Button(action: handleSpeedTest) {
+                    Text(speedTestButtonText)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(isSpeedTestRunning ? Color.gray : Color.accentColor)
+                        )
                 }
+                .buttonStyle(.plain)
+                .disabled(isSpeedTestRunning)
+                Spacer()
             }
+            .padding(.top, 8)
             
-            Text("Mbps • Last 60 seconds")
+            Text("Real-time network speed testing • Results are current measurements")
                 .font(.caption2)
                 .foregroundColor(Color(NSColor.tertiaryLabelColor))
         }
@@ -278,13 +294,15 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
             if metricData.isConnected {
                 VStack(spacing: 8) {
                     InfoRow(label: "Network Name", value: metricData.ssid ?? "Unknown")
-                    InfoRow(label: "IP Address", value: "192.168.1.105") // Simulated
-                    InfoRow(label: "Router IP", value: "192.168.1.1") // Simulated
-                    InfoRow(label: "DNS Server", value: "8.8.8.8") // Simulated
-                    InfoRow(label: "Subnet Mask", value: "255.255.255.0") // Simulated
-                    InfoRow(label: "Connection Type", value: "WiFi 6 (802.11ax)") // Simulated
-                    InfoRow(label: "Channel", value: "36 (5GHz)") // Simulated
-                    InfoRow(label: "Security", value: "WPA3") // Simulated
+                    InfoRow(label: "IP Address", value: networkConnectionInfo?.ipAddress ?? "Fetching...")
+                    InfoRow(label: "Router IP", value: networkConnectionInfo?.routerIP ?? "Fetching...")
+                    InfoRow(label: "DNS Server", value: networkConnectionInfo?.dnsServers.first ?? "Fetching...")
+                    InfoRow(label: "Subnet Mask", value: networkConnectionInfo?.subnetMask ?? "Fetching...")
+                    InfoRow(label: "Connection Type", value: networkConnectionInfo?.connectionType ?? "Fetching...")
+                    if let channel = networkConnectionInfo?.channel {
+                        InfoRow(label: "Channel", value: channel)
+                    }
+                    InfoRow(label: "Security", value: networkConnectionInfo?.security ?? "Fetching...")
                 }
             } else {
                 VStack(spacing: 12) {
@@ -314,31 +332,11 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 if metricData.isConnected {
                     InfoRow(label: "Signal Strength", value: rssiDisplayString)
                     InfoRow(label: "Quality Level", value: signalQualityLevel.level)
-                    InfoRow(label: "Current Download", value: "45.2 Mbps") // Simulated
-                    InfoRow(label: "Current Upload", value: "8.7 Mbps") // Simulated
-                    InfoRow(label: "Latency", value: "12 ms") // Simulated
-                    InfoRow(label: "Connection Duration", value: "2h 34m") // Simulated
-                    InfoRow(label: "Data Transferred", value: "1.2 GB") // Simulated
-                    
-                    // Speed Test Button
-                    HStack {
-                        Spacer()
-                        Button(action: handleSpeedTest) {
-                            Text(speedTestButtonText)
-                                .font(.caption.weight(.medium))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 6)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(isSpeedTestRunning ? Color.gray : Color.accentColor)
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(isSpeedTestRunning)
-                        Spacer()
+                    InfoRow(label: "Interface Type", value: networkConnectionInfo?.interfaceType ?? "Unknown")
+                    if let dnsCount = networkConnectionInfo?.dnsServers.count, dnsCount > 1 {
+                        InfoRow(label: "DNS Servers", value: "\(dnsCount) configured")
                     }
-                    .padding(.top, 8)
+                    InfoRow(label: "Connection Status", value: "Connected")
                 }
             }
         }
@@ -348,12 +346,6 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
     }
 }
 
-// MARK: - Supporting Data Structure
-struct NetworkSpeedPoint {
-    let timestamp: Date
-    let downloadSpeed: Double // Mbps
-    let uploadSpeed: Double   // Mbps
-}
 
 #Preview {
     AdvancedNetworkView(

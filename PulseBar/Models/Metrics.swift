@@ -184,6 +184,8 @@ struct BatteryMetrics {
     let timeRemaining: TimeInterval? // seconds
     let health: String?
     let cycleCount: Int?
+    let temperature: Double? // in Celsius
+    let maxCapacity: Double? // as percentage of design capacity
     let isLoading: Bool
     let error: String?
     
@@ -193,6 +195,8 @@ struct BatteryMetrics {
         timeRemaining: TimeInterval? = nil,
         health: String? = nil,
         cycleCount: Int? = nil,
+        temperature: Double? = nil,
+        maxCapacity: Double? = nil,
         isLoading: Bool = true,
         error: String? = nil
     ) {
@@ -201,6 +205,8 @@ struct BatteryMetrics {
         self.timeRemaining = timeRemaining
         self.health = health
         self.cycleCount = cycleCount
+        self.temperature = temperature
+        self.maxCapacity = maxCapacity
         self.isLoading = isLoading
         self.error = error
     }
