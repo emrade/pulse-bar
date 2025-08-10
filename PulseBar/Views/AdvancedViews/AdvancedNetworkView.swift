@@ -86,7 +86,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 .padding()
             }
         }
-        .frame(width: 360, height: 620)
+        .frame(width: 360, height: 700)
         .task {
             await loadNetworkConnectionInfo()
         }

@@ -92,7 +92,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                 noBatteryView
             }
         }
-        .frame(width: 360, height: 620)
+        .frame(width: 360, height: 700)
     }
     
     private func batteryLevelSection(battery: BatteryMetrics) -> some View {

@@ -84,7 +84,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                 .padding()
             }
         }
-        .frame(width: 360, height: 620)
+        .frame(width: 360, height: 700)
     }
     
     private var deviceSummarySection: some View {
