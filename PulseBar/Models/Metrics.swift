@@ -311,7 +311,7 @@ struct ConnectedDevice {
     let productID: String?
     let mountPoint: String? // For storage devices
     
-    enum DeviceType {
+    enum DeviceType: Equatable {
         case usb
         case thunderbolt
         case storage

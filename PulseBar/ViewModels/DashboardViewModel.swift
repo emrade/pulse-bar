@@ -9,12 +9,25 @@ import Foundation
 import Combine
 import SwiftUI
 
+// MARK: - View States
+enum DashboardViewState {
+    case basic
+    case advancedStorage
+    case advancedMemory  
+    case advancedBattery
+    case advancedCPU
+    case advancedNetwork
+    case advancedDevices
+    case advancedNetworkUsage
+}
+
 @MainActor
 class DashboardViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var showingResetConfirmation = false
     @Published var snapshot = MetricsSnapshot()
     @Published var networkSpeedTest = NetworkSpeedTest()
+    @Published var currentViewState: DashboardViewState = .basic
     
     // MARK: - Private Properties
     private let systemMonitor = SystemMonitor.shared
@@ -124,5 +137,47 @@ Better signal = faster speeds and more reliable connection.
     
     func refreshAllMetrics() {
         systemMonitor.refreshAllMetrics()
+    }
+    
+    // MARK: - Advanced View Navigation
+    func showAdvancedView(for metric: DashboardViewState) {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentViewState = metric
+        }
+    }
+    
+    func showBasicView() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentViewState = .basic
+        }
+    }
+    
+    // MARK: - Metric Tile Actions
+    func handleStorageTileTap() {
+        showAdvancedView(for: .advancedStorage)
+    }
+    
+    func handleMemoryTileTap() {
+        showAdvancedView(for: .advancedMemory)
+    }
+    
+    func handleBatteryTileTap() {
+        showAdvancedView(for: .advancedBattery)
+    }
+    
+    func handleCPUTileTap() {
+        showAdvancedView(for: .advancedCPU)
+    }
+    
+    func handleNetworkTileTap() {
+        showAdvancedView(for: .advancedNetwork)
+    }
+    
+    func handleDevicesTileTap() {
+        showAdvancedView(for: .advancedDevices)
+    }
+    
+    func handleNetworkUsageTileTap() {
+        showAdvancedView(for: .advancedNetworkUsage)
     }
 }
