@@ -53,7 +53,7 @@ struct DashboardView: View {
                 )
             }
         }
-        .frame(width: 360, height: 620)
+        .frame(width: 360, height: 700)
         .background(Color(NSColor.windowBackgroundColor))
         .alert("Reset Data Usage", isPresented: $viewModel.showingResetConfirmation) {
             Button("Cancel", role: .cancel) {
@@ -224,7 +224,7 @@ struct TappableMetricRowView: View {
                     .frame(maxHeight: .infinity, alignment: .center)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(minHeight: 60)
+            .frame(minHeight: 50)
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
             .contentShape(Rectangle()) // inside the label so full frame is tappable
