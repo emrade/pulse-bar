@@ -8,6 +8,7 @@
 import Foundation
 import SystemConfiguration
 import Darwin
+import CoreWLAN
 
 struct NetworkConnectionInfo {
     let ipAddress: String?
@@ -61,7 +62,7 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
             // Check interface type to detect WiFi vs Ethernet
             if interfaceType?.contains("WiFi") == true || interfaceType?.contains("Wi-Fi") == true {
                 connectionType = getWiFiConnectionType()
-                channel = getWiFiChannel()
+                channel = getWiFiType()
                 security = getWiFiSecurity()
             } else if primaryInterface.hasPrefix("en") {
                 connectionType = "Ethernet"
@@ -222,97 +223,127 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
         return []
     }
     
-    private func getWiFiConnectionType() -> String {
-        // Use airport command to get WiFi details
+    func getWiFiConnectionType() -> String {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport")
+        process.launchPath = "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
         process.arguments = ["-I"]
-        
+
         let pipe = Pipe()
         process.standardOutput = pipe
-        
-        do {
-            try process.run()
-            process.waitUntilExit()
-            
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            if let output = String(data: data, encoding: .utf8) {
-                let lines = output.components(separatedBy: .newlines)
-                for line in lines {
-                    if line.contains("802.11ac") {
-                        return "WiFi 5 (802.11ac)"
-                    } else if line.contains("802.11ax") {
-                        return "WiFi 6 (802.11ax)"
-                    } else if line.contains("802.11n") {
-                        return "WiFi 4 (802.11n)"
-                    }
-                }
-                return "WiFi"
-            }
-        } catch {}
-        
+        process.launch()
+        process.waitUntilExit()
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        guard let output = String(data: data, encoding: .utf8) else { return "WiFi" }
+
+        if let phyLine = output.split(separator: "\n").first(where: { $0.contains("PHY Mode") }) {
+            if phyLine.contains("11ax") { return "WiFi 6 (802.11ax)" }
+            if phyLine.contains("11ac") { return "WiFi 5 (802.11ac)" }
+            if phyLine.contains("11n")  { return "WiFi 4 (802.11n)" }
+            if phyLine.contains("11g")  { return "WiFi (802.11g)" }
+            if phyLine.contains("11a")  { return "WiFi (802.11a)" }
+            if phyLine.contains("11b")  { return "WiFi (802.11b)" }
+        }
+
         return "WiFi"
     }
+
+
     
-    private func getWiFiChannel() -> String {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath:
-            "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
-        )
-        process.arguments = ["-I"]
+   private func getWiFiType() -> String {
+        guard let interface = CWWiFiClient.shared().interface(),
+            let channelInfo = interface.wlanChannel() else {
+            return "Unknown"
+        }
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
+        let bandLabel: String
+        switch channelInfo.channelBand {
+        case .band2GHz: bandLabel = "2.4GHz"
+        case .band5GHz: bandLabel = "5GHz"
+        case .band6GHz: bandLabel = "6GHz"
+        case .bandUnknown: bandLabel = "Unknown Band"
+        @unknown default: bandLabel = "Unknown Band"
+        }
 
-        do {
-            try process.run()
-            process.waitUntilExit()
+        let phyModeLabel: String
+        switch interface.activePHYMode() {
+        case .mode11a: phyModeLabel = "Wi-Fi (802.11a)"
+        case .mode11b: phyModeLabel = "Wi-Fi (802.11b)"
+        case .mode11g: phyModeLabel = "Wi-Fi (802.11g)"
+        case .mode11n: phyModeLabel = "Wi-Fi 4 (802.11n)"
+        case .mode11ac: phyModeLabel = "Wi-Fi 5 (802.11ac)"
+        case .mode11ax:
+            phyModeLabel = bandLabel == "6GHz" ? "Wi-Fi 6E (802.11ax)" : "Wi-Fi 6 (802.11ax)"
+        case .modeNone:
+            phyModeLabel = "Wi-Fi"
+        @unknown default:
+            phyModeLabel = "Wi-Fi"
+        }
 
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            if let output = String(data: data, encoding: .utf8) {
-                if let line = output.components(separatedBy: .newlines)
-                    .first(where: { $0.lowercased().contains("channel:") }) {
+        return "\(phyModeLabel) (\(bandLabel))"
+    }
 
-                    let channelNumber = line
-                        .components(separatedBy: ":")
-                        .last?
-                        .trimmingCharacters(in: .whitespaces)
 
-                    if let ch = channelNumber {
-                        if ch.contains("5") { return "\(ch) (5GHz)" }
-                        else { return "\(ch) (2.4GHz)" }
-                    }
-                }
-            }
-        } catch {}
+
+    
+  private func getWiFiSecurity() -> String {
+    guard let interface = CWWiFiClient.shared().interface(),
+          let ssid = interface.ssid() else {
         return "Unknown"
     }
     
-    private func getWiFiSecurity() -> String {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath:
-            "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
-        )
-        process.arguments = ["-I"]
-
-        let pipe = Pipe()
-        process.standardOutput = pipe
-
-        do {
-            try process.run()
-            process.waitUntilExit()
-
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            if let output = String(data: data, encoding: .utf8) {
-                let lower = output.lowercased()
-
-                if lower.contains("wpa3") || lower.contains("wpa3-") { return "WPA3" }
-                if lower.contains("wpa2") || lower.contains("wpa2-") { return "WPA2" }
-                if lower.contains("wpa") || lower.contains("wpa-") { return "WPA" }
-                if lower.contains("wep") { return "WEP" }
-            }
-        } catch {}
-
+    let airportPath = "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
+    let process = Process()
+    process.launchPath = airportPath
+    process.arguments = ["-s"] // scan networks
+    
+    let pipe = Pipe()
+    process.standardOutput = pipe
+    process.standardError = Pipe()
+    
+    do {
+        try process.run()
+    } catch {
         return "Unknown"
     }
+    
+    process.waitUntilExit()
+    
+    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+    guard let output = String(data: data, encoding: .utf8) else {
+        return "Unknown"
+    }
+    
+    // Split into lines, skip header row
+    let lines = output.components(separatedBy: .newlines).dropFirst()
+    for line in lines {
+        // Each line contains SSID, BSSID, RSSI, CHANNEL, HT, CC, SECURITY
+        // Match SSID exactly (trimmed)
+        if line.trimmingCharacters(in: .whitespaces).hasPrefix(ssid) {
+            // SECURITY is usually the last column
+            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+            if let security = parts.last {
+                return String(security)
+            }
+        }
+    }
+    
+    return "Unknown"
+}
+
+
+
+private func securityDescription(for secType: CWSecurity) -> String {
+    switch secType {
+    case .none: return "Open"
+    case .WEP: return "WEP"
+    case .wpaPersonal, .wpaEnterprise: return "WPA"
+    case .wpa2Personal, .wpa2Enterprise: return "WPA2"
+    case .wpa3Personal, .wpa3Enterprise: return "WPA3"
+    default: return "Unknown"
+    }
+}
+
+
+
 }
