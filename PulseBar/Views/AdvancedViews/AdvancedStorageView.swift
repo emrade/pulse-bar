@@ -69,15 +69,29 @@ struct AdvancedStorageView: View, AdvancedMetricView {
     }
     
     private var healthStatus: (status: String, color: Color, icon: String) {
-        // Simulated SMART status - in real implementation would use IOKit
-        let usagePercentage = metricData.bootVolume?.usagePercentage ?? 0
+        guard let bootVolume = metricData.bootVolume,
+              let smartStatus = bootVolume.smartStatus else {
+            // Fallback to simulated status if SMART data is not available
+            let usagePercentage = metricData.bootVolume?.usagePercentage ?? 0
+            
+            if usagePercentage > 0.90 {
+                return ("Warning", .orange, "exclamationmark.triangle")
+            } else if usagePercentage > 0.95 {
+                return ("Critical", .red, "xmark.circle")
+            } else {
+                return ("Healthy", .green, "checkmark.circle")
+            }
+        }
         
-        if usagePercentage > 0.90 {
-            return ("Warning", .orange, "exclamationmark.triangle")
-        } else if usagePercentage > 0.95 {
-            return ("Critical", .red, "xmark.circle")
-        } else {
+        // Use real SMART status
+        if !smartStatus.isAvailable {
+            return ("Unknown", .gray, "questionmark.circle")
+        }
+        
+        if smartStatus.isHealthy {
             return ("Healthy", .green, "checkmark.circle")
+        } else {
+            return ("Failing", .red, "xmark.circle")
         }
     }
     
@@ -185,29 +199,74 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                     .font(.title2)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("SMART Status: \(healthStatus.status)")
-                        .font(.subheadline.weight(.medium))
-                    
-                    Text("Disk appears to be functioning normally")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    if let bootVolume = metricData.bootVolume,
+                       let smartStatus = bootVolume.smartStatus {
+                        Text("SMART Status: \(smartStatus.overallHealth)")
+                            .font(.subheadline.weight(.medium))
+                        
+                        if smartStatus.isAvailable {
+                            Text("Disk SMART data is available and \(smartStatus.isHealthy ? "healthy" : "indicating potential issues")")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("SMART data not available for this drive")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        Text("SMART Status: Unknown")
+                            .font(.subheadline.weight(.medium))
+                        
+                        Text("Disk appears to be functioning normally")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Spacer()
             }
             
-            // Temperature (simulated)
+            // Temperature (from SMART data if available, otherwise simulated)
             HStack {
                 Image(systemName: "thermometer")
                     .foregroundColor(.blue)
-                Text("Temperature: 38°C")
-                    .font(.caption)
                 
-                Spacer()
-                
-                Text("Normal")
-                    .font(.caption)
-                    .foregroundColor(.green)
+                if let bootVolume = metricData.bootVolume,
+                   let smartStatus = bootVolume.smartStatus,
+                   let temperature = smartStatus.formattedTemperature {
+                    Text("Temperature: \(temperature)")
+                        .font(.caption)
+                    
+                    Spacer()
+                    
+                    // Determine temperature status
+                    let tempColor: Color = {
+                        guard let temp = smartStatus.temperature else { return .secondary }
+                        if temp > 50 { return .red }
+                        else if temp > 40 { return .orange }
+                        else { return .green }
+                    }()
+                    
+                    let tempStatus: String = {
+                        guard let temp = smartStatus.temperature else { return "Unknown" }
+                        if temp > 50 { return "High" }
+                        else if temp > 40 { return "Warm" }
+                        else { return "Normal" }
+                    }()
+                    
+                    Text(tempStatus)
+                        .font(.caption)
+                        .foregroundColor(tempColor)
+                } else {
+                    Text("Temperature: 38°C")
+                        .font(.caption)
+                    
+                    Spacer()
+                    
+                    Text("Normal")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                }
             }
         }
         .padding()

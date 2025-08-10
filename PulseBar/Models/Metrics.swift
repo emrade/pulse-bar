@@ -166,6 +166,25 @@ struct VolumeInfo {
     let freeBytes: UInt64
     let isBootVolume: Bool
     let isExternal: Bool
+    let smartStatus: SMARTStatus? // Add SMART status information
+    
+    init(
+        name: String,
+        mountPoint: String,
+        totalBytes: UInt64,
+        freeBytes: UInt64,
+        isBootVolume: Bool,
+        isExternal: Bool,
+        smartStatus: SMARTStatus? = nil
+    ) {
+        self.name = name
+        self.mountPoint = mountPoint
+        self.totalBytes = totalBytes
+        self.freeBytes = freeBytes
+        self.isBootVolume = isBootVolume
+        self.isExternal = isExternal
+        self.smartStatus = smartStatus
+    }
     
     var usedBytes: UInt64 {
         return totalBytes > freeBytes ? totalBytes - freeBytes : 0
@@ -174,6 +193,25 @@ struct VolumeInfo {
     var usagePercentage: Double {
         guard totalBytes > 0 else { return 0.0 }
         return Double(usedBytes) / Double(totalBytes)
+    }
+}
+
+// MARK: - SMART Status
+struct SMARTStatus {
+    let overallHealth: String // "Verified", "Failing", "Unknown"
+    let temperature: Double? // Temperature in Celsius
+    let powerOnHours: UInt64? // Hours the drive has been powered on
+    let reallocatedSectorCount: UInt64? // Number of reallocated sectors
+    let pendingSectorCount: UInt64? // Number of pending sectors
+    let isAvailable: Bool // Whether SMART data is available for this drive
+    
+    var isHealthy: Bool {
+        return overallHealth == "Verified"
+    }
+    
+    var formattedTemperature: String? {
+        guard let temp = temperature else { return nil }
+        return String(format: "%.0f°C", temp)
     }
 }
 
