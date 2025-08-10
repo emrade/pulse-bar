@@ -221,17 +221,20 @@ struct TappableMetricRowView: View {
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .frame(maxHeight: .infinity, alignment: .center)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(minHeight: 60)
             .padding(.vertical, 8)
-            .padding(.horizontal, 4)
+            .padding(.horizontal, 12)
+            .contentShape(Rectangle()) // inside the label so full frame is tappable
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(isHovered ? Color(NSColor.controlAccentColor).opacity(0.1) : Color.clear)
+                    .animation(.easeInOut(duration: 0.2), value: isHovered)
+            )
         }
         .buttonStyle(.plain)
-        .contentShape(Rectangle())
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(isHovered ? Color(NSColor.controlAccentColor).opacity(0.1) : Color.clear)
-                .animation(.easeInOut(duration: 0.2), value: isHovered)
-        )
         .onHover { hovering in
             isHovered = hovering
             if hovering {

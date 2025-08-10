@@ -35,16 +35,18 @@ struct AdvancedViewHeader: View {
                         .font(.caption.weight(.medium))
                 }
                 .foregroundColor(.accentColor)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+                .padding(.vertical, 6)
+                .frame(width: 60, height: 32)
+                .contentShape(Rectangle())
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(isBackHovered ? Color(NSColor.controlAccentColor).opacity(0.1) : Color.clear)
+                        .animation(.easeInOut(duration: 0.2), value: isBackHovered)
+                )
             }
             .buttonStyle(.plain)
-            .contentShape(Rectangle())
-            .background(
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(isBackHovered ? Color(NSColor.controlAccentColor).opacity(0.1) : Color.clear)
-                    .animation(.easeInOut(duration: 0.2), value: isBackHovered)
-            )
             .onHover { hovering in
                 isBackHovered = hovering
                 if hovering {
