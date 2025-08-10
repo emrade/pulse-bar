@@ -34,40 +34,30 @@ final class StorageAnalysisService: StorageAnalysisServiceProtocol, @unchecked S
     }
     
     func performStorageAnalysis(totalUsedBytes: UInt64) -> [StorageCategoryInfo] {
-        print("StorageAnalysisService: Starting simplified storage analysis")
         var categories: [StorageCategoryInfo] = []
-        
-        // Get home directory
-        let homeDir = FileManager.default.homeDirectoryForCurrentUser
         
         // Only analyze accessible directories without permission issues
         let categoriesToAnalyze: [(name: String, paths: [String], color: String, description: String)] = [
-            ("Applications", ["/Applications"], "green", "Applications and utilities"),
-            ("Documents", [homeDir.appendingPathComponent("Documents").path], "blue", "Your documents and files")
+            ("Applications", ["/Applications"], "green", "Applications and utilities")
         ]
         
         var totalAnalyzedSize: UInt64 = 0
         
         for category in categoriesToAnalyze {
-            print("StorageAnalysisService: Analyzing category: \(category.name)")
-            
             var totalSize: UInt64 = 0
             for path in category.paths {
                 let size = calculateDirectorySize(at: path)
                 totalSize += size
-                print("StorageAnalysisService: \(path) = \(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .binary))")
             }
             
-            if totalSize > 0 {
-                categories.append(StorageCategoryInfo(
-                    name: category.name,
-                    sizeBytes: totalSize,
-                    color: category.color,
-                    description: category.description
-                ))
-                totalAnalyzedSize += totalSize
-                print("StorageAnalysisService: \(category.name) total = \(ByteCountFormatter.string(fromByteCount: Int64(totalSize), countStyle: .binary))")
-            }
+            // Always include Applications category, even if size is 0 or scan failed
+            categories.append(StorageCategoryInfo(
+                name: category.name,
+                sizeBytes: totalSize,
+                color: category.color,
+                description: category.description
+            ))
+            totalAnalyzedSize += totalSize
         }
         
         // Calculate "Other" as the remaining used space
@@ -77,17 +67,12 @@ final class StorageAnalysisService: StorageAnalysisServiceProtocol, @unchecked S
                 name: "Other",
                 sizeBytes: otherSize,
                 color: "gray",
-                description: "System files and other data"
+                description: "Documents, system files, and other data"
             ))
-            print("StorageAnalysisService: Other calculated = \(ByteCountFormatter.string(fromByteCount: Int64(otherSize), countStyle: .binary))")
         }
         
         // Sort by size (largest first)
         categories.sort { $0.sizeBytes > $1.sizeBytes }
-        
-        print("StorageAnalysisService: Analysis complete with \(categories.count) categories")
-        print("StorageAnalysisService: Total analyzed: \(ByteCountFormatter.string(fromByteCount: Int64(totalAnalyzedSize), countStyle: .binary))")
-        print("StorageAnalysisService: Total used: \(ByteCountFormatter.string(fromByteCount: Int64(totalUsedBytes), countStyle: .binary))")
         
         return categories
     }
@@ -102,7 +87,6 @@ final class StorageAnalysisService: StorageAnalysisServiceProtocol, @unchecked S
         var totalSize: UInt64 = 0
         
         guard fileManager.fileExists(atPath: path) else {
-            print("StorageAnalysisService: Path does not exist: \(path)")
             return 0
         }
         
@@ -113,7 +97,6 @@ final class StorageAnalysisService: StorageAnalysisServiceProtocol, @unchecked S
         var itemsProcessed = 0
         
         guard let enumerator = fileManager.enumerator(atPath: path) else {
-            print("StorageAnalysisService: Could not create enumerator for: \(path)")
             return 0
         }
         
@@ -121,12 +104,10 @@ final class StorageAnalysisService: StorageAnalysisServiceProtocol, @unchecked S
             // Check timeout and item limits
             itemsProcessed += 1
             if Date().timeIntervalSince(startTime) > maxDuration {
-                print("StorageAnalysisService: Timeout reached for \(path) after \(itemsProcessed) items")
                 break
             }
             
             if itemsProcessed > maxItemsToProcess {
-                print("StorageAnalysisService: Item limit reached for \(path)")
                 break
             }
             

@@ -34,7 +34,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
             ]
         }
         
-        // Use real storage categories if available (should only be 3: Documents, Applications, Other)
+        // Use real storage categories if available (should be Applications and Other)
         var chartPoints: [ChartDataPoint] = []
         
         for category in storageCategories {
