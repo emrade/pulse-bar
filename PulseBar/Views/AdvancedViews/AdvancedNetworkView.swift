@@ -300,7 +300,6 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                     InfoRow(label: "Subnet Mask", value: networkConnectionInfo?.subnetMask ?? "Fetching...")
                     InfoRow(label: "Connection Type", value: networkConnectionInfo?.connectionType ?? "Fetching...")
                     InfoRow(label: "Channel", value: networkConnectionInfo?.channel ?? "Fetching...")
-                    InfoRow(label: "Security", value: networkConnectionInfo?.security ?? "Fetching...")
                 }
             } else {
                 VStack(spacing: 12) {

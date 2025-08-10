@@ -18,7 +18,6 @@ struct NetworkConnectionInfo {
     let interfaceType: String?
     let connectionType: String?
     let channel: String?
-    let security: String?
 }
 
 protocol NetworkInfoServiceProtocol {
@@ -44,7 +43,6 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
         var interfaceType: String?
         var connectionType: String?
         var channel: String?
-        var security: String?
         
         // Get primary interface information
         if let primaryInterface = getPrimaryInterface() {
@@ -63,7 +61,6 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
             if interfaceType?.contains("WiFi") == true || interfaceType?.contains("Wi-Fi") == true {
                 connectionType = getWiFiConnectionType()
                 channel = getWiFiType()
-                security = getWiFiSecurity()
             } else if primaryInterface.hasPrefix("en") {
                 connectionType = "Ethernet"
             }
@@ -76,8 +73,7 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
             subnetMask: subnetMask,
             interfaceType: interfaceType,
             connectionType: connectionType,
-            channel: channel,
-            security: security
+            channel: channel
         )
     }
     
@@ -227,15 +223,15 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
         let process = Process()
         process.launchPath = "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
         process.arguments = ["-I"]
-
+        
         let pipe = Pipe()
         process.standardOutput = pipe
         process.launch()
         process.waitUntilExit()
-
+        
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         guard let output = String(data: data, encoding: .utf8) else { return "WiFi" }
-
+        
         if let phyLine = output.split(separator: "\n").first(where: { $0.contains("PHY Mode") }) {
             if phyLine.contains("11ax") { return "WiFi 6 (802.11ax)" }
             if phyLine.contains("11ac") { return "WiFi 5 (802.11ac)" }
@@ -244,18 +240,18 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
             if phyLine.contains("11a")  { return "WiFi (802.11a)" }
             if phyLine.contains("11b")  { return "WiFi (802.11b)" }
         }
-
+        
         return "WiFi"
     }
-
-
     
-   private func getWiFiType() -> String {
+    
+    
+    private func getWiFiType() -> String {
         guard let interface = CWWiFiClient.shared().interface(),
-            let channelInfo = interface.wlanChannel() else {
+              let channelInfo = interface.wlanChannel() else {
             return "Unknown"
         }
-
+        
         let bandLabel: String
         switch channelInfo.channelBand {
         case .band2GHz: bandLabel = "2.4GHz"
@@ -264,7 +260,7 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
         case .bandUnknown: bandLabel = "Unknown Band"
         @unknown default: bandLabel = "Unknown Band"
         }
-
+        
         let phyModeLabel: String
         switch interface.activePHYMode() {
         case .mode11a: phyModeLabel = "Wi-Fi (802.11a)"
@@ -279,71 +275,68 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
         @unknown default:
             phyModeLabel = "Wi-Fi"
         }
-
+        
         return "\(phyModeLabel) (\(bandLabel))"
     }
-
-
-
     
-  private func getWiFiSecurity() -> String {
-    guard let interface = CWWiFiClient.shared().interface(),
-          let ssid = interface.ssid() else {
-        return "Unknown"
-    }
     
-    let airportPath = "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
-    let process = Process()
-    process.launchPath = airportPath
-    process.arguments = ["-s"] // scan networks
     
-    let pipe = Pipe()
-    process.standardOutput = pipe
-    process.standardError = Pipe()
     
-    do {
-        try process.run()
-    } catch {
-        return "Unknown"
-    }
-    
-    process.waitUntilExit()
-    
-    let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    guard let output = String(data: data, encoding: .utf8) else {
-        return "Unknown"
-    }
-    
-    // Split into lines, skip header row
-    let lines = output.components(separatedBy: .newlines).dropFirst()
-    for line in lines {
-        // Each line contains SSID, BSSID, RSSI, CHANNEL, HT, CC, SECURITY
-        // Match SSID exactly (trimmed)
-        if line.trimmingCharacters(in: .whitespaces).hasPrefix(ssid) {
-            // SECURITY is usually the last column
-            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-            if let security = parts.last {
-                return String(security)
+    private func getWiFiSecurity() -> String {
+        guard let interface = CWWiFiClient.shared().interface(),
+              let ssid = interface.ssid() else {
+            return "Unknown"
+        }
+        
+        let airportPath = "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
+        let process = Process()
+        process.launchPath = airportPath
+        process.arguments = ["-s"] // scan networks
+        
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = Pipe()
+        
+        do {
+            try process.run()
+        } catch {
+            return "Unknown"
+        }
+        
+        process.waitUntilExit()
+        
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        guard let output = String(data: data, encoding: .utf8) else {
+            return "Unknown"
+        }
+        
+        // Split into lines, skip header row
+        let lines = output.components(separatedBy: .newlines).dropFirst()
+        for line in lines {
+            // Each line contains SSID, BSSID, RSSI, CHANNEL, HT, CC, SECURITY
+            // Match SSID exactly (trimmed)
+            if line.trimmingCharacters(in: .whitespaces).hasPrefix(ssid) {
+                // SECURITY is usually the last column
+                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                if let security = parts.last {
+                    return String(security)
+                }
             }
         }
+        
+        return "Unknown"
     }
     
-    return "Unknown"
-}
-
-
-
-private func securityDescription(for secType: CWSecurity) -> String {
-    switch secType {
-    case .none: return "Open"
-    case .WEP: return "WEP"
-    case .wpaPersonal, .wpaEnterprise: return "WPA"
-    case .wpa2Personal, .wpa2Enterprise: return "WPA2"
-    case .wpa3Personal, .wpa3Enterprise: return "WPA3"
-    default: return "Unknown"
+    
+    
+    private func securityDescription(for secType: CWSecurity) -> String {
+        switch secType {
+        case .none: return "Open"
+        case .WEP: return "WEP"
+        case .wpaPersonal, .wpaEnterprise: return "WPA"
+        case .wpa2Personal, .wpa2Enterprise: return "WPA2"
+        case .wpa3Personal, .wpa3Enterprise: return "WPA3"
+        default: return "Unknown"
+        }
     }
-}
-
-
-
 }
