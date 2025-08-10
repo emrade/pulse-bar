@@ -11,6 +11,10 @@ import Charts
 struct AdvancedCPUView: View, AdvancedMetricView {
     let metricData: CPUMetrics
     let onBack: () -> Void
+    @State private var temperatureMetrics: TemperatureMetrics?
+    @State private var isLoadingTemperature = true
+    
+    private let temperatureService = TemperatureService()
     
     init(metricData: CPUMetrics, onBack: @escaping () -> Void) {
         self.metricData = metricData
@@ -44,17 +48,21 @@ struct AdvancedCPUView: View, AdvancedMetricView {
     }
     
     private var thermalState: (level: String, color: Color, description: String) {
-        let avgTemp = cpuCoreData.map { $0.temperature }.reduce(0, +) / Double(cpuCoreData.count)
-        
-        if avgTemp > 85 {
-            return ("Critical", .red, "CPU is overheating")
-        } else if avgTemp > 75 {
-            return ("Hot", .orange, "CPU temperature is elevated")
-        } else if avgTemp > 65 {
-            return ("Warm", .yellow, "CPU temperature is above normal")
-        } else {
-            return ("Normal", .green, "CPU temperature is healthy")
+        guard let tempMetrics = temperatureMetrics else {
+            return ("Loading...", .gray, "Reading thermal sensors...")
         }
+        
+        let color: Color = {
+            switch tempMetrics.thermalStateColor {
+            case "green": return .green
+            case "yellow": return .yellow
+            case "orange": return .orange  
+            case "red": return .red
+            default: return .gray
+            }
+        }()
+        
+        return (tempMetrics.thermalStateDescription, color, "System thermal state")
     }
     
     var body: some View {
@@ -86,6 +94,19 @@ struct AdvancedCPUView: View, AdvancedMetricView {
             }
         }
         .frame(width: 360, height: 620)
+        .onAppear {
+            loadTemperatureMetrics()
+        }
+    }
+    
+    private func loadTemperatureMetrics() {
+        Task {
+            let metrics = await temperatureService.getCurrentTemperatureMetrics()
+            await MainActor.run {
+                temperatureMetrics = metrics
+                isLoadingTemperature = false
+            }
+        }
     }
     
     private var cpuUsageChartSection: some View {
@@ -239,28 +260,38 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                     Image(systemName: "thermometer")
                         .foregroundColor(.orange)
                     
-                    Text("Average Temperature:")
+                    Text("CPU Temperature:")
                         .font(.caption)
                     
                     Spacer()
                     
-                    let avgTemp = cpuCoreData.map { $0.temperature }.reduce(0, +) / Double(cpuCoreData.count)
-                    Text(String(format: "%.1f°C", avgTemp))
-                        .font(.caption.weight(.medium))
+                    if let tempMetrics = temperatureMetrics {
+                        Text(tempMetrics.formattedTemperature)
+                            .font(.caption.weight(.medium))
+                    } else {
+                        Text("Loading...")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 HStack {
-                    Image(systemName: "speedometer")
+                    Image(systemName: "clock")
                         .foregroundColor(.blue)
                     
-                    Text("Average Frequency:")
+                    Text("Last Updated:")
                         .font(.caption)
                     
                     Spacer()
                     
-                    let avgFreq = cpuCoreData.map { $0.frequency }.reduce(0, +) / Double(cpuCoreData.count)
-                    Text(String(format: "%.1f GHz", avgFreq))
-                        .font(.caption.weight(.medium))
+                    if let tempMetrics = temperatureMetrics {
+                        Text(tempMetrics.timestamp, style: .time)
+                            .font(.caption.weight(.medium))
+                    } else {
+                        Text("--")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
         }
@@ -282,8 +313,11 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                 InfoRow(label: "Max Frequency", value: "3.8 GHz") // Simulated
                 InfoRow(label: "Thermal State", value: thermalState.level)
                 
-                let avgTemp = cpuCoreData.map { $0.temperature }.reduce(0, +) / Double(cpuCoreData.count)
-                InfoRow(label: "Average Temperature", value: String(format: "%.1f°C", avgTemp))
+                if let tempMetrics = temperatureMetrics {
+                    InfoRow(label: "CPU Temperature", value: tempMetrics.formattedTemperature)
+                } else {
+                    InfoRow(label: "CPU Temperature", value: "Loading...")
+                }
             }
         }
         .padding()

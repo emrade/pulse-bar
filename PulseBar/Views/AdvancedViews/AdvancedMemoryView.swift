@@ -11,6 +11,10 @@ import Charts
 struct AdvancedMemoryView: View, AdvancedMetricView {
     let metricData: MemoryMetrics
     let onBack: () -> Void
+    @State private var topProcesses: [ProcessMemoryInfo] = []
+    @State private var isLoadingProcesses = true
+    
+    private let processService = ProcessService()
     
     init(metricData: MemoryMetrics, onBack: @escaping () -> Void) {
         self.metricData = metricData
@@ -36,7 +40,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
         ]
     }
     
-    @State private var topProcesses: [(name: String, usage: Double)] = []
+    @State private var showSimplifiedView = true
     
     private var memoryPressure: (level: String, color: Color, description: String) {
         let usagePercentage = metricData.usagePercentage
@@ -68,8 +72,11 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                     // Memory Pressure
                     memoryPressureSection
                     
-                    // Top Processes
-                    topProcessesSection
+                    // Top Memory Users
+                    topMemoryUsersSection
+                    
+                    // Memory Usage Categories
+                    memoryUsageCategoriesSection
                     
                     // Memory Stats
                     memoryStatsSection
@@ -81,21 +88,173 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
             }
         }
         .frame(width: 360, height: 620)
-        .task {
-            await loadTopProcesses()
+        .onAppear {
+            loadTopProcesses()
         }
     }
     
-    private func loadTopProcesses() async {
-        let processInfos = await SystemMonitor.shared.memoryService.processService.getTopMemoryProcesses(limit: 5)
-        
-        let processData = processInfos.map { info in
-            let usageGB = Double(info.memoryUsage) / (1024 * 1024 * 1024) // Convert bytes to GB
-            return (name: info.name, usage: usageGB)
+    private func loadTopProcesses() {
+        Task {
+            let processes = await processService.getTopMemoryProcesses(limit: 5)
+            await MainActor.run {
+                topProcesses = processes
+                isLoadingProcesses = false
+            }
         }
-        
-        await MainActor.run {
-            topProcesses = processData
+    }
+    
+    private var topMemoryUsersSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Top Memory Users")
+                .font(.headline.weight(.semibold))
+            
+            if isLoadingProcesses {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .scaleEffect(0.8)
+                    Text("Loading process data...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .padding(.vertical, 20)
+            } else if topProcesses.isEmpty {
+                HStack {
+                    Spacer()
+                    Text("No process data available")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .padding(.vertical, 20)
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(Array(topProcesses.enumerated()), id: \.element.pid) { index, process in
+                        processRow(
+                            rank: index + 1,
+                            name: process.name,
+                            memory: process.memoryUsage,
+                            pid: process.pid
+                        )
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(10)
+    }
+    
+    private func processRow(rank: Int, name: String, memory: UInt64, pid: Int32) -> some View {
+        HStack {
+            // Rank circle
+            ZStack {
+                Circle()
+                    .fill(rankColor(for: rank))
+                    .frame(width: 20, height: 20)
+                
+                Text("\(rank)")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundColor(.white)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name)
+                    .font(.caption.weight(.medium))
+                    .lineLimit(1)
+                
+                Text("PID: \(pid)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Text(ByteCountFormatter.string(fromByteCount: Int64(memory), countStyle: .memory))
+                .font(.caption.weight(.medium))
+                .foregroundColor(.primary)
+        }
+    }
+    
+    private func rankColor(for rank: Int) -> Color {
+        switch rank {
+        case 1: return .red
+        case 2: return .orange
+        case 3: return .yellow
+        default: return .gray
+        }
+    }
+    
+    private var memoryUsageCategoriesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Memory Usage Categories")
+                .font(.headline.weight(.semibold))
+            
+            VStack(spacing: 8) {
+                memoryUsageRow(
+                    label: "App Memory", 
+                    amount: Double(metricData.usedBytes) * 0.60, // 60% estimate 
+                    color: .blue,
+                    description: "Applications and their data"
+                )
+                
+                memoryUsageRow(
+                    label: "Wired Memory", 
+                    amount: Double(metricData.usedBytes) * 0.25, // 25% estimate
+                    color: .orange,
+                    description: "System kernel and drivers"
+                )
+                
+                memoryUsageRow(
+                    label: "Compressed", 
+                    amount: Double(metricData.usedBytes) * 0.15, // 15% estimate
+                    color: .red,
+                    description: "Compressed inactive memory"
+                )
+                
+                memoryUsageRow(
+                    label: "Cached Files", 
+                    amount: Double(metricData.cachedBytes),
+                    color: .green,
+                    description: "File system cache"
+                )
+                
+                memoryUsageRow(
+                    label: "Free Memory", 
+                    amount: Double(metricData.freeBytes),
+                    color: .gray,
+                    description: "Available for new apps"
+                )
+            }
+        }
+        .padding()
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(10)
+    }
+    
+    private func memoryUsageRow(label: String, amount: Double, color: Color, description: String) -> some View {
+        HStack {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 8, height: 8)
+                
+                Text(label)
+                    .font(.caption.weight(.medium))
+                    .frame(width: 80, alignment: .leading)
+            }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(ByteCountFormatter.string(fromByteCount: Int64(amount), countStyle: .binary))
+                    .font(.caption.weight(.medium))
+                
+                Text(description)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
         }
     }
     
@@ -202,35 +361,6 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
         .cornerRadius(10)
     }
     
-    private var topProcessesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Top Memory Users")
-                .font(.headline.weight(.semibold))
-            
-            VStack(spacing: 8) {
-                ForEach(Array(topProcesses.enumerated()), id: \.offset) { index, process in
-                    HStack {
-                        Text("\(index + 1).")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .frame(width: 20, alignment: .leading)
-                        
-                        Text(process.name)
-                            .font(.caption.weight(.medium))
-                        
-                        Spacer()
-                        
-                        Text(String(format: "%.1f GB", process.usage))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-        }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
-    }
     
     private var memoryStatsSection: some View {
         VStack(alignment: .leading, spacing: 12) {

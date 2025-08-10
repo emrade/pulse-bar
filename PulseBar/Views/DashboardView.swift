@@ -197,17 +197,9 @@ struct TappableMetricRowView: View {
                     .frame(width: 24, alignment: .center)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(title)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+                    Text(title)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(.primary)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(value)
@@ -223,6 +215,12 @@ struct TappableMetricRowView: View {
                         }
                     }
                 }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 4)
