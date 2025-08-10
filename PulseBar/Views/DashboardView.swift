@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @StateObject private var systemMonitor = SystemMonitor.shared
-    @State private var showingResetConfirmation = false
+    @StateObject private var viewModel = DashboardViewModel()
     
     var body: some View {
         VStack(spacing: 16) {
@@ -32,18 +31,18 @@ struct DashboardView: View {
                 MetricRowView(
                     icon: "internaldrive",
                     title: "Storage",
-                    value: systemMonitor.snapshot.disk.formattedBootUsage,
-                    detail: "\(systemMonitor.snapshot.disk.bootVolume?.name ?? "Unknown") • \(systemMonitor.snapshot.disk.formattedBootTotal)"
+                    value: viewModel.snapshot.disk.formattedBootUsage,
+                    detail: "\(viewModel.snapshot.disk.bootVolume?.name ?? "Unknown") • \(viewModel.snapshot.disk.formattedBootTotal)"
                 )
                 
                 MetricRowView(
                     icon: "memorychip",
                     title: "Memory",
-                    value: systemMonitor.snapshot.memory.formattedUsedWithAvailable,
-                    detail: systemMonitor.snapshot.memory.formattedTotal
+                    value: viewModel.snapshot.memory.formattedUsedWithAvailable,
+                    detail: viewModel.snapshot.memory.formattedTotal
                 )
                 
-                if let battery = systemMonitor.snapshot.battery {
+                if let battery = viewModel.snapshot.battery {
                     MetricRowView(
                         icon: battery.isCharging ? "battery.100.bolt" : "battery.100",
                         title: "Battery",
@@ -55,71 +54,34 @@ struct DashboardView: View {
                 MetricRowView(
                     icon: "cpu",
                     title: "CPU",
-                    value: systemMonitor.snapshot.cpu.formattedOverallUsage,
-                    detail: systemMonitor.snapshot.cpu.perCoreUsage.isEmpty ? nil : "\(systemMonitor.snapshot.cpu.perCoreUsage.count) cores"
+                    value: viewModel.snapshot.cpu.formattedOverallUsage,
+                    detail: viewModel.snapshot.cpu.perCoreUsage.isEmpty ? nil : "\(viewModel.snapshot.cpu.perCoreUsage.count) cores"
                 )
                 
                 MetricRowView(
-                    icon: systemMonitor.networkDisplayInfo.icon,
-                    title: systemMonitor.networkDisplayInfo.title,
-                    value: systemMonitor.activeConnectionType == .wifi ? 
-                        systemMonitor.snapshot.wifi.formattedStatus :
-                        "Connected via \(systemMonitor.networkDisplayInfo.connectionDetail ?? "Network")",
-                    detail: {
-                        switch systemMonitor.activeConnectionType {
-                        case .wifi:
-                            if systemMonitor.snapshot.wifi.isConnected {
-                                let speedTestResult = systemMonitor.networkSpeedTest.formattedResult != "Test Speed" && !systemMonitor.networkSpeedTest.isRunning ? 
-                                    " • \(systemMonitor.networkSpeedTest.formattedResult)" : ""
-                                return "\(systemMonitor.snapshot.wifi.signalQuality)\(speedTestResult)"
-                            }
-                            return nil
-                        case .ethernet, .other:
-                            return systemMonitor.networkSpeedTest.formattedResult != "Test Speed" && !systemMonitor.networkSpeedTest.isRunning ? 
-                                systemMonitor.networkSpeedTest.formattedResult : nil
-                        }
-                    }(),
-                    showInfoButton: systemMonitor.activeConnectionType == .wifi,
-                    infoContent: systemMonitor.activeConnectionType == .wifi ? """
-WiFi Signal Strength (dBm):
-
-dBm measures radio signal power. Higher numbers = weaker signal.
-
-Signal Quality Guide:
-• -30 to -50 dBm: Excellent (very close to router)
-• -50 to -60 dBm: Good (same room as router) 
-• -60 to -70 dBm: Fair (different room, some walls)
-• -70 to -80 dBm: Weak (far from router, obstacles)
-• -80 to -90 dBm: Very weak (barely usable)
-
-Better signal = faster speeds and more reliable connection.
-""" : nil,
-                    secondaryButtonText: systemMonitor.networkSpeedTest.isRunning ? 
-                        "Testing... \(Int(systemMonitor.networkSpeedTest.progress * 100))%" : "Test Speed",
-                    secondaryAction: {
-                        if systemMonitor.networkSpeedTest.isRunning {
-                            systemMonitor.cancelSpeedTest()
-                        } else {
-                            systemMonitor.runSpeedTest()
-                        }
-                    }
+                    icon: viewModel.networkDisplayInfo.icon,
+                    title: viewModel.networkDisplayInfo.title,
+                    value: viewModel.networkValueText,
+                    detail: viewModel.networkDetailText,
+                    showInfoButton: viewModel.shouldShowNetworkInfoButton,
+                    infoContent: viewModel.networkInfoContent,
+                    secondaryButtonText: viewModel.speedTestButtonText,
+                    secondaryAction: viewModel.handleSpeedTestAction
                 )
 
                 MetricRowView(
                     icon: "arrow.up.arrow.down.circle",
                     title: "Data Usage (Today)",
-                    value: systemMonitor.snapshot.networkUsage.formattedTotal,
+                    value: viewModel.snapshot.networkUsage.formattedTotal,
                     detail: nil,
                     secondaryButtonText: "Reset",
-                    secondaryAction: {
-                        showingResetConfirmation = true
-                    }
+                    secondaryAction: viewModel.showResetConfirmation
                 )
                 
                 MetricRowView(
                     icon: "externaldrive.connected.to.line.below",
                     title: "Devices",
-                    value: systemMonitor.snapshot.devices.formattedDetails,
+                    value: viewModel.snapshot.devices.formattedDetails,
                     detail: nil
                 )
             }
@@ -147,7 +109,7 @@ Better signal = faster speeds and more reliable connection.
                 Spacer()
                 
                 Button("Quit") {
-                    NSApplication.shared.terminate(nil)
+                    viewModel.quitApp()
                 }
                 .buttonStyle(.plain)
                 .foregroundColor(.secondary)
@@ -157,10 +119,12 @@ Better signal = faster speeds and more reliable connection.
         }
         .frame(width: 360, height: 580)
         .background(Color(NSColor.windowBackgroundColor))
-        .alert("Reset Data Usage", isPresented: $showingResetConfirmation) {
-            Button("Cancel", role: .cancel) { }
+        .alert("Reset Data Usage", isPresented: $viewModel.showingResetConfirmation) {
+            Button("Cancel", role: .cancel) {
+                viewModel.cancelReset()
+            }
             Button("Reset", role: .destructive) {
-                systemMonitor.resetDailyDataUsage()
+                viewModel.resetDailyDataUsage()
             }
         } message: {
             Text("Are you sure you want to reset today's data usage to 0? This action cannot be undone.")

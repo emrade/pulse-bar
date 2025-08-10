@@ -274,23 +274,33 @@ This comprehensive todo list is organized by development phases, following the P
   - ✅ Real-time loading indicators for network operations
   - ✅ Contextual network information display based on connection type
 
-### Phase 5: ViewModels & UI Integration
+- [x] **MVVM Architecture Implementation** ✅
+  - ✅ **DashboardViewModel:** Clean separation of business logic from presentation layer
+  - ✅ **Improved Testability:** ViewModel logic easily unit testable
+  - ✅ **Better Code Organization:** Complex view logic moved to dedicated ViewModel
+  - ✅ **Enhanced Maintainability:** Cleaner DashboardView focused only on layout/presentation
+  - ✅ **State Management:** Centralized UI state handling (confirmation dialogs, button states)
 
-#### 5.1. Dashboard ViewModel
-- [ ] **Implement DashboardViewModel**
-  - File: `ViewModels/DashboardViewModel.swift`
-  - Subscribe to `SystemMonitor.snapshot`
-  - Expose formatted data for views
-  - Handle UI state management
-  - **Acceptance:** UI updates reactively with system data
+### Phase 5: ViewModels & UI Integration ✅ COMPLETED
 
-#### 5.2. Complete Dashboard Views
-- [ ] **Enhance DashboardView**
-  - File: `Views/DashboardView.swift`
-  - Wire to `DashboardViewModel`
-  - Implement all metric rows with real data
-  - Add "Run Speed Test" button with progress
-  - **Acceptance:** All metrics display with live data
+#### 5.1. Dashboard ViewModel ✅ COMPLETED
+- [x] **Implement DashboardViewModel** ✅
+  - ✅ File: `ViewModels/DashboardViewModel.swift`
+  - ✅ Subscribe to `SystemMonitor.snapshot` via computed properties
+  - ✅ Expose formatted data for views with clean computed properties
+  - ✅ Handle UI state management (confirmation dialogs, button states)
+  - ✅ Simplify view logic with dedicated action methods
+  - ✅ **Acceptance:** UI updates reactively with system data through MVVM pattern
+
+#### 5.2. Complete Dashboard Views ✅ COMPLETED
+- [x] **Enhance DashboardView** ✅
+  - ✅ File: `Views/DashboardView.swift`
+  - ✅ Wire to `DashboardViewModel` replacing direct SystemMonitor access
+  - ✅ Implement all metric rows with real data via ViewModel
+  - ✅ Add "Test Speed" button with progress via ViewModel methods
+  - ✅ Add "Reset" button for Data Usage with confirmation dialog
+  - ✅ Clean separation of concerns: View handles presentation, ViewModel handles logic
+  - ✅ **Acceptance:** All metrics display with live data through clean MVVM architecture
 
 - [ ] **Create SettingsView**
   - File: `Views/SettingsView.swift`
