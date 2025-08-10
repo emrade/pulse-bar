@@ -33,9 +33,11 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
         
         if let cycleCount = battery.cycleCount {
             if cycleCount > 1000 { return "Replace Soon" }
+            else if cycleCount > 800 { return "Service Recommended" }
             else if cycleCount > 500 { return "Fair" }
+            else if cycleCount > 200 { return "Good" }
         }
-        return "Good"
+        return "Excellent"
     }
     
     private var estimatedChargeTime: String? {
@@ -90,7 +92,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                 noBatteryView
             }
         }
-        .frame(width: 360, height: 580)
+        .frame(width: 360, height: 620)
     }
     
     private func batteryLevelSection(battery: BatteryMetrics) -> some View {
@@ -170,7 +172,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                         
                         Spacer()
                         
-                        Text("85%") // Simulated
+                        Text("98%") // Simulated - realistic for new PC
                             .font(.caption.weight(.medium))
                     }
                     
@@ -183,7 +185,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                             
                             Rectangle()
                                 .fill(batteryHealthColor)
-                                .frame(width: geometry.size.width * 0.85, height: 6)
+                                .frame(width: geometry.size.width * 0.98, height: 6)
                                 .cornerRadius(3)
                         }
                     }
@@ -266,7 +268,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                 
                 InfoRow(label: "Temperature", value: "32°C") // Simulated
                 InfoRow(label: "Design Capacity", value: "100%") // Simulated
-                InfoRow(label: "Full Charge Capacity", value: "85%") // Simulated
+                InfoRow(label: "Full Charge Capacity", value: "98%") // Simulated - realistic for new PC
             }
         }
         .padding()
@@ -305,7 +307,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
             isCharging: true,
             timeRemaining: nil,
             health: "Good",
-            cycleCount: 342,
+            cycleCount: 15,
             isLoading: false,
             error: nil
         ),

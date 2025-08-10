@@ -77,7 +77,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                 .padding()
             }
         }
-        .frame(width: 360, height: 580)
+        .frame(width: 360, height: 620)
     }
     
     private var storageBreakdownSection: some View {

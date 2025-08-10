@@ -46,11 +46,14 @@ struct DashboardView: View {
                     onBack: viewModel.showBasicView
                 )
             case .advancedNetworkUsage:
-                // TODO: Create AdvancedNetworkUsageView for daily data usage details
-                basicDashboardView
+                AdvancedNetworkUsageView(
+                    metricData: viewModel.snapshot.networkUsage,
+                    onBack: viewModel.showBasicView,
+                    onReset: viewModel.showResetConfirmation
+                )
             }
         }
-        .frame(width: 360, height: 580)
+        .frame(width: 360, height: 620)
         .background(Color(NSColor.windowBackgroundColor))
         .alert("Reset Data Usage", isPresented: $viewModel.showingResetConfirmation) {
             Button("Cancel", role: .cancel) {
@@ -183,6 +186,8 @@ struct TappableMetricRowView: View {
     let detail: String?
     let onTap: () -> Void
     
+    @State private var isHovered = false
+    
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
@@ -220,15 +225,18 @@ struct TappableMetricRowView: View {
                 }
             }
             .padding(.vertical, 8)
+            .padding(.horizontal, 4)
         }
         .buttonStyle(.plain)
         .contentShape(Rectangle())
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(Color.clear)
+                .fill(isHovered ? Color(NSColor.controlAccentColor).opacity(0.1) : Color.clear)
+                .animation(.easeInOut(duration: 0.2), value: isHovered)
         )
-        .onHover { isHovered in
-            if isHovered {
+        .onHover { hovering in
+            isHovered = hovering
+            if hovering {
                 NSCursor.pointingHand.set()
             } else {
                 NSCursor.arrow.set()

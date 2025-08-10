@@ -40,11 +40,11 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
     private var topProcesses: [(name: String, usage: Double)] {
         // Simulated top processes - in real implementation would use ActivityMonitor APIs
         return [
-            ("Safari", 1.2),
+            ("Claude Code", 1.2),
             ("Xcode", 0.8),
-            ("Chrome", 0.6),
-            ("Slack", 0.4),
-            ("Spotify", 0.3)
+            ("System Preferences", 0.3),
+            ("WindowServer", 0.2),
+            ("Dock", 0.1)
         ]
     }
     
@@ -90,7 +90,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 .padding()
             }
         }
-        .frame(width: 360, height: 580)
+        .frame(width: 360, height: 620)
     }
     
     private var memoryBreakdownSection: some View {

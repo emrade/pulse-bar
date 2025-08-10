@@ -12,9 +12,29 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
     let metricData: WiFiMetrics
     let onBack: () -> Void
     
+    @State private var speedTestButtonText = "Test Speed"
+    @State private var isSpeedTestRunning = false
+    
     init(metricData: WiFiMetrics, onBack: @escaping () -> Void) {
         self.metricData = metricData
         self.onBack = onBack
+    }
+    
+    private func handleSpeedTest() {
+        if !isSpeedTestRunning {
+            isSpeedTestRunning = true
+            speedTestButtonText = "Testing..."
+            
+            // Simulate speed test (in real implementation, would use SystemMonitor)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                speedTestButtonText = "Test Complete"
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    speedTestButtonText = "Test Speed"
+                    isSpeedTestRunning = false
+                }
+            }
+        }
     }
     
     private var networkSpeedData: [NetworkSpeedPoint] {
@@ -92,7 +112,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 .padding()
             }
         }
-        .frame(width: 360, height: 580)
+        .frame(width: 360, height: 620)
     }
     
     private var networkSpeedChartSection: some View {
@@ -299,6 +319,26 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                     InfoRow(label: "Latency", value: "12 ms") // Simulated
                     InfoRow(label: "Connection Duration", value: "2h 34m") // Simulated
                     InfoRow(label: "Data Transferred", value: "1.2 GB") // Simulated
+                    
+                    // Speed Test Button
+                    HStack {
+                        Spacer()
+                        Button(action: handleSpeedTest) {
+                            Text(speedTestButtonText)
+                                .font(.caption.weight(.medium))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(isSpeedTestRunning ? Color.gray : Color.accentColor)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isSpeedTestRunning)
+                        Spacer()
+                    }
+                    .padding(.top, 8)
                 }
             }
         }
