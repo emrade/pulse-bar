@@ -15,6 +15,7 @@ struct MetricsSnapshot {
     let battery: BatteryMetrics?
     let wifi: WiFiMetrics
     let devices: DeviceMetrics
+    let networkUsage: NetworkUsageMetrics
     let timestamp: Date
     
     init(
@@ -24,6 +25,7 @@ struct MetricsSnapshot {
         battery: BatteryMetrics? = nil,
         wifi: WiFiMetrics = WiFiMetrics(),
         devices: DeviceMetrics = DeviceMetrics(),
+        networkUsage: NetworkUsageMetrics = NetworkUsageMetrics(),
         timestamp: Date = Date()
     ) {
         self.cpu = cpu
@@ -32,6 +34,7 @@ struct MetricsSnapshot {
         self.battery = battery
         self.wifi = wifi
         self.devices = devices
+        self.networkUsage = networkUsage
         self.timestamp = timestamp
     }
 }
@@ -375,4 +378,42 @@ enum NetworkConnectionType {
     case wifi
     case ethernet  
     case other
+}
+
+// MARK: - Network Usage Metrics
+struct NetworkUsageMetrics {
+    let downloaded: UInt64
+    let uploaded: UInt64
+    let isLoading: Bool
+    let error: String?
+
+    init(
+        downloaded: UInt64 = 0,
+        uploaded: UInt64 = 0,
+        isLoading: Bool = true,
+        error: String? = nil
+    ) {
+        self.downloaded = downloaded
+        self.uploaded = uploaded
+        self.isLoading = isLoading
+        self.error = error
+    }
+
+    var formattedDownloaded: String {
+        if isLoading { return "Loading..." }
+        if error != nil { return "Error" }
+        return ByteCountFormatter.string(fromByteCount: Int64(downloaded), countStyle: .file)
+    }
+
+    var formattedUploaded: String {
+        if isLoading { return "Loading..." }
+        if error != nil { return "Error" }
+        return ByteCountFormatter.string(fromByteCount: Int64(uploaded), countStyle: .file)
+    }
+
+    var formattedTotal: String {
+        if isLoading { return "Loading..." }
+        if error != nil { return "Error" }
+        return "↓ \(formattedDownloaded) / ↑ \(formattedUploaded)"
+    }
 }

@@ -109,6 +109,13 @@ Better signal = faster speeds and more reliable connection.
                     value: systemMonitor.snapshot.devices.formattedDetails,
                     detail: nil
                 )
+
+                MetricRowView(
+                    icon: "arrow.up.arrow.down.circle",
+                    title: "Data Usage (Today)",
+                    value: systemMonitor.snapshot.networkUsage.formattedTotal,
+                    detail: nil
+                )
             }
             .padding(.horizontal, 16)
             

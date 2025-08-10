@@ -21,6 +21,7 @@ class SystemMonitor: ObservableObject {
     private let wifiService: WiFiServiceProtocol
     private let deviceService: DeviceServiceProtocol
     private let networkService: NetworkServiceProtocol
+    private let networkUsageService: NetworkUsageServiceProtocol
     
     // Timers for different polling intervals
     private var cpuTimer: Timer?
@@ -29,6 +30,7 @@ class SystemMonitor: ObservableObject {
     private var batteryTimer: Timer?
     private var wifiTimer: Timer?
     private var deviceTimer: Timer?
+    private var networkUsageTimer: Timer?
     
     // Combine subscriptions
     private var cancellables = Set<AnyCancellable>()
@@ -43,7 +45,8 @@ class SystemMonitor: ObservableObject {
         batteryService: BatteryServiceProtocol = BatteryService(),
         wifiService: WiFiServiceProtocol = WiFiService(),
         deviceService: DeviceServiceProtocol = DeviceService(),
-        networkService: NetworkServiceProtocol = NetworkService()
+        networkService: NetworkServiceProtocol = NetworkService(),
+        networkUsageService: NetworkUsageServiceProtocol = NetworkUsageService()
     ) {
         self.cpuService = cpuService
         self.memoryService = memoryService
@@ -52,6 +55,7 @@ class SystemMonitor: ObservableObject {
         self.wifiService = wifiService
         self.deviceService = deviceService
         self.networkService = networkService
+        self.networkUsageService = networkUsageService
         
         setupSubscriptions()
         startPolling()
@@ -118,6 +122,14 @@ class SystemMonitor: ObservableObject {
                 self?.networkSpeedTest = speedTest
             }
             .store(in: &cancellables)
+
+        // Network usage updates
+        networkUsageService.metricsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] networkUsage in
+                self?.updateNetworkUsage(networkUsage)
+            }
+            .store(in: &cancellables)
     }
     
     private func startPolling() {
@@ -162,6 +174,13 @@ class SystemMonitor: ObservableObject {
                 await self.deviceService.updateMetrics()
             }
         }
+
+        // Network usage polling (5s interval)
+        networkUsageTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
+            Task {
+                await self.networkUsageService.updateMetrics()
+            }
+        }
         
         // Initial update
         Task {
@@ -176,6 +195,7 @@ class SystemMonitor: ObservableObject {
         batteryTimer?.invalidate()
         wifiTimer?.invalidate()
         deviceTimer?.invalidate()
+        networkUsageTimer?.invalidate()
         
         cpuTimer = nil
         memoryTimer = nil
@@ -183,6 +203,7 @@ class SystemMonitor: ObservableObject {
         batteryTimer = nil
         wifiTimer = nil
         deviceTimer = nil
+        networkUsageTimer = nil
     }
     
     private func updateAllMetrics() async {
@@ -193,6 +214,7 @@ class SystemMonitor: ObservableObject {
             group.addTask { await self.batteryService.updateMetrics() }
             group.addTask { await self.wifiService.updateMetrics() }
             group.addTask { await self.deviceService.updateMetrics() }
+            group.addTask { await self.networkUsageService.updateMetrics() }
         }
     }
     
@@ -205,6 +227,7 @@ class SystemMonitor: ObservableObject {
             battery: snapshot.battery,
             wifi: snapshot.wifi,
             devices: snapshot.devices,
+            networkUsage: snapshot.networkUsage,
             timestamp: Date()
         )
     }
@@ -217,6 +240,7 @@ class SystemMonitor: ObservableObject {
             battery: snapshot.battery,
             wifi: snapshot.wifi,
             devices: snapshot.devices,
+            networkUsage: snapshot.networkUsage,
             timestamp: Date()
         )
     }
@@ -229,6 +253,7 @@ class SystemMonitor: ObservableObject {
             battery: snapshot.battery,
             wifi: snapshot.wifi,
             devices: snapshot.devices,
+            networkUsage: snapshot.networkUsage,
             timestamp: Date()
         )
     }
@@ -241,6 +266,7 @@ class SystemMonitor: ObservableObject {
             battery: battery,
             wifi: snapshot.wifi,
             devices: snapshot.devices,
+            networkUsage: snapshot.networkUsage,
             timestamp: Date()
         )
     }
@@ -253,6 +279,7 @@ class SystemMonitor: ObservableObject {
             battery: snapshot.battery,
             wifi: wifi,
             devices: snapshot.devices,
+            networkUsage: snapshot.networkUsage,
             timestamp: Date()
         )
     }
@@ -265,6 +292,20 @@ class SystemMonitor: ObservableObject {
             battery: snapshot.battery,
             wifi: snapshot.wifi,
             devices: devices,
+            networkUsage: snapshot.networkUsage,
+            timestamp: Date()
+        )
+    }
+
+    private func updateNetworkUsage(_ networkUsage: NetworkUsageMetrics) {
+        snapshot = MetricsSnapshot(
+            cpu: snapshot.cpu,
+            memory: snapshot.memory,
+            disk: snapshot.disk,
+            battery: snapshot.battery,
+            wifi: snapshot.wifi,
+            devices: snapshot.devices,
+            networkUsage: networkUsage,
             timestamp: Date()
         )
     }
