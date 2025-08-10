@@ -9,6 +9,8 @@ import SwiftUI
 
 struct DashboardView: View {
     @StateObject private var systemMonitor = SystemMonitor.shared
+    @State private var showingResetConfirmation = false
+    
     var body: some View {
         VStack(spacing: 16) {
             // Header
@@ -114,7 +116,11 @@ Better signal = faster speeds and more reliable connection.
                     icon: "arrow.up.arrow.down.circle",
                     title: "Data Usage (Today)",
                     value: systemMonitor.snapshot.networkUsage.formattedTotal,
-                    detail: nil
+                    detail: nil,
+                    secondaryButtonText: "Reset",
+                    secondaryAction: {
+                        showingResetConfirmation = true
+                    }
                 )
             }
             .padding(.horizontal, 16)
@@ -151,6 +157,14 @@ Better signal = faster speeds and more reliable connection.
         }
         .frame(width: 360, height: 520)
         .background(Color(NSColor.windowBackgroundColor))
+        .alert("Reset Data Usage", isPresented: $showingResetConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                systemMonitor.resetDailyDataUsage()
+            }
+        } message: {
+            Text("Are you sure you want to reset today's data usage to 0? This action cannot be undone.")
+        }
     }
 }
 

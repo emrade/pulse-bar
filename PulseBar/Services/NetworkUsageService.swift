@@ -13,6 +13,7 @@ import SystemConfiguration
 protocol NetworkUsageServiceProtocol {
     var metricsPublisher: AnyPublisher<NetworkUsageMetrics, Never> { get }
     func updateMetrics() async
+    func resetDailyUsage() async
 }
 
 final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendable {
@@ -69,6 +70,27 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
         let metrics = NetworkUsageMetrics(downloaded: dailyDownloaded, uploaded: dailyUploaded, isLoading: false, error: nil)
         await MainActor.run {
             metricsSubject.send(metrics)
+        }
+    }
+    
+    func resetDailyUsage() async {
+        // Reset daily counters to 0
+        userDefaults.set(UInt64(0), forKey: dailyDownloadedKey)
+        userDefaults.set(UInt64(0), forKey: dailyUploadedKey)
+        
+        // Update the last system bytes to current values to prevent double counting
+        let currentSystemUsage = getNetworkUsage()
+        userDefaults.set(currentSystemUsage.bytesIn, forKey: lastSystemBytesInKey)
+        userDefaults.set(currentSystemUsage.bytesOut, forKey: lastSystemBytesOutKey)
+        
+        // Update the last update date to today
+        let today = Calendar.current.startOfDay(for: Date())
+        userDefaults.set(today, forKey: lastUpdateDateKey)
+        
+        // Send updated metrics immediately
+        let resetMetrics = NetworkUsageMetrics(downloaded: 0, uploaded: 0, isLoading: false, error: nil)
+        await MainActor.run {
+            metricsSubject.send(resetMetrics)
         }
     }
     

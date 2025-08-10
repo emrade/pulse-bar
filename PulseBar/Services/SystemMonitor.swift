@@ -363,6 +363,12 @@ class SystemMonitor: ObservableObject {
         }
     }
     
+    func resetDailyDataUsage() {
+        Task {
+            await networkUsageService.resetDailyUsage()
+        }
+    }
+    
     func stop() {
         stopPolling()
     }
