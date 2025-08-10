@@ -11,12 +11,9 @@ import Charts
 struct AdvancedStorageView: View, AdvancedMetricView {
     let metricData: DiskMetrics
     let onBack: () -> Void
-    @State private var diskIOMetrics: [DiskIOMetrics] = []
-    @State private var isLoadingIO = true
     @State private var storageCategories: [StorageCategoryInfo] = []
     @State private var isLoadingStorageAnalysis = true
     
-    private let diskIOService = DiskIOService()
     private let storageAnalysisService = StorageAnalysisService()
     
     init(metricData: DiskMetrics, onBack: @escaping () -> Void) {
@@ -97,9 +94,6 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                     // Storage Breakdown Chart
                     storageBreakdownSection
                     
-                    // Disk I/O Activity
-                    diskIOActivitySection
-                    
                     // Health Status
                     healthStatusSection
                     
@@ -114,18 +108,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
         }
         .frame(width: 360, height: 700)
         .onAppear {
-            loadDiskIOMetrics()
             loadStorageAnalysis()
-        }
-    }
-    
-    private func loadDiskIOMetrics() {
-        Task {
-            let metrics = await diskIOService.getCurrentDiskIOMetrics()
-            await MainActor.run {
-                diskIOMetrics = metrics
-                isLoadingIO = false
-            }
         }
     }
     
@@ -140,110 +123,6 @@ struct AdvancedStorageView: View, AdvancedMetricView {
             await MainActor.run {
                 storageCategories = categories
                 isLoadingStorageAnalysis = false
-            }
-        }
-    }
-    
-    private var diskIOActivitySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Disk I/O Activity")
-                .font(.headline.weight(.semibold))
-            
-            if isLoadingIO {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .scaleEffect(0.8)
-                    Text("Loading I/O data...")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                }
-                .padding(.vertical, 20)
-            } else if diskIOMetrics.isEmpty {
-                HStack {
-                    Spacer()
-                    VStack(spacing: 4) {
-                        Image(systemName: "moon.zzz")
-                            .font(.title2)
-                            .foregroundColor(.secondary)
-                        Text("Disk is idle")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                }
-                .padding(.vertical, 20)
-            } else {
-                VStack(spacing: 8) {
-                    ForEach(diskIOMetrics, id: \.diskName) { metric in
-                        diskIORow(metric: metric)
-                    }
-                }
-            }
-        }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
-    }
-    
-    private func diskIORow(metric: DiskIOMetrics) -> some View {
-        VStack(spacing: 8) {
-            HStack {
-                Image(systemName: "internaldrive")
-                    .foregroundColor(.blue)
-                    .font(.caption)
-                
-                Text(metric.diskName.uppercased())
-                    .font(.caption.weight(.semibold))
-                
-                Spacer()
-                
-                Text(metric.timestamp, style: .time)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-            
-            HStack(spacing: 12) {
-                // Read metrics
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "arrow.down.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.caption2)
-                        Text("Read")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                    Text(metric.formattedReadSpeed)
-                        .font(.caption.weight(.medium))
-                    Text(metric.formattedReadOps)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                // Write metrics
-                VStack(alignment: .trailing, spacing: 2) {
-                    HStack(spacing: 4) {
-                        Text("Write")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Image(systemName: "arrow.up.circle.fill")
-                            .foregroundColor(.orange)
-                            .font(.caption2)
-                    }
-                    Text(metric.formattedWriteSpeed)
-                        .font(.caption.weight(.medium))
-                    Text(metric.formattedWriteOps)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            if metric != diskIOMetrics.last {
-                Divider()
             }
         }
     }
