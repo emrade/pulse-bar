@@ -11,6 +11,7 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
+    private var eventMonitor: Any?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Create the status item
@@ -25,8 +26,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Create the popover
         popover = NSPopover()
-        popover?.contentSize = NSSize(width: 360, height: 520)
-        popover?.behavior = .transient
+        popover?.contentSize = NSSize(width: 360, height: 700)
+        popover?.behavior = .semitransient
         popover?.contentViewController = NSHostingController(rootView: DashboardView())
         
         // Hide the dock icon and main window
@@ -36,10 +37,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func togglePopover(_ sender: AnyObject?) {
         if let button = statusItem?.button {
             if popover?.isShown == true {
-                popover?.performClose(sender)
+                closePopover()
             } else {
-                popover?.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+                showPopover(relativeTo: button)
             }
+        }
+    }
+    
+    private func showPopover(relativeTo button: NSStatusBarButton) {
+        popover?.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+        
+        // Start monitoring for clicks outside the popover
+        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            if let popover = self?.popover, popover.isShown {
+                // Check if click is outside the popover
+                let clickLocation = event.locationInWindow
+                if let popoverWindow = popover.contentViewController?.view.window {
+                    let popoverFrame = popoverWindow.frame
+                    let globalClickLocation = event.window?.convertPoint(toScreen: clickLocation) ?? clickLocation
+                    
+                    if !popoverFrame.contains(globalClickLocation) {
+                        self?.closePopover()
+                    }
+                }
+            }
+        }
+    }
+    
+    func closePopover() {
+        popover?.performClose(nil)
+        
+        // Remove the event monitor
+        if let monitor = eventMonitor {
+            NSEvent.removeMonitor(monitor)
+            eventMonitor = nil
         }
     }
 }
