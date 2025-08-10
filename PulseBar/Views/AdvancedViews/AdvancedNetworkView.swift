@@ -299,9 +299,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                     InfoRow(label: "DNS Server", value: networkConnectionInfo?.dnsServers.first ?? "Fetching...")
                     InfoRow(label: "Subnet Mask", value: networkConnectionInfo?.subnetMask ?? "Fetching...")
                     InfoRow(label: "Connection Type", value: networkConnectionInfo?.connectionType ?? "Fetching...")
-                    if let channel = networkConnectionInfo?.channel {
-                        InfoRow(label: "Channel", value: channel)
-                    }
+                    InfoRow(label: "Channel", value: networkConnectionInfo?.channel ?? "Fetching...")
                     InfoRow(label: "Security", value: networkConnectionInfo?.security ?? "Fetching...")
                 }
             } else {

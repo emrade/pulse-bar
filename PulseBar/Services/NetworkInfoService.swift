@@ -58,7 +58,8 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
             dnsServers = getDNSServers()
             
             // For WiFi connections, try to get additional details
-            if primaryInterface.hasPrefix("en") && interfaceType?.contains("WiFi") == true {
+            // Check interface type to detect WiFi vs Ethernet
+            if interfaceType?.contains("WiFi") == true || interfaceType?.contains("Wi-Fi") == true {
                 connectionType = getWiFiConnectionType()
                 channel = getWiFiChannel()
                 security = getWiFiSecurity()
@@ -221,7 +222,7 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
         return []
     }
     
-    private func getWiFiConnectionType() -> String? {
+    private func getWiFiConnectionType() -> String {
         // Use airport command to get WiFi details
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport")
@@ -253,61 +254,65 @@ final class NetworkInfoService: NetworkInfoServiceProtocol, @unchecked Sendable 
         return "WiFi"
     }
     
-    private func getWiFiChannel() -> String? {
+    private func getWiFiChannel() -> String {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport")
+        process.executableURL = URL(fileURLWithPath:
+            "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
+        )
         process.arguments = ["-I"]
-        
+
         let pipe = Pipe()
         process.standardOutput = pipe
-        
+
         do {
             try process.run()
             process.waitUntilExit()
-            
+
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             if let output = String(data: data, encoding: .utf8) {
-                let lines = output.components(separatedBy: .newlines)
-                for line in lines {
-                    if line.contains("channel:") {
-                        let components = line.components(separatedBy: ":").last?.trimmingCharacters(in: .whitespaces)
-                        if let channelInfo = components {
-                            return channelInfo.contains("5") ? "\(channelInfo) (5GHz)" : "\(channelInfo) (2.4GHz)"
-                        }
+                if let line = output.components(separatedBy: .newlines)
+                    .first(where: { $0.lowercased().contains("channel:") }) {
+
+                    let channelNumber = line
+                        .components(separatedBy: ":")
+                        .last?
+                        .trimmingCharacters(in: .whitespaces)
+
+                    if let ch = channelNumber {
+                        if ch.contains("5") { return "\(ch) (5GHz)" }
+                        else { return "\(ch) (2.4GHz)" }
                     }
                 }
             }
         } catch {}
-        
-        return nil
+        return "Unknown"
     }
     
-    private func getWiFiSecurity() -> String? {
+    private func getWiFiSecurity() -> String {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport")
+        process.executableURL = URL(fileURLWithPath:
+            "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
+        )
         process.arguments = ["-I"]
-        
+
         let pipe = Pipe()
         process.standardOutput = pipe
-        
+
         do {
             try process.run()
             process.waitUntilExit()
-            
+
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             if let output = String(data: data, encoding: .utf8) {
-                if output.contains("WPA3") {
-                    return "WPA3"
-                } else if output.contains("WPA2") {
-                    return "WPA2"
-                } else if output.contains("WPA") {
-                    return "WPA"
-                } else if output.contains("WEP") {
-                    return "WEP"
-                }
+                let lower = output.lowercased()
+
+                if lower.contains("wpa3") || lower.contains("wpa3-") { return "WPA3" }
+                if lower.contains("wpa2") || lower.contains("wpa2-") { return "WPA2" }
+                if lower.contains("wpa") || lower.contains("wpa-") { return "WPA" }
+                if lower.contains("wep") { return "WEP" }
             }
         } catch {}
-        
-        return "WPA2" // Default assumption
+
+        return "Unknown"
     }
 }
