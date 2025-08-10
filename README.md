@@ -529,3 +529,22 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 5. **Phases 6-9:** Testing, optimization, and automated release setup
 
 Each phase should be completed and tested before moving to the next. Use this todo list to track progress and ensure all PRD requirements are met for successful open source distribution.
+
+### Phase 10: New Features ✅ COMPLETED
+
+#### 10.1. Daily Data Usage Tracking ✅ COMPLETED
+- [x] **Implement Daily Data Usage Service** ✅
+  - ✅ File: `Services/NetworkUsageService.swift`
+  - ✅ Use `getifaddrs` to get network interface statistics.
+  - ✅ Use `SystemConfiguration` framework to identify the primary network interface.
+  - ✅ Filter traffic to only include the primary interface, for more accurate internet usage.
+  - ✅ Persist data across app launches using `UserDefaults`.
+  - ✅ Handle daily reset of usage counters.
+  - ✅ **Acceptance:** Daily data usage is tracked and displayed correctly.
+
+- [x] **Integrate into UI** ✅
+  - ✅ File: `Views/DashboardView.swift`
+  - ✅ Add a new row to display daily downloaded and uploaded data.
+  - ✅ File: `Models/Metrics.swift`
+  - ✅ Add `NetworkUsageMetrics` to the data model.
+  - ✅ **Acceptance:** The UI displays the daily data usage in a clear and understandable format.
