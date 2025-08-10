@@ -61,7 +61,7 @@ struct CPUMetrics {
     var formattedOverallUsage: String {
         if isLoading { return "Loading..." }
         if error != nil { return "Error" }
-        return String(format: "%.0f%%", overallUsage * 100)
+        return String(format: "Load: %.0f%%", overallUsage * 100)
     }
 }
 

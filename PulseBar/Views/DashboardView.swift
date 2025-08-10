@@ -30,10 +30,10 @@ struct DashboardView: View {
             // Metric rows with real data
             VStack(spacing: 10) {
                 MetricRowView(
-                    icon: "cpu",
-                    title: "CPU",
-                    value: systemMonitor.snapshot.cpu.formattedOverallUsage,
-                    detail: systemMonitor.snapshot.cpu.perCoreUsage.isEmpty ? nil : "\(systemMonitor.snapshot.cpu.perCoreUsage.count) cores"
+                    icon: "internaldrive",
+                    title: "Storage",
+                    value: systemMonitor.snapshot.disk.formattedBootUsage,
+                    detail: "\(systemMonitor.snapshot.disk.bootVolume?.name ?? "Unknown") • \(systemMonitor.snapshot.disk.formattedBootTotal)"
                 )
                 
                 MetricRowView(
@@ -41,13 +41,6 @@ struct DashboardView: View {
                     title: "Memory",
                     value: systemMonitor.snapshot.memory.formattedUsedWithAvailable,
                     detail: systemMonitor.snapshot.memory.formattedTotal
-                )
-                
-                MetricRowView(
-                    icon: "internaldrive",
-                    title: "Storage",
-                    value: systemMonitor.snapshot.disk.formattedBootUsage,
-                    detail: "\(systemMonitor.snapshot.disk.bootVolume?.name ?? "Unknown") • \(systemMonitor.snapshot.disk.formattedBootTotal)"
                 )
                 
                 if let battery = systemMonitor.snapshot.battery {
@@ -58,6 +51,13 @@ struct DashboardView: View {
                         detail: nil
                     )
                 }
+                
+                MetricRowView(
+                    icon: "cpu",
+                    title: "CPU",
+                    value: systemMonitor.snapshot.cpu.formattedOverallUsage,
+                    detail: systemMonitor.snapshot.cpu.perCoreUsage.isEmpty ? nil : "\(systemMonitor.snapshot.cpu.perCoreUsage.count) cores"
+                )
                 
                 MetricRowView(
                     icon: systemMonitor.networkDisplayInfo.icon,
@@ -104,13 +104,6 @@ Better signal = faster speeds and more reliable connection.
                         }
                     }
                 )
-                
-                MetricRowView(
-                    icon: "externaldrive.connected.to.line.below",
-                    title: "Devices",
-                    value: systemMonitor.snapshot.devices.formattedDetails,
-                    detail: nil
-                )
 
                 MetricRowView(
                     icon: "arrow.up.arrow.down.circle",
@@ -121,6 +114,13 @@ Better signal = faster speeds and more reliable connection.
                     secondaryAction: {
                         showingResetConfirmation = true
                     }
+                )
+                
+                MetricRowView(
+                    icon: "externaldrive.connected.to.line.below",
+                    title: "Devices",
+                    value: systemMonitor.snapshot.devices.formattedDetails,
+                    detail: nil
                 )
             }
             .padding(.horizontal, 16)
@@ -155,7 +155,7 @@ Better signal = faster speeds and more reliable connection.
             .padding(.horizontal, 16)
             .padding(.bottom, 12)
         }
-        .frame(width: 360, height: 520)
+        .frame(width: 360, height: 580)
         .background(Color(NSColor.windowBackgroundColor))
         .alert("Reset Data Usage", isPresented: $showingResetConfirmation) {
             Button("Cancel", role: .cancel) { }
