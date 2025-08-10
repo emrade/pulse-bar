@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import Darwin
+import SystemConfiguration
 
 protocol NetworkUsageServiceProtocol {
     var metricsPublisher: AnyPublisher<NetworkUsageMetrics, Never> { get }
@@ -72,6 +73,8 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
     }
     
     private func getNetworkUsage() -> (bytesIn: UInt64, bytesOut: UInt64) {
+        let primaryInterface = getPrimaryNetworkInterface()
+
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
         var bytesIn: UInt64 = 0
         var bytesOut: UInt64 = 0
@@ -84,18 +87,34 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
         while ptr != nil {
             defer { ptr = ptr?.pointee.ifa_next }
             
-            let addr = ptr?.pointee.ifa_addr.pointee
+            let interface = ptr?.pointee
+            let addr = interface?.ifa_addr.pointee
+            let name = String(cString: (interface?.ifa_name)!)
             
             if addr?.sa_family == UInt8(AF_LINK) {
-                if let data = ptr?.pointee.ifa_data {
-                    let networkData = data.assumingMemoryBound(to: if_data.self)
-                    bytesIn += UInt64(networkData.pointee.ifi_ibytes)
-                    bytesOut += UInt64(networkData.pointee.ifi_obytes)
+                if primaryInterface == nil || name == primaryInterface { // If primary interface is nil, count all interfaces
+                    if let data = interface?.ifa_data {
+                        let networkData = data.assumingMemoryBound(to: if_data.self)
+                        bytesIn += UInt64(networkData.pointee.ifi_ibytes)
+                        bytesOut += UInt64(networkData.pointee.ifi_obytes)
+                    }
                 }
             }
         }
         
         freeifaddrs(ifaddr)
         return (bytesIn, bytesOut)
+    }
+
+    private func getPrimaryNetworkInterface() -> String? {
+        guard let store = SCDynamicStoreCreate(nil, "getPrimaryInterface" as CFString, nil, nil) else {
+            return nil
+        }
+
+        guard let globalState = SCDynamicStoreCopyValue(store, "State:/Network/Global/IPv4" as CFString) as? [String: Any] else {
+            return nil
+        }
+
+        return globalState["PrimaryInterface"] as? String
     }
 }
