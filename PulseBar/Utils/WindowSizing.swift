@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 enum WindowSizing {
-    static let mainWindowWidth: CGFloat = 400
-    static let mainWindowHeight: CGFloat = 600
+    static let mainWindowWidth: CGFloat = 360
+    static let mainWindowHeight: CGFloat = 680
     
     static let mainWindowSize = CGSize(width: mainWindowWidth, height: mainWindowHeight)
     

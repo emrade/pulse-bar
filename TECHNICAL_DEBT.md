@@ -107,13 +107,13 @@ The main dashboard had a long vertical stack of 7 metric items that made the win
 
 ### Key Changes Made
 - Created `TappableMetricCardView` for grid layout with proper alignment
-- Window size standardized to 400×600 pixels across all views (adjusted from initial 550px)
+- Window size standardized to 360×650 pixels across all views (final dimensions optimized for system info card)
 - All advanced views now use `.standardWindowFrame()` modifier
 - Improved spacing and padding for better visual balance
 - Fixed alignment from `.top` to `.center` for icon-title pairs
 
 ### Benefits Achieved
-- **Optimized Height**: Window height decreased from 700px to 600px with proper header/footer visibility
+- **Optimized Dimensions**: Window size adjusted to 360×650px with proper header/footer visibility
 - **Better Proportions**: Improved width-to-height ratio for modern displays
 - **Consistent Sizing**: All views now use centralized sizing system
 - **Enhanced UX**: Grid layout reduces scrolling and provides better visual organization
