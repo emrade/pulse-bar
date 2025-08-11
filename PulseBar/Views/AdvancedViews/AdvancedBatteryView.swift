@@ -98,7 +98,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
     private func batteryLevelSection(battery: BatteryMetrics) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Battery Level")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             VStack(spacing: 16) {
                 // Large percentage display
@@ -130,7 +130,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                 
                 // Status text
                 Text(battery.isCharging ? "Charging" : "On Battery")
-                    .font(.subheadline.weight(.medium))
+                    .themedFont(.primary, size: .regular)
                     .foregroundColor(battery.isCharging ? .green : .secondary)
             }
         }
@@ -142,7 +142,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
     private func batteryHealthSection(battery: BatteryMetrics) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Battery Health")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             VStack(spacing: 12) {
                 HStack {
@@ -151,11 +151,11 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Condition: \(batteryCondition)")
-                            .font(.subheadline.weight(.medium))
+                            .themedFont(.primary, size: .regular)
                         
                         if let cycleCount = battery.cycleCount {
                             Text("Cycle Count: \(cycleCount)")
-                                .font(.caption)
+                                .themedFont(.primary, size: .small)
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -167,13 +167,13 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text("Maximum Capacity")
-                            .font(.caption)
+                            .themedFont(.primary, size: .small)
                             .foregroundColor(.secondary)
                         
                         Spacer()
                         
                         Text(formatCapacity(battery.maxCapacity))
-                            .font(.caption.weight(.medium))
+                            .themedFont(.primary, size: .small)
                     }
                     
                     GeometryReader { geometry in
@@ -201,7 +201,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
     private func chargingInfoSection(battery: BatteryMetrics) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Charging Information")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             VStack(spacing: 8) {
                 HStack {
@@ -209,7 +209,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                         .foregroundColor(.yellow)
                     
                     Text("Connected to Power")
-                        .font(.subheadline.weight(.medium))
+                        .themedFont(.primary, size: .regular)
                     
                     Spacer()
                 }
@@ -220,7 +220,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                             .foregroundColor(.blue)
                         
                         Text(chargeTime)
-                            .font(.caption)
+                            .themedFont(.primary, size: .small)
                         
                         Spacer()
                     }
@@ -231,12 +231,12 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                         .foregroundColor(.orange)
                     
                     Text(formatTemperature(battery.temperature))
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                     
                     Spacer()
                     
                     Text("Normal")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.green)
                 }
             }
@@ -249,7 +249,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
     private func batteryStatsSection(battery: BatteryMetrics) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Battery Information")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             VStack(spacing: 8) {
                 InfoRow(label: "Current Charge", value: "\(battery.percentage)%")
@@ -286,7 +286,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
             
             VStack(spacing: 8) {
                 Text("No Battery Detected")
-                    .font(.headline.weight(.semibold))
+                    .themedFont(.primary, size: .large)
                 
                 Text("This device is running on external power")
                     .font(.subheadline)

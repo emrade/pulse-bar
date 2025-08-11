@@ -49,9 +49,10 @@
 
   "fonts": {
     "primary": {
-      "family": "SF Pro Rounded",
-      "weight": "semibold",
+      "family": "Avenir Next",
+      "weight": "medium",
       "size": {
+        "extraSmall": 12,
         "small": 11,
         "regular": 13,
         "large": 16,
@@ -59,9 +60,10 @@
       }
     },
     "monospace": {
-      "family": "SF Pro Rounded",
+      "family": "Avenir Next",
       "weight": "bold",
       "size": {
+        "extraSmall": 11,
         "small": 10,
         "regular": 12,
         "large": 14,

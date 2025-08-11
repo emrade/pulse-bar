@@ -110,7 +110,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
     private var cpuUsageChartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("CPU Usage History")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             Chart(cpuHistoryData, id: \.timestamp) { point in
                 LineMark(
@@ -155,13 +155,13 @@ struct AdvancedCPUView: View, AdvancedMetricView {
             // Current usage display
             HStack {
                 Text("Current Usage:")
-                    .font(.caption)
+                    .themedFont(.primary, size: .small)
                     .foregroundColor(.secondary)
                 
                 Spacer()
                 
                 Text(String(format: "%.1f%%", metricData.overallUsage * 100))
-                    .font(.caption.weight(.semibold))
+                    .themedFont(.primary, size: .small)
                     .foregroundColor(metricData.overallUsage > 0.8 ? .red : .primary)
             }
         }
@@ -173,17 +173,17 @@ struct AdvancedCPUView: View, AdvancedMetricView {
     private var coreUsageSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("CPU Cores (\(cpuCoreData.count) cores)")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 12) {
                 ForEach(cpuCoreData, id: \.coreId) { core in
                     VStack(spacing: 8) {
                         HStack {
                             Text("Core \(core.coreId)")
-                                .font(.caption.weight(.medium))
+                                .themedFont(.primary, size: .small)
                             Spacer()
                             Text(String(format: "%.0f%%", core.usage * 100))
-                                .font(.caption)
+                                .themedFont(.primary, size: .small)
                                 .foregroundColor(core.usage > 0.8 ? .red : .secondary)
                         }
                         
@@ -221,7 +221,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
     private var thermalInfoSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Thermal Status")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             HStack(spacing: 12) {
                 Circle()
@@ -230,10 +230,10 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(thermalState.level)
-                        .font(.subheadline.weight(.medium))
+                        .themedFont(.primary, size: .regular)
                     
                     Text(thermalState.description)
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.secondary)
                 }
                 
@@ -247,16 +247,16 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                         .foregroundColor(.orange)
                     
                     Text("CPU Temperature:")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                     
                     Spacer()
                     
                     if let tempMetrics = temperatureMetrics {
                         Text(tempMetrics.formattedTemperature)
-                            .font(.caption.weight(.medium))
+                            .themedFont(.primary, size: .small)
                     } else {
                         Text("Loading...")
-                            .font(.caption)
+                            .themedFont(.primary, size: .small)
                             .foregroundColor(.secondary)
                     }
                 }
@@ -266,16 +266,16 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                         .foregroundColor(.blue)
                     
                     Text("Last Updated:")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                     
                     Spacer()
                     
                     if let tempMetrics = temperatureMetrics {
                         Text(tempMetrics.timestamp, style: .time)
-                            .font(.caption.weight(.medium))
+                            .themedFont(.primary, size: .small)
                     } else {
                         Text("--")
-                            .font(.caption)
+                            .themedFont(.primary, size: .small)
                             .foregroundColor(.secondary)
                     }
                 }
@@ -289,7 +289,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
     private var cpuStatsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("CPU Information")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             VStack(spacing: 8) {
                 InfoRow(label: "Current Usage", value: String(format: "%.1f%%", metricData.overallUsage * 100))

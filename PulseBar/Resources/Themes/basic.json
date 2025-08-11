@@ -47,6 +47,7 @@
       "family": "SF Pro Display",
       "weight": "medium",
       "size": {
+        "extraSmall": 12,
         "small": 11,
         "regular": 13,
         "large": 16,
@@ -57,6 +58,7 @@
       "family": "SF Mono",
       "weight": "regular",
       "size": {
+        "extraSmall": 11,
         "small": 10,
         "regular": 12,
         "large": 14,

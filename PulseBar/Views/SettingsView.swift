@@ -28,7 +28,7 @@ struct SettingsView: View {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 14, weight: .medium))
                             Text("Back")
-                                .font(.subheadline.weight(.medium))
+                                .themedFont(.primary, size: .regular)
                         }
                         .foregroundColor(.accentColor)
                     }
@@ -41,7 +41,7 @@ struct SettingsView: View {
                         .foregroundColor(.accentColor)
                     
                     Text("Settings")
-                        .font(.headline.weight(.semibold))
+                        .themedFont(.primary, size: .large)
                         .foregroundColor(.primary)
                     
                     Spacer()
@@ -344,10 +344,10 @@ extension SettingsView {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .foregroundColor(iconColor)
-                    .font(.headline)
+                    .font(.themedLarge)
                 
                 Text(title)
-                    .font(.headline.weight(.semibold))
+                    .themedFont(.primary, size: .large)
                     .foregroundColor(.primary)
             }
             
@@ -369,11 +369,11 @@ extension SettingsView {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .foregroundColor(iconColor)
-                .font(.subheadline)
+                .font(.themedRegular)
                 .frame(width: 20)
             
             Text(title)
-                .font(.subheadline)
+                .themedFont(.primary, size: .regular)
                 .foregroundColor(.primary)
             
             Spacer()

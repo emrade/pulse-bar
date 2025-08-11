@@ -107,7 +107,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
     private var deviceSummarySection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Device Summary")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             HStack(spacing: 20) {
                 // Active devices indicator
@@ -117,7 +117,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                         .foregroundColor(.green)
                     
                     Text("Active")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.secondary)
                 }
                 
@@ -130,7 +130,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                         .foregroundColor(.primary)
                     
                     Text("Total")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.secondary)
                 }
                 
@@ -145,7 +145,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                     }
                     
                     Text("Connection Types")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.secondary)
                 }
             }
@@ -162,7 +162,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                 .foregroundColor(color)
             
             Text(label)
-                .font(.caption2)
+                .themedFont(.primary, size: .small)
                 .foregroundColor(.secondary)
         }
     }
@@ -174,12 +174,12 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                     .foregroundColor(.accentColor)
                 
                 Text(category.name)
-                    .font(.headline.weight(.semibold))
+                    .themedFont(.primary, size: .large)
                 
                 Spacer()
                 
                 Text("\(category.devices.count)")
-                    .font(.caption)
+                    .themedFont(.primary, size: .small)
                     .foregroundColor(.secondary)
             }
             
@@ -190,7 +190,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                         .foregroundColor(.gray)
                     
                     Text("No devices connected")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity)
@@ -217,11 +217,11 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(device.name)
-                    .font(.subheadline.weight(.medium))
+                    .themedFont(.primary, size: .regular)
                     .foregroundColor(device.isActive ? .primary : .secondary)
                 
                 Text(device.connectionType)
-                    .font(.caption)
+                    .themedFont(.primary, size: .small)
                     .foregroundColor(.secondary)
             }
             
@@ -234,7 +234,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                     .frame(width: 6, height: 6)
                 
                 Text(device.isActive ? "Active" : "Idle")
-                    .font(.caption2)
+                    .themedFont(.primary, size: .small)
                     .foregroundColor(.secondary)
             }
         }

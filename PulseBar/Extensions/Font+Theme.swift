@@ -51,6 +51,11 @@ extension Font {
     }
     
     @MainActor
+    static var themedExtraSmall: Font {
+        Font.themed(.primary, size: .extraSmall)
+    }
+    
+    @MainActor
     static var themedMonoRegular: Font {
         Font.themed(.monospace, size: .regular)
     }
@@ -106,6 +111,11 @@ extension Text {
     @MainActor
     func themedSmall() -> Text {
         return self.font(.themedSmall)
+    }
+    
+    @MainActor
+    func themedExtraSmall() -> Text {
+        return self.font(.themedExtraSmall)
     }
     
     @MainActor

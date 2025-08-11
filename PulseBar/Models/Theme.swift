@@ -101,6 +101,7 @@ struct FontStyleConfiguration: Codable {
 }
 
 struct FontSizeConfiguration: Codable {
+    let extraSmall: CGFloat
     let small: CGFloat
     let regular: CGFloat
     let large: CGFloat
@@ -230,6 +231,7 @@ extension Theme {
                     family: "SF Pro Display",
                     weight: "medium",
                     size: FontSizeConfiguration(
+                        extraSmall: 12,
                         small: 11,
                         regular: 13,
                         large: 16,
@@ -240,6 +242,7 @@ extension Theme {
                     family: "SF Mono",
                     weight: "regular",
                     size: FontSizeConfiguration(
+                        extraSmall: 11,
                         small: 10,
                         regular: 12,
                         large: 14,
@@ -335,6 +338,7 @@ extension FontStyleConfiguration {
 extension FontSizeConfiguration {
     func value(for size: ThemedFontSize) -> CGFloat {
         switch size {
+        case .extraSmall: return extraSmall
         case .small: return small
         case .regular: return regular
         case .large: return large
@@ -344,7 +348,7 @@ extension FontSizeConfiguration {
 }
 
 enum ThemedFontSize {
-    case small, regular, large, title
+    case extraSmall, small, regular, large, title
 }
 
 enum ThemedFontStyle {

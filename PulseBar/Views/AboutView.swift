@@ -25,7 +25,7 @@ struct AboutView: View {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 14, weight: .medium))
                             Text("Back")
-                                .font(.subheadline.weight(.medium))
+                                .themedFont(.primary, size: .regular)
                         }
                         .foregroundColor(.accentColor)
                     }
@@ -38,7 +38,7 @@ struct AboutView: View {
                         .foregroundColor(.accentColor)
                     
                     Text("About")
-                        .font(.headline.weight(.semibold))
+                        .themedFont(.primary, size: .large)
                         .foregroundColor(.primary)
                     
                     Spacer()
@@ -78,15 +78,15 @@ struct AboutView: View {
                         // App Details
                         VStack(spacing: 8) {
                             Text("PulseBar")
-                                .font(.title.weight(.bold))
+                                .themedFont(.primary, size: .title)
                                 .foregroundColor(.primary)
                             
                             Text("System Performance Monitor")
-                                .font(.subheadline)
+                                .themedFont(.primary, size: .regular)
                                 .foregroundColor(.secondary)
                             
                             Text("Version \(appVersion) (\(buildNumber))")
-                                .font(.caption)
+                                .themedFont(.primary, size: .extraSmall)
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -294,10 +294,10 @@ extension AboutView {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .foregroundColor(iconColor)
-                    .font(.headline)
+                    .font(.themedLarge)
                 
                 Text(title)
-                    .font(.headline.weight(.semibold))
+                    .themedFont(.primary, size: .large)
                     .foregroundColor(.primary)
             }
             
@@ -314,16 +314,16 @@ extension AboutView {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .foregroundColor(.accentColor)
-                .font(.subheadline)
+                .font(.themedRegular)
                 .frame(width: 20)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.subheadline.weight(.medium))
+                    .themedFont(.primary, size: .regular)
                     .foregroundColor(.primary)
                 
                 Text(description)
-                    .font(.caption)
+                    .themedFont(.primary, size: .extraSmall)
                     .foregroundColor(.secondary)
             }
             
@@ -335,13 +335,13 @@ extension AboutView {
     private func systemInfoRow(label: String, value: String) -> some View {
         HStack {
             Text(label)
-                .font(.subheadline)
+                .themedFont(.primary, size: .regular)
                 .foregroundColor(.secondary)
             
             Spacer()
             
             Text(value)
-                .font(.subheadline.weight(.medium))
+                .themedFont(.primary, size: .regular)
                 .foregroundColor(.primary)
         }
         .padding(.vertical, 4)
@@ -350,13 +350,13 @@ extension AboutView {
     private func techRow(label: String, value: String) -> some View {
         HStack {
             Text(label)
-                .font(.subheadline)
+                .themedFont(.primary, size: .regular)
                 .foregroundColor(.secondary)
             
             Spacer()
             
             Text(value)
-                .font(.caption.weight(.medium))
+                .themedFont(.primary, size: .extraSmall)
                 .foregroundColor(.primary)
         }
         .padding(.vertical, 4)

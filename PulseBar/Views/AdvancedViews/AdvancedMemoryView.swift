@@ -103,7 +103,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
     private var topMemoryUsersSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Top Memory Users")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             if isLoadingProcesses {
                 HStack {
@@ -111,7 +111,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                     ProgressView()
                         .scaleEffect(0.8)
                     Text("Loading process data...")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.secondary)
                     Spacer()
                 }
@@ -120,7 +120,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 HStack {
                     Spacer()
                     Text("No process data available")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.secondary)
                     Spacer()
                 }
@@ -152,24 +152,24 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                     .frame(width: 20, height: 20)
                 
                 Text("\(rank)")
-                    .font(.caption2.weight(.semibold))
+                    .themedFont(.primary, size: .small)
                     .foregroundColor(.white)
             }
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(name)
-                    .font(.caption.weight(.medium))
+                    .themedFont(.primary, size: .small)
                     .lineLimit(1)
                 
                 Text("PID: \(pid)")
-                    .font(.caption2)
+                    .themedFont(.primary, size: .small)
                     .foregroundColor(.secondary)
             }
             
             Spacer()
             
             Text(FormatterUtility.shared.formatMemorySize(UInt64(memory)))
-                .font(.caption.weight(.medium))
+                .themedFont(.primary, size: .small)
                 .foregroundColor(.primary)
         }
     }
@@ -186,7 +186,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
     private var memoryUsageCategoriesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Memory Usage Categories")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             VStack(spacing: 8) {
                 memoryUsageRow(
@@ -238,7 +238,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                     .frame(width: 8, height: 8)
                 
                 Text(label)
-                    .font(.caption.weight(.medium))
+                    .themedFont(.primary, size: .small)
                     .frame(width: 80, alignment: .leading)
             }
             
@@ -246,10 +246,10 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
             
             VStack(alignment: .trailing, spacing: 2) {
                 Text(FormatterUtility.shared.formatMemorySize(UInt64(amount)))
-                    .font(.caption.weight(.medium))
+                    .themedFont(.primary, size: .small)
                 
                 Text(description)
-                    .font(.caption2)
+                    .themedFont(.primary, size: .small)
                     .foregroundColor(.secondary)
             }
         }
@@ -258,7 +258,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
     private var memoryBreakdownSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Memory Usage")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             HStack(spacing: 20) {
                 // Pie Chart
@@ -282,9 +282,9 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                             
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(item.label)
-                                    .font(.caption.weight(.medium))
+                                    .themedFont(.primary, size: .small)
                                 Text(FormatterUtility.shared.formatMemorySize(UInt64(item.value)))
-                                    .font(.caption2)
+                                    .themedFont(.primary, size: .small)
                                     .foregroundColor(.secondary)
                             }
                             
@@ -304,7 +304,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
     private var memoryPressureSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Memory Pressure")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             HStack(spacing: 12) {
                 Circle()
@@ -313,10 +313,10 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(memoryPressure.level)
-                        .font(.subheadline.weight(.medium))
+                        .themedFont(.primary, size: .regular)
                     
                     Text(memoryPressure.description)
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.secondary)
                 }
                 
@@ -327,11 +327,11 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text("Usage")
-                        .font(.caption)
+                        .themedFont(.primary, size: .small)
                         .foregroundColor(.secondary)
                     Spacer()
                     Text(String(format: "%.1f%%", metricData.usagePercentage * 100))
-                        .font(.caption.weight(.medium))
+                        .themedFont(.primary, size: .small)
                 }
                 
                 GeometryReader { geometry in
@@ -362,7 +362,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
     private var memoryStatsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Memory Information")
-                .font(.headline.weight(.semibold))
+                .themedFont(.primary, size: .large)
             
             VStack(spacing: 8) {
                 InfoRow(label: "Total Memory", value: metricData.formattedTotal)
