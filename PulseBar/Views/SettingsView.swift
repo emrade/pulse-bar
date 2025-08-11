@@ -160,23 +160,6 @@ struct SettingsView: View {
                         icon: "wifi",
                         iconColor: .blue
                     ) {
-                        settingRow(
-                            title: "Speed Test Region",
-                            icon: "globe",
-                            iconColor: .blue
-                        ) {
-                            Picker("Speed Test Region", selection: $settingsManager.settings.speedTestRegion) {
-                                ForEach(SpeedTestRegion.allCases, id: \.self) { region in
-                                    Text(region.displayName).tag(region)
-                                }
-                            }
-                            .pickerStyle(MenuPickerStyle())
-                            .frame(minWidth: 160)
-                        }
-                        .onChange(of: settingsManager.settings.speedTestRegion) { _ in
-                            settingsManager.saveSettings()
-                        }
-                        
                         settingToggleRow(
                             title: "Auto Reset Daily Data",
                             subtitle: "Reset data usage counters at midnight",

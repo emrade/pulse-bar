@@ -44,11 +44,11 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
         
         do {
             // Perform real speed test
-            let (downloadSpeed, latency) = try await performRealSpeedTest()
+            let (downloadSpeed, uploadSpeed, latency) = try await performRealSpeedTest()
             
             let finalResult = NetworkSpeedTest(
                 downloadSpeed: downloadSpeed,
-                uploadSpeed: nil, // Upload test is more complex, skip for MVP
+                uploadSpeed: uploadSpeed,
                 latency: latency,
                 isRunning: false,
                 progress: 1.0,
@@ -87,106 +87,269 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
         }
     }
     
-    private func performRealSpeedTest() async throws -> (downloadSpeed: Double, latency: Double) {
-        // Use a simple approach with a reliable, large file for testing
-        // Generate random data locally to test network bandwidth to a known endpoint
-        
-        // First, test latency with a simple request
+    private func performRealSpeedTest() async throws -> (downloadSpeed: Double, uploadSpeed: Double, latency: Double) {
+        // First, test latency
         let latency = try await measureLatency()
         
         // Update progress
         await MainActor.run {
-            speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: 0.3))
+            speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: 0.1))
         }
         
         guard !Task.isCancelled else { throw CancellationError() }
         
-        // Create a URLSession with longer timeout
+        // Test download speed with multiple endpoints and larger files
+        let downloadSpeed = try await measureDownloadSpeed()
+        
+        // Update progress
+        await MainActor.run {
+            speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: 0.7))
+        }
+        
+        guard !Task.isCancelled else { throw CancellationError() }
+        
+        // Test upload speed
+        let uploadSpeed = try await measureUploadSpeed()
+        
+        await MainActor.run {
+            speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: 1.0))
+        }
+        
+        return (downloadSpeed: downloadSpeed, uploadSpeed: uploadSpeed, latency: latency)
+    }
+    
+    private func measureDownloadSpeed() async throws -> Double {
+        // Test endpoints with larger files for more accurate speed measurement
+        let testEndpoints = [
+            // Use publicly available test files from reliable CDNs
+            "https://speed.cloudflare.com/__down?bytes=25000000", // 25MB file
+            "https://www.google.com/favicon.ico", // Fallback small file
+            "https://httpbin.org/bytes/10000000", // 10MB file
+            "https://github.com/favicon.ico" // Another fallback
+        ]
+        
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForRequest = 15
         configuration.timeoutIntervalForResource = 30
+        configuration.urlCache = nil // Disable caching for accurate measurement
         let session = URLSession(configuration: configuration)
         
-        // Try to download a known file to test bandwidth
-        // Using Apple's software update server which should be reliable
-        let testURL = URL(string: "https://www.apple.com")!
+        var bestSpeed: Double = 0.0
+        var successfulTests = 0
+        let maxTestDuration: TimeInterval = 10.0 // Maximum time per test
         
-        do {
-            print("Speed Test Debug: Testing network speed using basic connectivity test...")
+        for (index, endpoint) in testEndpoints.enumerated() {
+            guard let url = URL(string: endpoint) else { continue }
+            guard !Task.isCancelled else { throw CancellationError() }
             
-            // Perform multiple small requests to estimate speed
-            let startTime = CFAbsoluteTimeGetCurrent()
-            var totalBytes: Double = 0
-            
-            // Make several requests to get a better average
-            for i in 0..<3 {
-                let (data, response) = try await session.data(from: testURL)
+            do {
+                print("Speed Test Debug: Testing endpoint \(index + 1)/\(testEndpoints.count): \(endpoint)")
                 
-                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                    totalBytes += Double(data.count)
-                    
-                    // Update progress
-                    await MainActor.run {
-                        speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: 0.3 + (Double(i + 1) / 3.0) * 0.7))
-                    }
-                } else {
-                    throw NetworkSpeedTestError.allEndpointsFailed
+                let startTime = CFAbsoluteTimeGetCurrent()
+                
+                // Create a task with timeout
+                let downloadTask = Task {
+                    return try await session.data(from: url)
                 }
                 
-                guard !Task.isCancelled else { throw CancellationError() }
+                let timeoutTask = Task {
+                    try await Task.sleep(nanoseconds: UInt64(maxTestDuration * 1_000_000_000))
+                    downloadTask.cancel()
+                }
+                
+                let (data, response) = try await downloadTask.value
+                timeoutTask.cancel()
+                
+                let endTime = CFAbsoluteTimeGetCurrent()
+                let duration = endTime - startTime
+                
+                // Validate response
+                guard let httpResponse = response as? HTTPURLResponse,
+                      httpResponse.statusCode == 200,
+                      duration > 0.1, // Minimum duration for meaningful measurement
+                      data.count > 1000 else { // Minimum data size
+                    print("Speed Test Debug: Endpoint \(endpoint) - Invalid response or too fast")
+                    continue
+                }
+                
+                // Calculate speed
+                let bytesPerSecond = Double(data.count) / duration
+                let mbps = (bytesPerSecond * 8) / 1_000_000 // Convert to Mbps
+                
+                print("Speed Test Debug: Endpoint \(endpoint) - Downloaded \(data.count) bytes in \(duration)s = \(mbps) Mbps")
+                
+                bestSpeed = max(bestSpeed, mbps)
+                successfulTests += 1
+                
+                // Update progress
+                await MainActor.run {
+                    let progress = 0.1 + (Double(index + 1) / Double(testEndpoints.count)) * 0.5
+                    speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: progress))
+                }
+                
+                // If we get a good speed from Cloudflare, prioritize it
+                if endpoint.contains("cloudflare") && mbps > 1.0 {
+                    break
+                }
+                
+            } catch {
+                print("Speed Test Debug: Endpoint \(endpoint) failed: \(error)")
+                continue
             }
-            
-            let endTime = CFAbsoluteTimeGetCurrent()
-            let totalTime = endTime - startTime
-            
-            // Calculate speed (this is a rough estimate)
-            let bytesPerSecond = totalBytes / totalTime
-            let mbps = (bytesPerSecond * 8) / 1_000_000
-            
-            // Since we're not downloading large files, estimate based on connection quality
-            // This is a simplified approach - adjust based on actual measurement
-            let estimatedSpeed = min(max(mbps * 10, 1.0), 1000.0) // Scale and cap between 1-1000 Mbps
-            
-            print("Speed Test Debug: Estimated speed: \(estimatedSpeed) Mbps (based on \(totalBytes) bytes in \(totalTime) seconds)")
-            
-            await MainActor.run {
-                speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: 1.0))
-            }
-            
-            return (downloadSpeed: estimatedSpeed, latency: latency)
-            
-        } catch {
-            print("Speed Test Debug: Test failed: \(error)")
+        }
+        
+        guard successfulTests > 0, bestSpeed > 0 else {
             throw NetworkSpeedTestError.allEndpointsFailed
         }
+        
+        // Apply reasonable bounds
+        let finalSpeed = min(max(bestSpeed, 0.1), 2000.0) // Cap between 0.1 and 2000 Mbps
+        
+        print("Speed Test Debug: Final speed: \(finalSpeed) Mbps (from \(successfulTests) successful tests)")
+        
+        return finalSpeed
+    }
+    
+    private func measureUploadSpeed() async throws -> Double {
+        // Test upload speed using POST requests with data
+        let uploadEndpoints = [
+            "https://httpbin.org/post", // Reliable HTTP testing service
+            "https://postman-echo.com/post" // Alternative testing service
+        ]
+        
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 20
+        configuration.urlCache = nil
+        let session = URLSession(configuration: configuration)
+        
+        var bestSpeed: Double = 0.0
+        var successfulTests = 0
+        let testDataSize = 1_000_000 // 1MB test data
+        
+        // Create test data
+        let testData = Data(repeating: 65, count: testDataSize) // 1MB of 'A' characters
+        
+        for (index, endpoint) in uploadEndpoints.enumerated() {
+            guard let url = URL(string: endpoint) else { continue }
+            guard !Task.isCancelled else { throw CancellationError() }
+            
+            do {
+                print("Speed Test Debug: Testing upload to \(endpoint)")
+                
+                var request = URLRequest(url: url)
+                request.httpMethod = "POST"
+                request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+                request.setValue("\(testDataSize)", forHTTPHeaderField: "Content-Length")
+                request.httpBody = testData
+                request.timeoutInterval = 15
+                
+                let startTime = CFAbsoluteTimeGetCurrent()
+                
+                let (_, response) = try await session.data(for: request)
+                
+                let endTime = CFAbsoluteTimeGetCurrent()
+                let duration = endTime - startTime
+                
+                // Validate response
+                guard let httpResponse = response as? HTTPURLResponse,
+                      httpResponse.statusCode >= 200 && httpResponse.statusCode < 300,
+                      duration > 0.1 else { // Minimum duration for meaningful measurement
+                    print("Speed Test Debug: Upload to \(endpoint) - Invalid response or too fast")
+                    continue
+                }
+                
+                // Calculate upload speed
+                let bytesPerSecond = Double(testDataSize) / duration
+                let mbps = (bytesPerSecond * 8) / 1_000_000 // Convert to Mbps
+                
+                print("Speed Test Debug: Upload to \(endpoint) - Uploaded \(testDataSize) bytes in \(duration)s = \(mbps) Mbps")
+                
+                bestSpeed = max(bestSpeed, mbps)
+                successfulTests += 1
+                
+                // Update progress
+                await MainActor.run {
+                    let progress = 0.7 + (Double(index + 1) / Double(uploadEndpoints.count)) * 0.3
+                    speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: progress))
+                }
+                
+                // If we get a decent upload speed, we can stop
+                if mbps > 1.0 {
+                    break
+                }
+                
+            } catch {
+                print("Speed Test Debug: Upload to \(endpoint) failed: \(error)")
+                continue
+            }
+        }
+        
+        // Use the best upload speed, or 0 if all tests failed
+        let finalSpeed = successfulTests > 0 ? bestSpeed : 0.0
+        
+        // Apply reasonable bounds (0 to 1000 Mbps for upload)
+        let boundedSpeed = min(max(finalSpeed, 0.0), 1000.0)
+        
+        print("Speed Test Debug: Final upload speed: \(boundedSpeed) Mbps (from \(successfulTests) successful tests)")
+        
+        return boundedSpeed
     }
     
     private func measureLatency() async throws -> Double {
-        // Simple latency test using DNS resolution + basic connectivity
-        let url = URL(string: "https://www.apple.com")!
+        // Test latency with multiple endpoints and take the best result
+        let latencyEndpoints = [
+            "https://www.cloudflare.com",
+            "https://www.google.com",
+            "https://www.apple.com"
+        ]
         
-        do {
-            let startTime = CFAbsoluteTimeGetCurrent()
+        var bestLatency: Double = Double.infinity
+        var successfulTests = 0
+        
+        for endpoint in latencyEndpoints {
+            guard let url = URL(string: endpoint) else { continue }
             
-            // Create a simple HEAD request to minimize data transfer
-            var request = URLRequest(url: url)
-            request.httpMethod = "HEAD"
-            request.timeoutInterval = 10
-            
-            let (_, response) = try await URLSession.shared.data(for: request)
-            let endTime = CFAbsoluteTimeGetCurrent()
-            
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                let latency = (endTime - startTime) * 1000 // Convert to ms
-                print("Speed Test Debug: Latency measured: \(latency) ms")
-                return latency
+            do {
+                let startTime = CFAbsoluteTimeGetCurrent()
+                
+                // Create a simple HEAD request to minimize data transfer
+                var request = URLRequest(url: url)
+                request.httpMethod = "HEAD"
+                request.timeoutInterval = 5
+                request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+                
+                let (_, response) = try await URLSession.shared.data(for: request)
+                let endTime = CFAbsoluteTimeGetCurrent()
+                
+                if let httpResponse = response as? HTTPURLResponse, 
+                   httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+                    let latency = (endTime - startTime) * 1000 // Convert to ms
+                    print("Speed Test Debug: Latency to \(endpoint): \(latency) ms")
+                    
+                    bestLatency = min(bestLatency, latency)
+                    successfulTests += 1
+                    
+                    // If we get a very good latency, we can stop early
+                    if latency < 20.0 {
+                        break
+                    }
+                }
+            } catch {
+                print("Speed Test Debug: Latency test to \(endpoint) failed: \(error)")
+                continue
             }
-        } catch {
-            print("Speed Test Debug: Latency test failed: \(error)")
         }
         
-        // Return reasonable default latency if test fails
-        return 25.0
+        // Use the best latency, or a reasonable default if all tests failed
+        let finalLatency = successfulTests > 0 ? bestLatency : 50.0
+        
+        // Apply reasonable bounds (1ms to 2000ms)
+        let boundedLatency = min(max(finalLatency, 1.0), 2000.0)
+        
+        print("Speed Test Debug: Final latency: \(boundedLatency) ms (from \(successfulTests) successful tests)")
+        
+        return boundedLatency
     }
 }
 

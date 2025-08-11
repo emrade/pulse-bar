@@ -16,7 +16,6 @@ struct AppSettings: Codable {
     var launchAtLogin: Bool = false
     var showDockIcon: Bool = false
     var defaultView: DefaultView = .dashboard
-    var speedTestRegion: SpeedTestRegion = .auto
     var autoResetDailyData: Bool = true
     var enableNotifications: Bool = false
     var cpuWarningThreshold: Double = 0.80
@@ -84,21 +83,6 @@ enum DefaultView: String, CaseIterable, Codable {
     }
 }
 
-enum SpeedTestRegion: String, CaseIterable, Codable {
-    case auto = "auto"
-    case northAmerica = "na"
-    case europe = "eu"
-    case asia = "asia"
-    
-    var displayName: String {
-        switch self {
-        case .auto: return "Auto (Recommended)"
-        case .northAmerica: return "North America"
-        case .europe: return "Europe"
-        case .asia: return "Asia"
-        }
-    }
-}
 
 // MARK: - Thread-Safe Settings Access
 struct SettingsAccessor {
