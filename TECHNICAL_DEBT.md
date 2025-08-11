@@ -118,6 +118,16 @@ The main dashboard had a long vertical stack of 7 metric items that made the win
 - **Consistent Sizing**: All views now use centralized sizing system
 - **Enhanced UX**: Grid layout reduces scrolling and provides better visual organization
 - **Maintainability**: Future size changes can be made in one place (`WindowSizing.swift`)
+- **System Overview**: Added full-width system information card showing computer name, chip, memory, model, and macOS version
+
+### Additional Features Added
+- **SystemInfoService**: Centralized service for retrieving system information
+- **SystemInfoCardView**: Full-width card at top of dashboard displaying:
+  - Computer name (e.g., "My MacBook Pro")
+  - Chip information (e.g., "Apple M4 Max")
+  - Memory size (e.g., "36GB")
+  - Device model (e.g., "MacBook Pro M3 Max")
+  - macOS version (e.g., "macOS 15.5.0")
 
 ---
 

@@ -87,6 +87,9 @@ struct DashboardView: View {
             
             Divider()
             
+            // System Information Card
+            systemInfoCard
+            
             // Grid layout for metrics
             LazyVGrid(columns: [
                 GridItem(.flexible(minimum: 160)),
@@ -198,6 +201,11 @@ struct DashboardView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
         }
+    }
+    
+    private var systemInfoCard: some View {
+        SystemInfoCardView()
+            .padding(.horizontal, 16)
     }
 }
 
@@ -346,6 +354,70 @@ struct TappableMetricRowView: View {
             } else {
                 NSCursor.arrow.set()
             }
+        }
+    }
+}
+
+// MARK: - System Information Card View
+struct SystemInfoCardView: View {
+    private let systemInfo = SystemInfoService.shared
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header with computer icon and name
+            HStack(spacing: 8) {
+                Image(systemName: "desktopcomputer")
+                    .font(.title3)
+                    .foregroundColor(.accentColor)
+                
+                Text(systemInfo.computerName)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+            }
+            
+            // System specs in a grid
+            HStack(spacing: 16) {
+                // Left column
+                VStack(alignment: .leading, spacing: 8) {
+                    systemInfoRow(label: "Chip", value: systemInfo.chipName)
+                    systemInfoRow(label: "Memory", value: systemInfo.totalMemory)
+                }
+                
+                Spacer()
+                
+                // Right column  
+                VStack(alignment: .leading, spacing: 8) {
+                    systemInfoRow(label: "Model", value: systemInfo.deviceModel)
+                    systemInfoRow(label: "OS", value: systemInfo.macOSVersion)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(NSColor.controlBackgroundColor))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color(NSColor.separatorColor).opacity(0.3), lineWidth: 0.5)
+                )
+                .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
+        )
+    }
+    
+    private func systemInfoRow(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            Text(value)
+                .font(.caption)
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
     }
 }
