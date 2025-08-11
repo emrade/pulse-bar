@@ -22,7 +22,7 @@ struct ThemedDashboardLayout<Content: View>: View {
         ) {
             content
         }
-        .themedLayoutPadding()
+        .themedHorizontalPadding()
     }
     
     private var gridColumns: [GridItem] {
@@ -154,7 +154,8 @@ struct ThemedHeader: View {
             Spacer()
         }
         .themedHorizontalPadding()
-        .themedVerticalPadding()
+        .frame(height: 44, alignment: .center)
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -189,7 +190,8 @@ struct ThemedFooter: View {
             )
         }
         .themedHorizontalPadding()
-        .themedVerticalPadding()
+        .frame(height: 44, alignment: .center)
+        .frame(maxWidth: .infinity)
     }
 }
 

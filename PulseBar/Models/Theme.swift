@@ -207,9 +207,9 @@ extension Theme {
             ),
             layout: LayoutConfiguration(
                 gridColumns: 2,
-                cardSpacing: 12,
-                sectionSpacing: 16,
-                padding: PaddingConfiguration(horizontal: 16, vertical: 16)
+                cardSpacing: 10,
+                sectionSpacing: 10,
+                padding: PaddingConfiguration(horizontal: 10, vertical: 12)
             ),
             colors: ColorConfiguration(
                 background: "system.windowBackground",

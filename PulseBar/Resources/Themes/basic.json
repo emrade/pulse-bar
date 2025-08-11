@@ -20,11 +20,11 @@
   
   "layout": {
     "gridColumns": 2,
-    "cardSpacing": 12,
-    "sectionSpacing": 16,
+    "cardSpacing": 10,
+    "sectionSpacing": 10,
     "padding": {
-      "horizontal": 16,
-      "vertical": 16
+      "horizontal": 10,
+      "vertical": 12
     }
   },
   
