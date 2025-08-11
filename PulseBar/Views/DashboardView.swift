@@ -15,7 +15,7 @@ struct DashboardView: View {
         Group {
             switch viewModel.currentViewState {
             case .basic:
-                themedDashboardView
+                ThemedDashboardView(viewModel: viewModel)
             case .advancedStorage:
                 AdvancedStorageView(
                     metricData: viewModel.snapshot.disk,
@@ -70,75 +70,6 @@ struct DashboardView: View {
         } message: {
             Text("Are you sure you want to reset today's data usage to 0? This action cannot be undone.")
         }
-    }
-    
-    private var themedDashboardView: some View {
-        VStack(spacing: themeManager.layout.sectionSpacing) {
-            // Header
-            HStack {
-                Image(systemName: "waveform.path.ecg")
-                    .themedIcon(size: .regular)
-                
-                Text("PulseBar")
-                    .themedFont(.primary, size: .title)
-                    .themedPrimaryText()
-                
-                Spacer()
-            }
-            .themedHorizontalPadding()
-            .themedVerticalPadding()
-            
-            ThemedDivider()
-            
-            // System Information Card
-            ThemedSystemInfoCard()
-                .themedHorizontalPadding()
-            
-            // Metrics Grid using themed layout
-            ThemedDashboardLayout {
-                ForEach(metricCards, id: \.title) { card in
-                    ThemedMetricCard(
-                        icon: card.icon,
-                        title: card.title,
-                        value: card.value,
-                        detail: card.detail,
-                        onTap: card.onTap
-                    )
-                }
-            }
-            
-            Spacer(minLength: 8)
-            
-            // Footer
-            ThemedDivider()
-            
-            HStack(spacing: 20) {
-                FooterButton(
-                    icon: "gearshape.fill",
-                    title: "Settings",
-                    action: viewModel.showSettings
-                )
-                
-                Spacer()
-                
-                FooterButton(
-                    icon: "info.circle.fill",
-                    title: "About", 
-                    action: viewModel.showAbout
-                )
-                
-                Spacer()
-                
-                FooterButton(
-                    icon: "power.circle.fill",
-                    title: "Quit",
-                    action: viewModel.quitApp
-                )
-            }
-            .themedHorizontalPadding()
-            .themedVerticalPadding()
-        }
-        .environmentObject(themeManager)
     }
     
     private var metricCards: [MetricCardData] {

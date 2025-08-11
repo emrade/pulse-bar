@@ -44,8 +44,8 @@ struct ThemedDashboardLayout<Content: View>: View {
 // MARK: - Themed Dashboard View
 
 struct ThemedDashboardView: View {
+    let viewModel: DashboardViewModel
     @EnvironmentObject var themeManager: ThemeManager
-    @StateObject private var viewModel = DashboardViewModel()
     
     var body: some View {
         VStack(spacing: themeManager.layout.sectionSpacing) {
@@ -55,7 +55,7 @@ struct ThemedDashboardView: View {
             ThemedDivider()
             
             // System Information Card
-            ThemedSystemInfoCard()
+            ThemedSystemInfoCard().themedHorizontalPadding()
             
             // Metrics Grid
             ThemedDashboardLayout {
@@ -74,7 +74,7 @@ struct ThemedDashboardView: View {
             
             // Footer
             ThemedDivider()
-            ThemedFooter()
+            ThemedFooter(viewModel: viewModel)
         }
         .themedWindowFrame()
         .themedBackground()
@@ -162,8 +162,8 @@ struct ThemedHeader: View {
 // MARK: - Themed Footer
 
 struct ThemedFooter: View {
+    let viewModel: DashboardViewModel
     @EnvironmentObject var themeManager: ThemeManager
-    @StateObject private var viewModel = DashboardViewModel()
     
     var body: some View {
         HStack(spacing: 20) {
@@ -242,6 +242,6 @@ struct MetricCardData {
 // MARK: - Preview
 
 #Preview {
-    ThemedDashboardView()
+    ThemedDashboardView(viewModel: DashboardViewModel())
         .environmentObject(ThemeManager.shared)
 }
