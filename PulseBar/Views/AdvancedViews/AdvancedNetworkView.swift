@@ -97,7 +97,17 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
             if speedTest.isRunning {
                 if !isSpeedTestRunning {
                     isSpeedTestRunning = true
-                    speedTestButtonText = "Testing..."
+                }
+                // Update progress text based on completion percentage
+                let progressPercent = Int(speedTest.progress * 100)
+                if progressPercent < 10 {
+                    speedTestButtonText = "Measuring latency..."
+                } else if progressPercent < 60 {
+                    speedTestButtonText = "Testing download (\(progressPercent)%)"
+                } else if progressPercent < 100 {
+                    speedTestButtonText = "Testing upload (\(progressPercent)%)"
+                } else {
+                    speedTestButtonText = "Finishing..."
                 }
             } else if isSpeedTestRunning {
                 // Test completed

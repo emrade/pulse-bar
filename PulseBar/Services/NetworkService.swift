@@ -214,21 +214,30 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
         // Test upload speed using POST requests with data
         let uploadEndpoints = [
             "https://httpbin.org/post", // Reliable HTTP testing service
-            "https://postman-echo.com/post" // Alternative testing service
+            "https://postman-echo.com/post", // Alternative testing service
+            "https://httpbingo.org/post" // Another testing service
         ]
         
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 15
-        configuration.timeoutIntervalForResource = 20
+        configuration.timeoutIntervalForRequest = 20
+        configuration.timeoutIntervalForResource = 30
         configuration.urlCache = nil
+        // Optimize for upload performance
+        configuration.allowsCellularAccess = true
+        configuration.waitsForConnectivity = false
         let session = URLSession(configuration: configuration)
         
         var bestSpeed: Double = 0.0
         var successfulTests = 0
-        let testDataSize = 1_000_000 // 1MB test data
         
-        // Create test data
-        let testData = Data(repeating: 65, count: testDataSize) // 1MB of 'A' characters
+        // Start with larger data size for better accuracy
+        let testDataSize = 2_000_000 // 2MB test data
+        
+        // Create test data - use random data to prevent compression
+        var testData = Data(count: testDataSize)
+        testData.withUnsafeMutableBytes { bytes in
+            arc4random_buf(bytes.baseAddress, testDataSize)
+        }
         
         for (index, endpoint) in uploadEndpoints.enumerated() {
             guard let url = URL(string: endpoint) else { continue }
@@ -242,11 +251,12 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
                 request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
                 request.setValue("\(testDataSize)", forHTTPHeaderField: "Content-Length")
                 request.httpBody = testData
-                request.timeoutInterval = 15
+                request.timeoutInterval = 20
                 
+                // Measure upload time more precisely - start timing just before upload
                 let startTime = CFAbsoluteTimeGetCurrent()
                 
-                let (_, response) = try await session.data(for: request)
+                let (responseData, response) = try await session.data(for: request)
                 
                 let endTime = CFAbsoluteTimeGetCurrent()
                 let duration = endTime - startTime
@@ -254,16 +264,21 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
                 // Validate response
                 guard let httpResponse = response as? HTTPURLResponse,
                       httpResponse.statusCode >= 200 && httpResponse.statusCode < 300,
-                      duration > 0.1 else { // Minimum duration for meaningful measurement
-                    print("Speed Test Debug: Upload to \(endpoint) - Invalid response or too fast")
+                      duration > 0.2 else { // Minimum duration for meaningful measurement
+                    let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+                    print("Speed Test Debug: Upload to \(endpoint) - Invalid response, too fast, or failed (status: \(statusCode))")
                     continue
                 }
                 
-                // Calculate upload speed
-                let bytesPerSecond = Double(testDataSize) / duration
+                // Calculate upload speed - account for overhead more carefully
+                // Subtract estimated network overhead (headers, TCP handshake, etc.)
+                let networkOverheadEstimate = 0.1 // 100ms overhead estimate
+                let adjustedDuration = max(duration - networkOverheadEstimate, duration * 0.8) // Use at least 80% of total time
+                
+                let bytesPerSecond = Double(testDataSize) / adjustedDuration
                 let mbps = (bytesPerSecond * 8) / 1_000_000 // Convert to Mbps
                 
-                print("Speed Test Debug: Upload to \(endpoint) - Uploaded \(testDataSize) bytes in \(duration)s = \(mbps) Mbps")
+                print("Speed Test Debug: Upload to \(endpoint) - Uploaded \(testDataSize) bytes in \(duration)s (adjusted: \(adjustedDuration)s) = \(mbps) Mbps, response size: \(responseData.count) bytes")
                 
                 bestSpeed = max(bestSpeed, mbps)
                 successfulTests += 1
@@ -274,8 +289,9 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
                     speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: progress))
                 }
                 
-                // If we get a decent upload speed, we can stop
-                if mbps > 1.0 {
+                // If we get a reasonable upload speed from the first endpoint, use it
+                // Don't require high speeds since upload is typically much slower than download
+                if mbps > 0.5 && endpoint.contains("httpbin") {
                     break
                 }
                 
@@ -288,8 +304,9 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
         // Use the best upload speed, or 0 if all tests failed
         let finalSpeed = successfulTests > 0 ? bestSpeed : 0.0
         
-        // Apply reasonable bounds (0 to 1000 Mbps for upload)
-        let boundedSpeed = min(max(finalSpeed, 0.0), 1000.0)
+        // Apply reasonable bounds for upload (typically much lower than download)
+        // Most residential connections have upload speeds between 1-100 Mbps
+        let boundedSpeed = min(max(finalSpeed, 0.0), 500.0) // Cap at 500 Mbps for upload
         
         print("Speed Test Debug: Final upload speed: \(boundedSpeed) Mbps (from \(successfulTests) successful tests)")
         
