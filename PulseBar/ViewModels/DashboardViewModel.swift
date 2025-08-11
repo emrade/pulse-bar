@@ -19,6 +19,8 @@ enum DashboardViewState {
     case advancedNetwork
     case advancedDevices
     case advancedNetworkUsage
+    case settings
+    case about
 }
 
 @MainActor
@@ -179,5 +181,13 @@ Better signal = faster speeds and more reliable connection.
     
     func handleNetworkUsageTileTap() {
         showAdvancedView(for: .advancedNetworkUsage)
+    }
+    
+    func showSettings() {
+        showAdvancedView(for: .settings)
+    }
+    
+    func showAbout() {
+        showAdvancedView(for: .about)
     }
 }

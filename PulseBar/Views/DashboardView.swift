@@ -51,6 +51,10 @@ struct DashboardView: View {
                     onBack: viewModel.showBasicView,
                     onReset: viewModel.showResetConfirmation
                 )
+            case .settings:
+                SettingsView(onBack: viewModel.showBasicView)
+            case .about:
+                AboutView(onBack: viewModel.showBasicView)
             }
         }
         .frame(width: 360, height: 700)
@@ -149,28 +153,43 @@ struct DashboardView: View {
             
             // Footer
             Divider()
-            HStack {
-                Button("Settings") {
-                    // TODO: Open settings
+            HStack(spacing: 20) {
+                Button(action: { viewModel.showSettings() }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 14))
+                        Text("Settings")
+                            .font(.caption.weight(.medium))
+                    }
+                    .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(.secondary)
                 
                 Spacer()
                 
-                Button("About") {
-                    // TODO: Open about
+                Button(action: { viewModel.showAbout() }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "info.circle.fill")
+                            .font(.system(size: 14))
+                        Text("About")
+                            .font(.caption.weight(.medium))
+                    }
+                    .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(.secondary)
                 
                 Spacer()
                 
-                Button("Quit") {
-                    viewModel.quitApp()
+                Button(action: { viewModel.quitApp() }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "power.circle.fill")
+                            .font(.system(size: 14))
+                        Text("Quit")
+                            .font(.caption.weight(.medium))
+                    }
+                    .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(.secondary)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 12)

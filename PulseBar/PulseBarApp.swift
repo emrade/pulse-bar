@@ -13,7 +13,10 @@ struct PulseBarApp: App {
     
     var body: some Scene {
         Settings {
-            EmptyView()
+            SettingsView(onBack: {
+                // Close settings window when back is pressed
+                NSApplication.shared.keyWindow?.close()
+            })
         }
     }
 }
