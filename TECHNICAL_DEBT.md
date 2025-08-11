@@ -84,6 +84,43 @@ When addressing this debt:
 
 ---
 
+## UI Layout Improvements (COMPLETED - August 11, 2025)
+
+**Status:** Completed ✅  
+**Priority:** High (user experience)  
+**Files affected:**
+- `PulseBar/Views/DashboardView.swift` - Grid layout implementation
+- `PulseBar/Utils/WindowSizing.swift` - Centralized sizing system
+- All `PulseBar/Views/AdvancedViews/*.swift` - Updated to use centralized sizing
+- `PulseBar/Views/SettingsView.swift` - Updated sizing
+- `PulseBar/Views/AboutView.swift` - Updated sizing
+
+### Issue Description (RESOLVED)
+The main dashboard had a long vertical stack of 7 metric items that made the window quite tall. User requested a grid layout with items side by side to reduce vertical space usage.
+
+### Implementation Completed
+1. **Grid Layout**: Converted the vertical VStack to a LazyVGrid with 2 flexible columns
+2. **Icon Alignment**: Fixed alignment issues between icons and titles in grid cards  
+3. **Header/Footer**: Ensured proper visibility of header (PulseBar title) and footer (Settings/About/Quit buttons)
+4. **Centralized Sizing**: Created `WindowSizing.swift` utility for consistent sizing across all views
+5. **Window Optimization**: Changed main window size from 360×700 to 400×550 for better proportions
+
+### Key Changes Made
+- Created `TappableMetricCardView` for grid layout with proper alignment
+- Window size standardized to 400×550 pixels across all views
+- All advanced views now use `.standardWindowFrame()` modifier
+- Improved spacing and padding for better visual balance
+- Fixed alignment from `.top` to `.center` for icon-title pairs
+
+### Benefits Achieved
+- **Reduced Height**: Window height decreased from 700px to 550px
+- **Better Proportions**: Improved width-to-height ratio for modern displays
+- **Consistent Sizing**: All views now use centralized sizing system
+- **Enhanced UX**: Grid layout reduces scrolling and provides better visual organization
+- **Maintainability**: Future size changes can be made in one place (`WindowSizing.swift`)
+
+---
+
 ## Speed Test Accuracy - Upload Speed Measurement
 
 **Status:** Active (as of August 11, 2025)  

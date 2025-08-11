@@ -57,7 +57,7 @@ struct DashboardView: View {
                 AboutView(onBack: viewModel.showBasicView)
             }
         }
-        .frame(width: 400, height: 550)
+        .standardWindowFrame()
         .background(Color(NSColor.windowBackgroundColor))
         .alert("Reset Data Usage", isPresented: $viewModel.showingResetConfirmation) {
             Button("Cancel", role: .cancel) {
@@ -72,7 +72,7 @@ struct DashboardView: View {
     }
     
     private var basicDashboardView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             // Header
             HStack {
                 Image(systemName: "waveform.path.ecg")
@@ -83,7 +83,7 @@ struct DashboardView: View {
                 Spacer()
             }
             .padding(.horizontal, 16)
-            .padding(.top, 12)
+            .padding(.top, 16)
             
             Divider()
             
@@ -153,7 +153,7 @@ struct DashboardView: View {
             }
             .padding(.horizontal, 16)
             
-            Spacer(minLength: 4)
+            Spacer(minLength: 8)
             
             // Footer
             Divider()
@@ -196,7 +196,7 @@ struct DashboardView: View {
                 .buttonStyle(.plain)
             }
             .padding(.horizontal, 16)
-            .padding(.bottom, 12)
+            .padding(.bottom, 16)
         }
     }
 }
@@ -215,19 +215,17 @@ struct TappableMetricCardView: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 8) {
                 // Icon and title row
-                HStack(alignment: .top, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
                     Image(systemName: icon)
                         .font(.title3)
                         .foregroundColor(.accentColor)
                         .frame(width: 20, height: 20, alignment: .center)
                     
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(title)
-                            .font(.caption.weight(.semibold))
-                            .foregroundColor(.primary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                    }
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                     
                     Spacer()
                 }

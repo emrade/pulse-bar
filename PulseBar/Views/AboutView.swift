@@ -180,7 +180,7 @@ struct AboutView: View {
                 .padding(16)
             }
         }
-        .frame(width: 360, height: 700)
+        .standardWindowFrame()
     }
     
     // MARK: - System Information Properties

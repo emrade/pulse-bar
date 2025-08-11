@@ -84,7 +84,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 .padding()
             }
         }
-        .frame(width: 360, height: 700)
+        .standardWindowFrame()
         .onAppear {
             loadTopProcesses()
         }

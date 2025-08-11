@@ -52,7 +52,7 @@ struct AdvancedNetworkUsageView: View {
                 .padding()
             }
         }
-        .frame(width: 360, height: 700)
+        .standardWindowFrame()
     }
     
     private var usageSummarySection: some View {

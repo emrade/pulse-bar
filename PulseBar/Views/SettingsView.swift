@@ -249,7 +249,7 @@ struct SettingsView: View {
                 .padding(16)
             }
         }
-        .frame(width: 360, height: 700)
+        .standardWindowFrame()
         .alert("Settings Exported", isPresented: $showingExportAlert) {
             Button("Copy to Clipboard") {
                 NSPasteboard.general.clearContents()
