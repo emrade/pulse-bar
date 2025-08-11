@@ -155,9 +155,6 @@ struct ThemedHeader: View {
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)
-        // .themedHorizontalPadding()
-        // .frame(height: 44, alignment: .center)
-        // .frame(maxWidth: .infinity)
     }
 }
 
