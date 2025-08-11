@@ -168,7 +168,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
             
             Spacer()
             
-            Text(ByteCountFormatter.string(fromByteCount: Int64(memory), countStyle: .memory))
+            Text(FormatterUtility.shared.formatMemorySize(UInt64(memory)))
                 .font(.caption.weight(.medium))
                 .foregroundColor(.primary)
         }
@@ -245,7 +245,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
             Spacer()
             
             VStack(alignment: .trailing, spacing: 2) {
-                Text(ByteCountFormatter.string(fromByteCount: Int64(amount), countStyle: .binary))
+                Text(FormatterUtility.shared.formatMemorySize(UInt64(amount)))
                     .font(.caption.weight(.medium))
                 
                 Text(description)
@@ -283,7 +283,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(item.label)
                                     .font(.caption.weight(.medium))
-                                Text(ByteCountFormatter.string(fromByteCount: Int64(item.value), countStyle: .memory))
+                                Text(FormatterUtility.shared.formatMemorySize(UInt64(item.value)))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -368,7 +368,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 InfoRow(label: "Total Memory", value: metricData.formattedTotal)
                 InfoRow(label: "Used Memory", value: metricData.formattedUsed)
                 InfoRow(label: "Available Memory", value: metricData.formattedAvailable)
-                InfoRow(label: "Cached Memory", value: ByteCountFormatter.string(fromByteCount: Int64(metricData.cachedBytes), countStyle: .memory))
+                InfoRow(label: "Cached Memory", value: FormatterUtility.shared.formatMemorySize(metricData.cachedBytes))
                 InfoRow(label: "Memory Pressure", value: memoryPressure.level)
             }
         }

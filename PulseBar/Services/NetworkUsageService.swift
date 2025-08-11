@@ -274,8 +274,7 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
         print("NetworkUsageService: Performing automatic midnight reset")
         
         // Check if auto-reset is enabled in settings
-        let settingsManager = SettingsManager()
-        if settingsManager.settings.autoResetDailyData {
+        if SettingsAccessor.getCurrentSettings().autoResetDailyData {
             // Reset the daily usage
             await resetDailyUsage()
         } else {

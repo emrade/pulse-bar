@@ -102,16 +102,16 @@ struct MemoryMetrics {
     var formattedUsed: String {
         if isLoading { return "Loading..." }
         if error != nil { return "Error" }
-        return ByteCountFormatter.string(fromByteCount: Int64(usedBytes), countStyle: .binary)
+        return FormatterUtility.shared.formatMemorySize(usedBytes)
     }
     
     var formattedTotal: String {
-        return ByteCountFormatter.string(fromByteCount: Int64(totalBytes), countStyle: .binary)
+        return FormatterUtility.shared.formatMemorySize(totalBytes)
     }
     
     var formattedAvailable: String {
         let availableBytes = freeBytes + cachedBytes // Free + reclaimable memory
-        return ByteCountFormatter.string(fromByteCount: Int64(availableBytes), countStyle: .binary)
+        return FormatterUtility.shared.formatMemorySize(availableBytes)
     }
     
     var formattedUsedWithAvailable: String {
@@ -220,7 +220,7 @@ struct SMARTStatus {
     
     var formattedTemperature: String? {
         guard let temp = temperature else { return nil }
-        return String(format: "%.0f°C", temp)
+        return FormatterUtility.shared.formatTemperature(temp)
     }
 }
 

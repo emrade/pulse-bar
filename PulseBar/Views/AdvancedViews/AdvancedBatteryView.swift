@@ -300,8 +300,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
     }
     
     private func formatTemperature(_ temperature: Double?) -> String {
-        guard let temp = temperature else { return "Unknown" }
-        return String(format: "%.0f°C", temp)
+        return FormatterUtility.shared.formatTemperature(temperature)
     }
     
     private func formatCapacity(_ capacity: Double?) -> String {

@@ -243,10 +243,7 @@ struct AdvancedNetworkUsageView: View {
     }
     
     private func formatBytes(_ bytes: UInt64) -> String {
-        let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useGB, .useMB, .useKB]
-        formatter.countStyle = .file
-        return formatter.string(fromByteCount: Int64(bytes))
+        return FormatterUtility.shared.formatNetworkSize(bytes)
     }
     
     private func getPeakHour() -> String {

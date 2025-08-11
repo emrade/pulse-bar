@@ -2,7 +2,7 @@
 //  AppSettings.swift
 //  PulseBar
 //
-//  Created by Claude on 11/08/2025.
+//  Created by Emmanuel Fache on 11/08/2025.
 //
 
 import Foundation
@@ -100,6 +100,20 @@ enum SpeedTestRegion: String, CaseIterable, Codable {
     }
 }
 
+// MARK: - Thread-Safe Settings Access
+struct SettingsAccessor {
+    private static let settingsKey = "PulseBarSettings"
+    
+    static func getCurrentSettings() -> AppSettings {
+        let defaults = UserDefaults.standard
+        if let data = defaults.data(forKey: settingsKey),
+           let decodedSettings = try? JSONDecoder().decode(AppSettings.self, from: data) {
+            return decodedSettings
+        }
+        return AppSettings()
+    }
+}
+
 // MARK: - Settings Manager
 @MainActor
 class SettingsManager: ObservableObject {
@@ -140,7 +154,7 @@ class SettingsManager: ObservableObject {
     private func setLaunchAtLogin(_ enabled: Bool) {
         // Implementation would go here for macOS launch services
         // This is a simplified version
-        if let bundleIdentifier = Bundle.main.bundleIdentifier {
+        if Bundle.main.bundleIdentifier != nil {
             let task = Process()
             task.launchPath = "/usr/bin/osascript"
             

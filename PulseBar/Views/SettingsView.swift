@@ -2,7 +2,7 @@
 //  SettingsView.swift
 //  PulseBar
 //
-//  Created by Claude on 11/08/2025.
+//  Created by Emmanuel Fache on 11/08/2025.
 //
 
 import SwiftUI

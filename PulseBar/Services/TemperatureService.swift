@@ -20,7 +20,7 @@ struct TemperatureMetrics {
     
     var formattedTemperature: String {
         if let temp = estimatedCPUTemperature {
-            return String(format: "~%.0f°C", temp)
+            return "~" + FormatterUtility.shared.formatTemperature(temp)
         }
         return "Unknown"
     }

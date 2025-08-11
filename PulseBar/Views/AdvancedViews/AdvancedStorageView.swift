@@ -170,7 +170,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.label)
                                     .font(.caption.weight(.medium))
-                                Text(ByteCountFormatter.string(fromByteCount: Int64(item.value), countStyle: .binary))
+                                Text(FormatterUtility.shared.formatFileSize(UInt64(item.value)))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -258,7 +258,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                         .font(.caption)
                         .foregroundColor(tempColor)
                 } else {
-                    Text("Temperature: 38°C")
+                    Text("Temperature: \(FormatterUtility.shared.formatTemperature(38.0))")
                         .font(.caption)
                     
                     Spacer()
@@ -283,9 +283,9 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                 VStack(spacing: 8) {
                     InfoRow(label: "Volume Name", value: bootVolume.name)
                     InfoRow(label: "Mount Point", value: bootVolume.mountPoint)
-                    InfoRow(label: "Total Capacity", value: ByteCountFormatter.string(fromByteCount: Int64(bootVolume.totalBytes), countStyle: .binary))
-                    InfoRow(label: "Available Space", value: ByteCountFormatter.string(fromByteCount: Int64(bootVolume.freeBytes), countStyle: .binary))
-                    InfoRow(label: "Used Space", value: ByteCountFormatter.string(fromByteCount: Int64(bootVolume.usedBytes), countStyle: .binary))
+                    InfoRow(label: "Total Capacity", value: FormatterUtility.shared.formatFileSize(bootVolume.totalBytes))
+                    InfoRow(label: "Available Space", value: FormatterUtility.shared.formatFileSize(bootVolume.freeBytes))
+                    InfoRow(label: "Used Space", value: FormatterUtility.shared.formatFileSize(bootVolume.usedBytes))
                     InfoRow(label: "Usage", value: String(format: "%.1f%%", bootVolume.usagePercentage * 100))
                 }
             }
