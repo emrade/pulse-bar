@@ -8,7 +8,7 @@
   "popover": {
     "width": 360,
     "height": 700,
-    "cornerRadius": 14,
+    "cornerRadius": 4,
     "shadow": {
       "enabled": true,
       "color": "#000000",
@@ -49,8 +49,8 @@
 
   "fonts": {
     "primary": {
-      "family": "SF Pro Display",
-      "weight": "semibold",
+      "family": "SF Mono",
+      "weight": "medium",
       "size": {
         "small": 11,
         "regular": 13,
@@ -60,7 +60,7 @@
     },
     "monospace": {
       "family": "SF Mono",
-      "weight": "medium",
+      "weight": "semibold",
       "size": {
         "small": 10,
         "regular": 12,
@@ -104,29 +104,29 @@
       "curve": "easeInOut"
     },
     "glowEffect": {
-      "enabled": true,
+      "enabled": false,
       "color": "#00FFF5",
-      "radius": 6,
-      "opacity": 0.8
+      "radius": 0,
+      "opacity": 0.0
     }
   },
 
   "components": {
     "cards": {
       "style": "glass",
-      "borderWidth": 1,
-      "borderColor": "#3A4553",
-      "cornerRadius": 12,
-      "backgroundOpacity": 0.7,
+      "borderWidth": 2,
+      "borderColor": "#00FFF5",
+      "cornerRadius": 2,
+      "backgroundOpacity": 0.8,
       "hoverEffect": {
         "enabled": true,
-        "scale": 1.03,
-        "glowIntensity": 1.4
+        "scale": 1.02,
+        "glowIntensity": 2.0
       }
     },
     "buttons": {
       "style": "gradient",
-      "cornerRadius": 8,
+      "cornerRadius": 2,
       "borderWidth": 0,
       "hoverEffect": {
         "enabled": true,

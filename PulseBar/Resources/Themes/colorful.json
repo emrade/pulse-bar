@@ -8,7 +8,7 @@
   "popover": {
     "width": 360,
     "height": 700,
-    "cornerRadius": 16,
+    "cornerRadius": 20,
     "shadow": {
       "enabled": true,
       "color": "#000000",
@@ -49,7 +49,7 @@
 
   "fonts": {
     "primary": {
-      "family": "SF Pro Display",
+      "family": "SF Pro Rounded",
       "weight": "semibold",
       "size": {
         "small": 11,
@@ -59,8 +59,8 @@
       }
     },
     "monospace": {
-      "family": "SF Mono",
-      "weight": "medium",
+      "family": "SF Pro Rounded",
+      "weight": "bold",
       "size": {
         "small": 10,
         "regular": 12,
@@ -112,22 +112,22 @@
       "style": "gradient",
       "borderWidth": 0,
       "borderColor": "#E2E8F0",
-      "cornerRadius": 14,
+      "cornerRadius": 16,
       "backgroundOpacity": 1.0,
-      "hoverEffect": {
-        "enabled": true,
-        "scale": 1.02,
-        "brightness": 1.08
-      }
-    },
-    "buttons": {
-      "style": "gradient",
-      "cornerRadius": 10,
-      "borderWidth": 0,
       "hoverEffect": {
         "enabled": true,
         "scale": 1.05,
         "brightness": 1.15
+      }
+    },
+    "buttons": {
+      "style": "gradient",
+      "cornerRadius": 12,
+      "borderWidth": 0,
+      "hoverEffect": {
+        "enabled": true,
+        "scale": 1.08,
+        "brightness": 1.2
       }
     },
     "systemInfoCard": {
