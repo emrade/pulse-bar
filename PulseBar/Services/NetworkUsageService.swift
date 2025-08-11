@@ -38,10 +38,18 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
     private let dailyUploadedKey = "dailyUploaded"
     private let hourlyUsageKey = "hourlyUsageHistory"
     
+    // Timer for automatic midnight reset
+    private var midnightResetTimer: Timer?
+    
     init() {
         Task {
             await updateMetrics()
         }
+        setupMidnightResetTimer()
+    }
+    
+    deinit {
+        midnightResetTimer?.invalidate()
     }
     
     func updateMetrics() async {
@@ -56,10 +64,28 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
         var dailyUploaded = userDefaults.object(forKey: dailyUploadedKey) as? UInt64 ?? 0
         
         if !Calendar.current.isDate(today, inSameDayAs: lastUpdateDate) {
-            // New day, reset daily counters
+            // New day detected, reset daily counters and system baseline
+            print("NetworkUsageService: New day detected. Last update: \(lastUpdateDate), Today: \(today)")
+            print("NetworkUsageService: Resetting daily usage from \(dailyDownloaded) bytes down, \(dailyUploaded) bytes up")
+            
             dailyDownloaded = 0
             dailyUploaded = 0
             userDefaults.set(today, forKey: lastUpdateDateKey)
+            userDefaults.set(dailyDownloaded, forKey: dailyDownloadedKey)
+            userDefaults.set(dailyUploaded, forKey: dailyUploadedKey)
+            
+            // Reset system baseline to current values to prevent carrying over yesterday's data
+            userDefaults.set(currentSystemUsage.bytesIn, forKey: lastSystemBytesInKey)
+            userDefaults.set(currentSystemUsage.bytesOut, forKey: lastSystemBytesOutKey)
+            
+            print("NetworkUsageService: Daily usage reset completed")
+            
+            // Update the local variables to reflect the reset baseline
+            let resetMetrics = NetworkUsageMetrics(downloaded: 0, uploaded: 0, isLoading: false, error: nil)
+            await MainActor.run {
+                metricsSubject.send(resetMetrics)
+            }
+            return
         }
         
         if currentSystemUsage.bytesIn >= lastSystemBytesIn {
@@ -215,5 +241,48 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
         } catch {
             print("Failed to encode hourly usage history: \(error)")
         }
+    }
+    
+    // MARK: - Automatic Midnight Reset
+    private func setupMidnightResetTimer() {
+        // Calculate time until next midnight
+        let calendar = Calendar.current
+        let now = Date()
+        
+        // Get next midnight
+        guard let nextMidnight = calendar.nextDate(after: now, matching: DateComponents(hour: 0, minute: 0, second: 0), matchingPolicy: .nextTime) else {
+            print("Failed to calculate next midnight")
+            return
+        }
+        
+        let timeUntilMidnight = nextMidnight.timeIntervalSince(now)
+        
+        print("NetworkUsageService: Next automatic reset in \(Int(timeUntilMidnight)) seconds (\(nextMidnight))")
+        
+        // Set up timer to fire at midnight
+        DispatchQueue.main.async { [weak self] in
+            self?.midnightResetTimer = Timer.scheduledTimer(withTimeInterval: timeUntilMidnight, repeats: false) { _ in
+                Task { [weak self] in
+                    await self?.performAutomaticMidnightReset()
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    private func performAutomaticMidnightReset() async {
+        print("NetworkUsageService: Performing automatic midnight reset")
+        
+        // Check if auto-reset is enabled in settings
+        let settingsManager = SettingsManager()
+        if settingsManager.settings.autoResetDailyData {
+            // Reset the daily usage
+            await resetDailyUsage()
+        } else {
+            print("NetworkUsageService: Auto-reset disabled in settings")
+        }
+        
+        // Schedule the next midnight reset (24 hours from now)
+        setupMidnightResetTimer()
     }
 }
