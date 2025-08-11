@@ -23,6 +23,8 @@ extension Font {
         switch style {
         case .primary:
             fontConfig = themeManager.fonts.primary
+        case .accent:
+            fontConfig = themeManager.fonts.accent ?? themeManager.fonts.primary
         case .monospace:
             fontConfig = themeManager.fonts.monospace ?? themeManager.fonts.primary
         }
@@ -30,22 +32,34 @@ extension Font {
         let fontSize = fontConfig.size.value(for: size)
         let weight = fontConfig.swiftUIWeight
         
-        return .custom(fontConfig.family, size: fontSize).weight(weight)
+        // Use FontLoader to ensure bundled fonts are available
+        let actualFamily = FontLoader.shared.getFontFamilyName(for: fontConfig.family)
+        return .custom(actualFamily, size: fontSize).weight(weight)
     }
     
     @MainActor
     private static func systemFont(for size: ThemedFontSize, style: ThemedFontStyle) -> Font {
         switch size {
         case .extraSmall:
-            return style == .monospace ? Font.system(size: 10, design: .monospaced) : .caption
+            if style == .monospace { return Font.system(size: 10, design: .monospaced) }
+            if style == .accent { return .caption.weight(.semibold) }
+            return .caption
         case .small:
-            return style == .monospace ? Font.system(size: 11, design: .monospaced) : .caption2
+            if style == .monospace { return Font.system(size: 11, design: .monospaced) }
+            if style == .accent { return .caption2.weight(.semibold) }
+            return .caption2
         case .regular:
-            return style == .monospace ? Font.system(size: 13, design: .monospaced) : .subheadline
+            if style == .monospace { return Font.system(size: 13, design: .monospaced) }
+            if style == .accent { return .subheadline.weight(.semibold) }
+            return .subheadline
         case .large:
-            return style == .monospace ? Font.system(size: 16, design: .monospaced) : .headline
+            if style == .monospace { return Font.system(size: 16, design: .monospaced) }
+            if style == .accent { return .headline.weight(.bold) }
+            return .headline
         case .title:
-            return style == .monospace ? Font.system(size: 18, design: .monospaced) : .title
+            if style == .monospace { return Font.system(size: 18, design: .monospaced) }
+            if style == .accent { return .title.weight(.bold) }
+            return .title
         }
     }
     
@@ -84,6 +98,21 @@ extension Font {
     @MainActor
     static var themedMonoSmall: Font {
         Font.themed(.monospace, size: .small)
+    }
+    
+    @MainActor
+    static var themedAccentTitle: Font {
+        Font.themed(.accent, size: .title)
+    }
+    
+    @MainActor
+    static var themedAccentLarge: Font {
+        Font.themed(.accent, size: .large)
+    }
+    
+    @MainActor
+    static var themedAccentRegular: Font {
+        Font.themed(.accent, size: .regular)
     }
     
     // MARK: - Dynamic Font Sizing
@@ -142,6 +171,11 @@ extension Text {
     @MainActor
     func themedMono(_ size: ThemedFontSize = .regular) -> Text {
         return self.font(.themed(.monospace, size: size))
+    }
+    
+    @MainActor
+    func themedAccent(_ size: ThemedFontSize = .regular) -> Text {
+        return self.font(.themed(.accent, size: size))
     }
 }
 

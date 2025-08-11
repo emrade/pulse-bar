@@ -49,14 +49,25 @@
 
   "fonts": {
     "primary": {
-      "family": "Menlo",
-      "weight": "regular",
+      "family": "Rajdhani",
+      "weight": "medium",
+      "size": {
+        "extraSmall": 13,
+        "small": 12,
+        "regular": 14,
+        "large": 17,
+        "title": 20
+      }
+    },
+    "accent": {
+      "family": "Orbitron",
+      "weight": "bold",
       "size": {
         "extraSmall": 12,
         "small": 11,
         "regular": 13,
         "large": 16,
-        "title": 18
+        "title": 19
       }
     },
     "monospace": {

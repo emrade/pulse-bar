@@ -49,8 +49,8 @@
 
   "fonts": {
     "primary": {
-      "family": "Avenir Next",
-      "weight": "medium",
+      "family": "Nunito Sans",
+      "weight": "regular",
       "size": {
         "extraSmall": 12,
         "small": 11,
@@ -59,9 +59,20 @@
         "title": 19
       }
     },
-    "monospace": {
-      "family": "Avenir Next",
+    "accent": {
+      "family": "Baloo 2",
       "weight": "bold",
+      "size": {
+        "extraSmall": 13,
+        "small": 12,
+        "regular": 14,
+        "large": 17,
+        "title": 21
+      }
+    },
+    "monospace": {
+      "family": "SF Mono",
+      "weight": "regular",
       "size": {
         "extraSmall": 11,
         "small": 10,

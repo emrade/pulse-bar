@@ -49,7 +49,7 @@
 
   "fonts": {
     "primary": {
-      "family": "Optima",
+      "family": "Lato",
       "weight": "regular",
       "size": {
         "extraSmall": 12,
@@ -59,9 +59,20 @@
         "title": 18
       }
     },
-    "monospace": {
-      "family": "Optima",
+    "accent": {
+      "family": "Merriweather Sans",
       "weight": "bold",
+      "size": {
+        "extraSmall": 12,
+        "small": 11,
+        "regular": 13,
+        "large": 16,
+        "title": 19
+      }
+    },
+    "monospace": {
+      "family": "SF Mono",
+      "weight": "regular",
       "size": {
         "extraSmall": 11,
         "small": 10,

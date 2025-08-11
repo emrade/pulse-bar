@@ -16,6 +16,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let themeManager = ThemeManager.shared
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Initialize bundled fonts
+        _ = FontLoader.shared
+        
         // Create the status item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         

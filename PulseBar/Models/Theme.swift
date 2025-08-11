@@ -91,6 +91,7 @@ struct GradientConfiguration: Codable {
 
 struct FontConfiguration: Codable {
     let primary: FontStyleConfiguration
+    let accent: FontStyleConfiguration?
     let monospace: FontStyleConfiguration?
 }
 
@@ -238,6 +239,7 @@ extension Theme {
                         title: 18
                     )
                 ),
+                accent: nil,
                 monospace: FontStyleConfiguration(
                     family: "SF Mono",
                     weight: "regular",
@@ -352,5 +354,5 @@ enum ThemedFontSize {
 }
 
 enum ThemedFontStyle {
-    case primary, monospace
+    case primary, accent, monospace
 }
