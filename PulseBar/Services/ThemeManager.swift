@@ -42,9 +42,6 @@ final class ThemeManager: ObservableObject {
             return Bundle.main.resourceURL
         }
         
-        print("Debug: Bundle resource URL: \(Bundle.main.resourceURL?.path ?? "nil")")
-        print("Debug: Checking if Themes folder exists at: \(Bundle.main.resourceURL?.appendingPathComponent("Themes").path ?? "nil")")
-        
         return nil
     }
     
@@ -87,8 +84,6 @@ final class ThemeManager: ObservableObject {
                 self.customThemes = custom
                 self.availableThemes = builtIn + custom
                 self.isLoading = false
-                print("🎨 Themes loaded: \(builtIn.count) built-in, \(custom.count) custom")
-                print("🎨 Built-in themes: \(builtIn.map { $0.name })")
             }
             
         } catch let error as ThemeError {
@@ -213,7 +208,6 @@ final class ThemeManager: ObservableObject {
     
     private func loadBuiltInThemes() async throws -> [Theme] {
         guard let themesPath = builtInThemesPath else {
-            print("Built-in themes directory not found")
             // Try to load individual theme files directly
             return try await loadThemesFromIndividualFiles()
         }
@@ -297,12 +291,11 @@ final class ThemeManager: ObservableObject {
                     let theme = try JSONDecoder().decode(Theme.self, from: data)
                     try validateTheme(theme)
                     themes.append(theme)
-                    print("✅ Loaded theme: \(theme.name)")
                 } catch {
-                    print("❌ Failed to load theme \(themeName): \(error)")
+                    // Silently skip failed themes
                 }
             } else {
-                print("❌ Theme file not found: \(themeName).json")
+                // Theme file not found, skip
             }
         }
         

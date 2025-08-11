@@ -20,26 +20,26 @@
 
   "layout": {
     "gridColumns": 2,
-    "cardSpacing": 14,
-    "sectionSpacing": 20,
+    "cardSpacing": 10,
+    "sectionSpacing": 10,
     "padding": {
-      "horizontal": 18,
-      "vertical": 20
+      "horizontal": 10,
+      "vertical": 12
     }
   },
 
   "colors": {
-    "background": "#F8FAFC",
-    "secondaryBackground": "#EDF2F7",
-    "cardBackground": "#FFFFFF",
-    "primaryText": "#1A202C",
-    "secondaryText": "#718096",
-    "accent": "#667EEA",
-    "accentSecondary": "#F093FB",
+    "background": "#667EEA",
+    "secondaryBackground": "#F093FB",
+    "cardBackground": "#4ECDC4",
+    "primaryText": "#FFFFFF",
+    "secondaryText": "#E2E8F0",
+    "accent": "#FFD700",
+    "accentSecondary": "#FF6B6B",
     "success": "#48BB78",
     "warning": "#ED8936",
     "error": "#F56565",
-    "divider": "#E2E8F0",
+    "divider": "#FFFFFF",
     "gradient": {
       "primary": ["#667EEA", "#764BA2"],
       "secondary": ["#F093FB", "#F5576C"],
@@ -73,7 +73,7 @@
   "icons": {
     "style": "fill",
     "weight": "semibold",
-    "accentColor": "#667EEA",
+    "accentColor": "#FFD700",
     "size": {
       "small": 15,
       "regular": 17,
