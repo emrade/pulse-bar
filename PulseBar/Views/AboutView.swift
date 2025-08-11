@@ -147,19 +147,19 @@ struct AboutView: View {
                         )
                         
                         actionRow(
-                            icon: "questionmark.circle",
-                            title: "Support & Feedback",
-                            subtitle: "Get help or report issues",
-                            buttonTitle: "Contact",
+                            icon: "exclamationmark.bubble",
+                            title: "Report Issues",
+                            subtitle: "Report bugs or request features on GitHub",
+                            buttonTitle: "GitHub Issues",
                             buttonColor: .green,
                             action: openSupport
                         )
                         
                         actionRow(
                             icon: "star",
-                            title: "Rate PulseBar",
-                            subtitle: "Share your experience",
-                            buttonTitle: "Rate",
+                            title: "View on GitHub",
+                            subtitle: "Star the project and contribute",
+                            buttonTitle: "GitHub Repo",
                             buttonColor: .orange,
                             action: rateApp
                         )
@@ -270,14 +270,15 @@ struct AboutView: View {
     }
     
     private func openSupport() {
-        if let url = URL(string: "mailto:support@pulsebar.app?subject=PulseBar%20Support") {
+        if let url = URL(string: "https://github.com/emrade/pulse-bar/issues") {
             NSWorkspace.shared.open(url)
         }
     }
     
     private func rateApp() {
-        // Would open App Store rating page in a real app
-        print("Rate app functionality would be implemented here")
+        if let url = URL(string: "https://github.com/emrade/pulse-bar") {
+            NSWorkspace.shared.open(url)
+        }
     }
 }
 
