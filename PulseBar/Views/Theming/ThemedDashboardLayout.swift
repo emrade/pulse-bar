@@ -191,9 +191,8 @@ struct ThemedFooter: View {
                 action: viewModel.quitApp
             )
         }
-        .themedHorizontalPadding()
-        .frame(height: 44, alignment: .center)
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
     }
 }
 
