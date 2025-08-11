@@ -44,7 +44,7 @@ struct ThemedDashboardLayout<Content: View>: View {
 // MARK: - Themed Dashboard View
 
 struct ThemedDashboardView: View {
-    let viewModel: DashboardViewModel
+    @ObservedObject var viewModel: DashboardViewModel
     @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
@@ -145,24 +145,26 @@ struct ThemedHeader: View {
     var body: some View {
         HStack {
             Image(systemName: "waveform.path.ecg")
-                .themedIcon(size: .regular)
+                .themedIcon(size: .small)
             
             Text("PulseBar")
-                .themedFont(.primary, size: .title)
+                .themedFont(.primary, size: .large)
                 .themedPrimaryText()
             
             Spacer()
         }
-        .themedHorizontalPadding()
-        .frame(height: 44, alignment: .center)
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        // .themedHorizontalPadding()
+        // .frame(height: 44, alignment: .center)
+        // .frame(maxWidth: .infinity)
     }
 }
 
 // MARK: - Themed Footer
 
 struct ThemedFooter: View {
-    let viewModel: DashboardViewModel
+    @ObservedObject var viewModel: DashboardViewModel
     @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
