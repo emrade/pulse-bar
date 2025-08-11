@@ -1,0 +1,125 @@
+{
+  "id": "basic",
+  "name": "Basic",
+  "description": "Clean, minimal theme using native system colors",
+  "version": "1.0.0",
+  "author": "PulseBar Team",
+  
+  "popover": {
+    "width": 360,
+    "height": 700,
+    "cornerRadius": 12,
+    "shadow": {
+      "enabled": true,
+      "color": "#000000",
+      "opacity": 0.2,
+      "radius": 10,
+      "offset": { "x": 0, "y": 5 }
+    }
+  },
+  
+  "layout": {
+    "gridColumns": 2,
+    "cardSpacing": 12,
+    "sectionSpacing": 16,
+    "padding": {
+      "horizontal": 16,
+      "vertical": 16
+    }
+  },
+  
+  "colors": {
+    "background": "system.windowBackground",
+    "secondaryBackground": "system.controlBackground",
+    "cardBackground": "system.controlBackground", 
+    "primaryText": "system.labelColor",
+    "secondaryText": "system.secondaryLabel",
+    "accent": "#007AFF",
+    "accentSecondary": "#5856D6",
+    "success": "#30D158",
+    "warning": "#FF9F0A",
+    "error": "#FF453A",
+    "divider": "system.separatorColor"
+  },
+  
+  "fonts": {
+    "primary": {
+      "family": "SF Pro Display",
+      "weight": "medium",
+      "size": {
+        "small": 11,
+        "regular": 13,
+        "large": 16,
+        "title": 18
+      }
+    },
+    "monospace": {
+      "family": "SF Mono",
+      "weight": "regular",
+      "size": {
+        "small": 10,
+        "regular": 12,
+        "large": 14,
+        "title": 16
+      }
+    }
+  },
+  
+  "icons": {
+    "style": "fill",
+    "weight": "medium",
+    "accentColor": "#007AFF",
+    "size": {
+      "small": 14,
+      "regular": 16,
+      "large": 20
+    }
+  },
+  
+  "effects": {
+    "backgroundBlur": {
+      "enabled": false,
+      "radius": 0,
+      "saturation": 1.0
+    },
+    "animations": {
+      "enabled": true,
+      "duration": 0.2,
+      "curve": "easeInOut"
+    },
+    "glowEffect": {
+      "enabled": false,
+      "color": "#007AFF",
+      "radius": 0,
+      "opacity": 0.0
+    }
+  },
+  
+  "components": {
+    "cards": {
+      "style": "standard",
+      "borderWidth": 0.5,
+      "borderColor": "system.separatorColor",
+      "cornerRadius": 8,
+      "backgroundOpacity": 1.0,
+      "hoverEffect": {
+        "enabled": true,
+        "scale": 1.02,
+        "brightness": 1.05
+      }
+    },
+    "buttons": {
+      "style": "standard",
+      "cornerRadius": 6,
+      "borderWidth": 0,
+      "hoverEffect": {
+        "enabled": true,
+        "brightness": 1.1
+      }
+    },
+    "systemInfoCard": {
+      "style": "standard",
+      "borderGlow": false
+    }
+  }
+}

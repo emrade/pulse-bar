@@ -8,10 +8,12 @@
 import AppKit
 import SwiftUI
 
+@MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
     private var eventMonitor: Any?
+    private let themeManager = ThemeManager.shared
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Create the status item
@@ -26,9 +28,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Create the popover
         popover = NSPopover()
-        popover?.contentSize = NSSize(width: 360, height: 700)
+        updatePopoverSize()
         popover?.behavior = .semitransient
-        popover?.contentViewController = NSHostingController(rootView: DashboardView())
+        popover?.contentViewController = NSHostingController(
+            rootView: DashboardView()
+                .environmentObject(themeManager)
+        )
+        
+        // Listen for theme changes to update popover size
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(themeDidChange(_:)),
+            name: .themeDidChange,
+            object: nil
+        )
         
         // Hide the dock icon and main window
         NSApp.setActivationPolicy(.accessory)
@@ -72,5 +85,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSEvent.removeMonitor(monitor)
             eventMonitor = nil
         }
+    }
+    
+    @objc private func themeDidChange(_ notification: Notification) {
+        DispatchQueue.main.async {
+            self.updatePopoverSize()
+        }
+    }
+    
+    @MainActor
+    private func updatePopoverSize() {
+        let size = NSSize(
+            width: themeManager.popover.width,
+            height: themeManager.popover.height
+        )
+        popover?.contentSize = size
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }

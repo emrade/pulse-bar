@@ -9,12 +9,13 @@ import SwiftUI
 
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         Group {
             switch viewModel.currentViewState {
             case .basic:
-                basicDashboardView
+                themedDashboardView
             case .advancedStorage:
                 AdvancedStorageView(
                     metricData: viewModel.snapshot.disk,
@@ -57,8 +58,8 @@ struct DashboardView: View {
                 AboutView(onBack: viewModel.showBasicView)
             }
         }
-        .standardWindowFrame()
-        .background(Color(NSColor.windowBackgroundColor))
+        .themedWindowFrame()
+        .themedBackground()
         .alert("Reset Data Usage", isPresented: $viewModel.showingResetConfirmation) {
             Button("Cancel", role: .cancel) {
                 viewModel.cancelReset()
@@ -69,6 +70,130 @@ struct DashboardView: View {
         } message: {
             Text("Are you sure you want to reset today's data usage to 0? This action cannot be undone.")
         }
+    }
+    
+    private var themedDashboardView: some View {
+        VStack(spacing: themeManager.layout.sectionSpacing) {
+            // Header
+            HStack {
+                Image(systemName: "waveform.path.ecg")
+                    .themedIcon(size: .regular)
+                
+                Text("PulseBar")
+                    .themedFont(.primary, size: .title)
+                    .themedPrimaryText()
+                
+                Spacer()
+            }
+            .themedHorizontalPadding()
+            .themedVerticalPadding()
+            
+            ThemedDivider()
+            
+            // System Information Card
+            ThemedSystemInfoCard()
+                .themedHorizontalPadding()
+            
+            // Metrics Grid using themed layout
+            ThemedDashboardLayout {
+                ForEach(metricCards, id: \.title) { card in
+                    ThemedMetricCard(
+                        icon: card.icon,
+                        title: card.title,
+                        value: card.value,
+                        detail: card.detail,
+                        onTap: card.onTap
+                    )
+                }
+            }
+            
+            Spacer(minLength: 8)
+            
+            // Footer
+            ThemedDivider()
+            
+            HStack(spacing: 20) {
+                FooterButton(
+                    icon: "gearshape.fill",
+                    title: "Settings",
+                    action: viewModel.showSettings
+                )
+                
+                Spacer()
+                
+                FooterButton(
+                    icon: "info.circle.fill",
+                    title: "About", 
+                    action: viewModel.showAbout
+                )
+                
+                Spacer()
+                
+                FooterButton(
+                    icon: "power.circle.fill",
+                    title: "Quit",
+                    action: viewModel.quitApp
+                )
+            }
+            .themedHorizontalPadding()
+            .themedVerticalPadding()
+        }
+        .environmentObject(themeManager)
+    }
+    
+    private var metricCards: [MetricCardData] {
+        [
+            MetricCardData(
+                icon: "internaldrive",
+                title: "Storage",
+                value: viewModel.snapshot.disk.formattedBootUsage,
+                detail: viewModel.snapshot.disk.bootVolume?.name ?? "Unknown",
+                onTap: viewModel.handleStorageTileTap
+            ),
+            MetricCardData(
+                icon: "memorychip",
+                title: "Memory",
+                value: viewModel.snapshot.memory.formattedUsedWithAvailable,
+                detail: viewModel.snapshot.memory.formattedTotal,
+                onTap: viewModel.handleMemoryTileTap
+            ),
+            MetricCardData(
+                icon: "cpu",
+                title: "CPU",
+                value: viewModel.snapshot.cpu.formattedOverallUsage,
+                detail: "\(viewModel.snapshot.cpu.perCoreUsage.count) cores",
+                onTap: viewModel.handleCPUTileTap
+            ),
+            MetricCardData(
+                icon: viewModel.networkDisplayInfo.icon,
+                title: viewModel.networkDisplayInfo.title,
+                value: viewModel.networkValueText,
+                detail: viewModel.networkDetailText,
+                onTap: viewModel.handleNetworkTileTap
+            ),
+            MetricCardData(
+                icon: "arrow.up.arrow.down.circle",
+                title: "Data Usage",
+                value: viewModel.snapshot.networkUsage.formattedTotal,
+                detail: "Today",
+                onTap: viewModel.handleNetworkUsageTileTap
+            ),
+            MetricCardData(
+                icon: "externaldrive.connected.to.line.below",
+                title: "Devices",
+                value: viewModel.snapshot.devices.formattedDetails,
+                detail: nil,
+                onTap: viewModel.handleDevicesTileTap
+            )
+        ] + (viewModel.snapshot.battery != nil ? [
+            MetricCardData(
+                icon: viewModel.snapshot.battery!.isCharging ? "battery.100.bolt" : "battery.100",
+                title: "Battery",
+                value: viewModel.snapshot.battery!.formattedStatus,
+                detail: nil,
+                onTap: viewModel.handleBatteryTileTap
+            )
+        ] : [])
     }
     
     private var basicDashboardView: some View {

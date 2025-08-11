@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @StateObject private var settingsManager = SettingsManager()
+    @EnvironmentObject var themeManager: ThemeManager
     let onBack: () -> Void
     
     @State private var showingExportAlert = false
@@ -122,6 +123,62 @@ struct SettingsView: View {
                         }
                         .onChange(of: settingsManager.settings.memoryUnit) { _ in
                             settingsManager.saveSettings()
+                        }
+                    }
+                    
+                    // Theme Section
+                    settingsSection(
+                        title: "Appearance",
+                        icon: "paintpalette.fill",
+                        iconColor: .pink
+                    ) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("Current Theme:")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                
+                                Spacer()
+                                
+                                Text(themeManager.currentTheme.name)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundColor(.primary)
+                            }
+                            
+                            // Quick theme selection
+                            if themeManager.isLoading {
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                    Text("Loading themes...")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                                .frame(height: 30)
+                            } else {
+                                LazyVGrid(
+                                    columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: min(4, themeManager.builtInThemes.count)),
+                                    spacing: 8
+                                ) {
+                                    ForEach(Array(themeManager.builtInThemes.prefix(4))) { theme in
+                                        QuickThemeButton(
+                                            theme: theme,
+                                            isSelected: themeManager.currentTheme.id == theme.id
+                                        ) {
+                                            themeManager.applyTheme(theme)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Full theme picker button
+                            Button("More Themes...") {
+                                // This could open a sheet with the full ThemePicker
+                            }
+                            .font(.caption)
+                            .foregroundColor(.accentColor)
                         }
                     }
                     
@@ -435,6 +492,61 @@ extension SettingsView {
     }
 }
 
+// MARK: - Quick Theme Button
+
+struct QuickThemeButton: View {
+    let theme: Theme
+    let isSelected: Bool
+    let action: () -> Void
+    
+    @State private var isHovered = false
+    
+    var body: some View {
+        Button(action: action) {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color(hex: theme.colors.background))
+                .frame(height: 30)
+                .overlay(
+                    VStack(spacing: 1) {
+                        Circle()
+                            .fill(Color(hex: theme.colors.accent))
+                            .frame(width: 4, height: 4)
+                        
+                        RoundedRectangle(cornerRadius: 1)
+                            .fill(Color(hex: theme.colors.primaryText))
+                            .frame(width: 12, height: 2)
+                        
+                        HStack(spacing: 1) {
+                            Circle()
+                                .fill(Color(hex: theme.colors.accent).opacity(0.6))
+                                .frame(width: 2, height: 2)
+                            
+                            Circle()
+                                .fill(Color(hex: theme.colors.cardBackground))
+                                .frame(width: 2, height: 2)
+                        }
+                    }
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(
+                            isSelected ? Color.accentColor : Color.secondary.opacity(0.3),
+                            lineWidth: isSelected ? 2 : 1
+                        )
+                )
+                .scaleEffect(isHovered ? 1.05 : 1.0)
+                .animation(.easeInOut(duration: 0.15), value: isHovered)
+                .animation(.easeInOut(duration: 0.15), value: isSelected)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+        .help(theme.name)
+    }
+}
+
 #Preview {
     SettingsView(onBack: {})
+        .environmentObject(ThemeManager.shared)
 }

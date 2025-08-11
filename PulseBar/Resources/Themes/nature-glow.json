@@ -1,0 +1,139 @@
+{
+  "id": "nature-glow",
+  "name": "Nature Glow",
+  "description": "Earth-inspired theme with greens, golds, and soft gradients",
+  "version": "1.0.0",
+  "author": "PulseBar Team",
+  
+  "popover": {
+    "width": 365,
+    "height": 705,
+    "cornerRadius": 18,
+    "shadow": {
+      "enabled": true,
+      "color": "#2D5016",
+      "opacity": 0.3,
+      "radius": 12,
+      "offset": { "x": 0, "y": 6 }
+    }
+  },
+  
+  "layout": {
+    "gridColumns": 2,
+    "cardSpacing": 13,
+    "sectionSpacing": 18,
+    "padding": {
+      "horizontal": 17,
+      "vertical": 18
+    }
+  },
+  
+  "colors": {
+    "background": "#F7F9F5",
+    "secondaryBackground": "#E8F5E3",
+    "cardBackground": "#FFFFFF",
+    "primaryText": "#2D4A22",
+    "secondaryText": "#5A7C4E",
+    "accent": "#4CAF50",
+    "accentSecondary": "#FF9800",
+    "success": "#8BC34A",
+    "warning": "#FFC107",
+    "error": "#F44336",
+    "divider": "#C8E6C9",
+    "gradient": {
+      "primary": ["#4CAF50", "#81C784"],
+      "secondary": ["#FF9800", "#FFB74D"],
+      "accent": ["#8BC34A", "#AED581"]
+    }
+  },
+  
+  "fonts": {
+    "primary": {
+      "family": "SF Pro Display",
+      "weight": "medium",
+      "size": {
+        "small": 11,
+        "regular": 13,
+        "large": 16,
+        "title": 18
+      }
+    },
+    "monospace": {
+      "family": "SF Mono",
+      "weight": "regular",
+      "size": {
+        "small": 10,
+        "regular": 12,
+        "large": 14,
+        "title": 16
+      }
+    }
+  },
+  
+  "icons": {
+    "style": "fill",
+    "weight": "medium",
+    "accentColor": "#4CAF50",
+    "size": {
+      "small": 14,
+      "regular": 16,
+      "large": 20
+    },
+    "customMappings": {
+      "cpu": "leaf.fill",
+      "memory": "tree.fill",
+      "storage": "folder.fill.badge.gearshape",
+      "network": "antenna.radiowaves.left.and.right",
+      "battery": "bolt.fill"
+    }
+  },
+  
+  "effects": {
+    "backgroundBlur": {
+      "enabled": false,
+      "radius": 0,
+      "saturation": 1.1
+    },
+    "animations": {
+      "enabled": true,
+      "duration": 0.3,
+      "curve": "easeInOut"
+    },
+    "glowEffect": {
+      "enabled": true,
+      "color": "#4CAF50",
+      "radius": 5,
+      "opacity": 0.5
+    }
+  },
+  
+  "components": {
+    "cards": {
+      "style": "nature",
+      "borderWidth": 1,
+      "borderColor": "#C8E6C9",
+      "cornerRadius": 12,
+      "backgroundOpacity": 0.95,
+      "hoverEffect": {
+        "enabled": true,
+        "scale": 1.02,
+        "glowIntensity": 1.2
+      }
+    },
+    "buttons": {
+      "style": "soft",
+      "cornerRadius": 8,
+      "borderWidth": 0,
+      "hoverEffect": {
+        "enabled": true,
+        "brightness": 1.1
+      }
+    },
+    "systemInfoCard": {
+      "style": "nature",
+      "height": 125,
+      "backgroundGradient": ["#E8F5E3", "#F1F8E9"],
+      "borderGlow": true
+    }
+  }
+}

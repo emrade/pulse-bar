@@ -1,0 +1,143 @@
+{
+  "id": "futuristic",
+  "name": "Futuristic",
+  "description": "Dark theme with neon accents and blurred backgrounds",
+  "version": "1.0.0",
+  "author": "PulseBar Team",
+  
+  "popover": {
+    "width": 380,
+    "height": 720,
+    "cornerRadius": 14,
+    "shadow": {
+      "enabled": true,
+      "color": "#000000",
+      "opacity": 0.4,
+      "radius": 20,
+      "offset": { "x": 0, "y": 10 }
+    }
+  },
+  
+  "layout": {
+    "gridColumns": 2,
+    "cardSpacing": 14,
+    "sectionSpacing": 18,
+    "padding": {
+      "horizontal": 18,
+      "vertical": 18
+    }
+  },
+  
+  "colors": {
+    "background": "#0A0F1C",
+    "secondaryBackground": "#1A1F2C",
+    "cardBackground": "#252B3A",
+    "primaryText": "#FFFFFF",
+    "secondaryText": "#8A9BA8",
+    "accent": "#00FFF5",
+    "accentSecondary": "#FF6B9D",
+    "success": "#00FF88",
+    "warning": "#FFB800",
+    "error": "#FF5555",
+    "divider": "#3A4553",
+    "gradient": {
+      "primary": ["#00FFF5", "#FF6B9D"],
+      "secondary": ["#1A1F2C", "#252B3A"],
+      "accent": ["#00FFF5", "#0080FF"]
+    }
+  },
+  
+  "fonts": {
+    "primary": {
+      "family": "SF Pro Display",
+      "weight": "semibold",
+      "size": {
+        "small": 11,
+        "regular": 13,
+        "large": 16,
+        "title": 18
+      }
+    },
+    "monospace": {
+      "family": "SF Mono",
+      "weight": "medium",
+      "size": {
+        "small": 10,
+        "regular": 12,
+        "large": 14,
+        "title": 16
+      }
+    }
+  },
+  
+  "icons": {
+    "style": "outline",
+    "weight": "medium",
+    "accentColor": "#00FFF5",
+    "size": {
+      "small": 14,
+      "regular": 16,
+      "large": 20
+    },
+    "customMappings": {
+      "cpu": "cpu",
+      "memory": "memorychip",
+      "storage": "externaldrive",
+      "network": "wifi.circle",
+      "battery": "battery.100.bolt"
+    }
+  },
+  
+  "effects": {
+    "backgroundBlur": {
+      "enabled": true,
+      "radius": 20,
+      "saturation": 1.2
+    },
+    "cardBlur": {
+      "enabled": true,
+      "radius": 10
+    },
+    "animations": {
+      "enabled": true,
+      "duration": 0.3,
+      "curve": "easeInOut"
+    },
+    "glowEffect": {
+      "enabled": true,
+      "color": "#00FFF5",
+      "radius": 6,
+      "opacity": 0.8
+    }
+  },
+  
+  "components": {
+    "cards": {
+      "style": "glass",
+      "borderWidth": 1,
+      "borderColor": "#3A4553",
+      "cornerRadius": 12,
+      "backgroundOpacity": 0.7,
+      "hoverEffect": {
+        "enabled": true,
+        "scale": 1.03,
+        "glowIntensity": 1.4
+      }
+    },
+    "buttons": {
+      "style": "gradient",
+      "cornerRadius": 8,
+      "borderWidth": 0,
+      "hoverEffect": {
+        "enabled": true,
+        "brightness": 1.2
+      }
+    },
+    "systemInfoCard": {
+      "style": "featured",
+      "height": 130,
+      "backgroundGradient": ["#1A1F2C", "#252B3A"],
+      "borderGlow": true
+    }
+  }
+}

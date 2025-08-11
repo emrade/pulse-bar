@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct PulseBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var themeManager = ThemeManager.shared
     
     var body: some Scene {
         Settings {
@@ -17,6 +18,7 @@ struct PulseBarApp: App {
                 // Close settings window when back is pressed
                 NSApplication.shared.keyWindow?.close()
             })
+            .environmentObject(themeManager)
         }
     }
 }
