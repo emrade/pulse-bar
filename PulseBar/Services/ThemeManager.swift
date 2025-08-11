@@ -31,7 +31,21 @@ final class ThemeManager: ObservableObject {
     // MARK: - Paths
     
     private var builtInThemesPath: URL? {
-        Bundle.main.url(forResource: "Themes", withExtension: nil)
+        // Try multiple possible paths
+        if let resourcePath = Bundle.main.resourceURL?.appendingPathComponent("Themes"),
+           FileManager.default.fileExists(atPath: resourcePath.path) {
+            return resourcePath
+        }
+        
+        // Try finding individual theme files
+        if Bundle.main.url(forResource: "basic", withExtension: "json") != nil {
+            return Bundle.main.resourceURL
+        }
+        
+        print("Debug: Bundle resource URL: \(Bundle.main.resourceURL?.path ?? "nil")")
+        print("Debug: Checking if Themes folder exists at: \(Bundle.main.resourceURL?.appendingPathComponent("Themes").path ?? "nil")")
+        
+        return nil
     }
     
     private var userThemesPath: URL? {
@@ -73,6 +87,8 @@ final class ThemeManager: ObservableObject {
                 self.customThemes = custom
                 self.availableThemes = builtIn + custom
                 self.isLoading = false
+                print("🎨 Themes loaded: \(builtIn.count) built-in, \(custom.count) custom")
+                print("🎨 Built-in themes: \(builtIn.map { $0.name })")
             }
             
         } catch let error as ThemeError {
@@ -99,10 +115,8 @@ final class ThemeManager: ObservableObject {
             
         } catch let error as ThemeError {
             lastError = error
-            print("Failed to apply theme: \(error.localizedDescription)")
         } catch {
             lastError = ThemeError.themeValidationFailed(error.localizedDescription)
-            print("Failed to apply theme: \(error.localizedDescription)")
         }
     }
     
@@ -200,7 +214,8 @@ final class ThemeManager: ObservableObject {
     private func loadBuiltInThemes() async throws -> [Theme] {
         guard let themesPath = builtInThemesPath else {
             print("Built-in themes directory not found")
-            return [Theme.defaultTheme]
+            // Try to load individual theme files directly
+            return try await loadThemesFromIndividualFiles()
         }
         
         do {
@@ -269,6 +284,34 @@ final class ThemeManager: ObservableObject {
             print("Failed to load custom themes: \(error)")
             return []
         }
+    }
+    
+    private func loadThemesFromIndividualFiles() async throws -> [Theme] {
+        let themeNames = ["basic", "light", "colorful", "futuristic", "nature-glow"]
+        var themes: [Theme] = []
+        
+        for themeName in themeNames {
+            if let themeURL = Bundle.main.url(forResource: themeName, withExtension: "json") {
+                do {
+                    let data = try Data(contentsOf: themeURL)
+                    let theme = try JSONDecoder().decode(Theme.self, from: data)
+                    try validateTheme(theme)
+                    themes.append(theme)
+                    print("✅ Loaded theme: \(theme.name)")
+                } catch {
+                    print("❌ Failed to load theme \(themeName): \(error)")
+                }
+            } else {
+                print("❌ Theme file not found: \(themeName).json")
+            }
+        }
+        
+        // Always include default theme as fallback
+        if themes.isEmpty {
+            themes.append(Theme.defaultTheme)
+        }
+        
+        return themes
     }
     
     private func saveCustomTheme(_ theme: Theme, from data: Data) async throws {

@@ -4,10 +4,10 @@
   "description": "Dark theme with neon accents and blurred backgrounds",
   "version": "1.0.0",
   "author": "PulseBar Team",
-  
+
   "popover": {
-    "width": 380,
-    "height": 720,
+    "width": 360,
+    "height": 700,
     "cornerRadius": 14,
     "shadow": {
       "enabled": true,
@@ -17,7 +17,7 @@
       "offset": { "x": 0, "y": 10 }
     }
   },
-  
+
   "layout": {
     "gridColumns": 2,
     "cardSpacing": 14,
@@ -27,7 +27,7 @@
       "vertical": 18
     }
   },
-  
+
   "colors": {
     "background": "#0A0F1C",
     "secondaryBackground": "#1A1F2C",
@@ -46,7 +46,7 @@
       "accent": ["#00FFF5", "#0080FF"]
     }
   },
-  
+
   "fonts": {
     "primary": {
       "family": "SF Pro Display",
@@ -69,7 +69,7 @@
       }
     }
   },
-  
+
   "icons": {
     "style": "outline",
     "weight": "medium",
@@ -87,7 +87,7 @@
       "battery": "battery.100.bolt"
     }
   },
-  
+
   "effects": {
     "backgroundBlur": {
       "enabled": true,
@@ -110,7 +110,7 @@
       "opacity": 0.8
     }
   },
-  
+
   "components": {
     "cards": {
       "style": "glass",

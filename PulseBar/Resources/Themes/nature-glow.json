@@ -4,10 +4,10 @@
   "description": "Earth-inspired theme with greens, golds, and soft gradients",
   "version": "1.0.0",
   "author": "PulseBar Team",
-  
+
   "popover": {
-    "width": 365,
-    "height": 705,
+    "width": 360,
+    "height": 700,
     "cornerRadius": 18,
     "shadow": {
       "enabled": true,
@@ -17,7 +17,7 @@
       "offset": { "x": 0, "y": 6 }
     }
   },
-  
+
   "layout": {
     "gridColumns": 2,
     "cardSpacing": 13,
@@ -27,7 +27,7 @@
       "vertical": 18
     }
   },
-  
+
   "colors": {
     "background": "#F7F9F5",
     "secondaryBackground": "#E8F5E3",
@@ -46,7 +46,7 @@
       "accent": ["#8BC34A", "#AED581"]
     }
   },
-  
+
   "fonts": {
     "primary": {
       "family": "SF Pro Display",
@@ -69,7 +69,7 @@
       }
     }
   },
-  
+
   "icons": {
     "style": "fill",
     "weight": "medium",
@@ -87,7 +87,7 @@
       "battery": "bolt.fill"
     }
   },
-  
+
   "effects": {
     "backgroundBlur": {
       "enabled": false,
@@ -106,7 +106,7 @@
       "opacity": 0.5
     }
   },
-  
+
   "components": {
     "cards": {
       "style": "nature",
