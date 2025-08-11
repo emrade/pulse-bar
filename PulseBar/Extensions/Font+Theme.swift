@@ -14,6 +14,11 @@ extension Font {
     static func themed(_ style: ThemedFontStyle, size: ThemedFontSize = .regular) -> Font {
         let themeManager = ThemeManager.shared
         
+        // Use system fonts for Basic theme
+        if themeManager.currentTheme.id == "basic" {
+            return systemFont(for: size, style: style)
+        }
+        
         let fontConfig: FontStyleConfiguration
         switch style {
         case .primary:
@@ -26,6 +31,22 @@ extension Font {
         let weight = fontConfig.swiftUIWeight
         
         return .custom(fontConfig.family, size: fontSize).weight(weight)
+    }
+    
+    @MainActor
+    private static func systemFont(for size: ThemedFontSize, style: ThemedFontStyle) -> Font {
+        switch size {
+        case .extraSmall:
+            return style == .monospace ? Font.system(size: 10, design: .monospaced) : .caption
+        case .small:
+            return style == .monospace ? Font.system(size: 11, design: .monospaced) : .caption2
+        case .regular:
+            return style == .monospace ? Font.system(size: 13, design: .monospaced) : .subheadline
+        case .large:
+            return style == .monospace ? Font.system(size: 16, design: .monospaced) : .headline
+        case .title:
+            return style == .monospace ? Font.system(size: 18, design: .monospaced) : .title
+        }
     }
     
     // MARK: - Common Themed Fonts

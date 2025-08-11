@@ -27,14 +27,14 @@ struct ThemedSystemInfoCard: View {
                 }
                 
                 // System specs in a grid
-                HStack(spacing: 16) {
+                HStack(spacing: 12) {
                     // Left column
                     VStack(alignment: .leading, spacing: 8) {
                         systemInfoRow(label: "Chip", value: systemInfo.chipName)
                         systemInfoRow(label: "Memory", value: systemInfo.totalMemory)
                     }
                     
-                    Spacer()
+                    Spacer(minLength: 8)
                     
                     // Right column  
                     VStack(alignment: .leading, spacing: 8) {
@@ -52,11 +52,11 @@ struct ThemedSystemInfoCard: View {
     private func systemInfoRow(label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
-                .themedFont(.primary, size: .small)
+                .themedFont(.primary, size: .regular)
                 .themedSecondaryText()
             
             Text(value)
-                .themedFont(.primary, size: .small)
+                .themedFont(.primary, size: .regular)
                 .themedPrimaryText()
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
