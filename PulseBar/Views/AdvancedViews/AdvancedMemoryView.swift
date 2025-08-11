@@ -22,19 +22,16 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
     }
     
     private var memoryBreakdown: [ChartDataPoint] {
-        let usedBytes = Double(metricData.usedBytes)
+        let activeBytes = Double(metricData.activeBytes)
+        let wiredBytes = Double(metricData.wiredBytes)
+        let compressedBytes = Double(metricData.compressedBytes)
         let cachedBytes = Double(metricData.cachedBytes)
         let freeBytes = Double(metricData.freeBytes)
         
-        // Simulated memory breakdown
-        let appMemory = usedBytes * 0.60    // 60% app memory
-        let wiredMemory = usedBytes * 0.25   // 25% wired
-        let compressedMemory = usedBytes * 0.15 // 15% compressed
-        
         return [
-            ChartDataPoint(label: "App Memory", value: appMemory, color: .blue),
-            ChartDataPoint(label: "Wired Memory", value: wiredMemory, color: .orange),
-            ChartDataPoint(label: "Compressed", value: compressedMemory, color: .red),
+            ChartDataPoint(label: "Active Memory", value: activeBytes, color: .blue),
+            ChartDataPoint(label: "Wired Memory", value: wiredBytes, color: .orange),
+            ChartDataPoint(label: "Compressed", value: compressedBytes, color: .red),
             ChartDataPoint(label: "Cached", value: cachedBytes, color: .green),
             ChartDataPoint(label: "Free", value: freeBytes, color: .gray.opacity(0.3))
         ]
@@ -193,22 +190,22 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
             
             VStack(spacing: 8) {
                 memoryUsageRow(
-                    label: "App Memory", 
-                    amount: Double(metricData.usedBytes) * 0.60, // 60% estimate 
+                    label: "Active Memory", 
+                    amount: Double(metricData.activeBytes),
                     color: .blue,
                     description: "Applications and their data"
                 )
                 
                 memoryUsageRow(
                     label: "Wired Memory", 
-                    amount: Double(metricData.usedBytes) * 0.25, // 25% estimate
+                    amount: Double(metricData.wiredBytes),
                     color: .orange,
                     description: "System kernel and drivers"
                 )
                 
                 memoryUsageRow(
                     label: "Compressed", 
-                    amount: Double(metricData.usedBytes) * 0.15, // 15% estimate
+                    amount: Double(metricData.compressedBytes),
                     color: .red,
                     description: "Compressed inactive memory"
                 )
@@ -388,6 +385,9 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
             usedBytes: 12_000_000_000,
             cachedBytes: 2_000_000_000,
             freeBytes: 2_000_000_000,
+            activeBytes: 8_000_000_000,
+            wiredBytes: 3_000_000_000,
+            compressedBytes: 1_000_000_000,
             isLoading: false,
             error: nil
         ),

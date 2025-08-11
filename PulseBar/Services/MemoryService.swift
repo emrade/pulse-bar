@@ -37,6 +37,9 @@ final class MemoryService: MemoryServiceProtocol, @unchecked Sendable {
                 usedBytes: 0,
                 cachedBytes: 0,
                 freeBytes: 0,
+                activeBytes: 0,
+                wiredBytes: 0,
+                compressedBytes: 0,
                 isLoading: false,
                 error: error.localizedDescription
             )
@@ -102,6 +105,9 @@ final class MemoryService: MemoryServiceProtocol, @unchecked Sendable {
             usedBytes: usedBytes,
             cachedBytes: cachedBytes,
             freeBytes: freeBytes,
+            activeBytes: activeBytes,
+            wiredBytes: wiredBytes,
+            compressedBytes: compressedBytes,
             isLoading: false,
             error: nil
         )

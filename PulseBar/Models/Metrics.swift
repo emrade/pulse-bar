@@ -71,6 +71,9 @@ struct MemoryMetrics {
     let usedBytes: UInt64
     let cachedBytes: UInt64
     let freeBytes: UInt64
+    let activeBytes: UInt64
+    let wiredBytes: UInt64
+    let compressedBytes: UInt64
     let isLoading: Bool
     let error: String?
     
@@ -79,6 +82,9 @@ struct MemoryMetrics {
         usedBytes: UInt64 = 0,
         cachedBytes: UInt64 = 0,
         freeBytes: UInt64 = 0,
+        activeBytes: UInt64 = 0,
+        wiredBytes: UInt64 = 0,
+        compressedBytes: UInt64 = 0,
         isLoading: Bool = true,
         error: String? = nil
     ) {
@@ -86,6 +92,9 @@ struct MemoryMetrics {
         self.usedBytes = usedBytes
         self.cachedBytes = cachedBytes
         self.freeBytes = freeBytes
+        self.activeBytes = activeBytes
+        self.wiredBytes = wiredBytes
+        self.compressedBytes = compressedBytes
         self.isLoading = isLoading
         self.error = error
     }
