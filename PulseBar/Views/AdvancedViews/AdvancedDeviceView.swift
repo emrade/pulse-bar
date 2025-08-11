@@ -19,29 +19,49 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
     }
     
     private var categorizedDevices: [DeviceCategory] {
-        // Simulated device categorization - in real implementation would parse actual device data
-        let usbDevices = [
-            DetailedDevice(name: "Magic Keyboard", type: "Keyboard", connectionType: "USB", isActive: true),
-            DetailedDevice(name: "Magic Mouse", type: "Mouse", connectionType: "USB", isActive: true),
-            DetailedDevice(name: "External SSD", type: "Storage", connectionType: "USB 3.2", isActive: true),
-            DetailedDevice(name: "Webcam", type: "Camera", connectionType: "USB 2.0", isActive: false)
-        ]
+        let devices = metricData.devices
         
-        let thunderboltDevices = [
-            DetailedDevice(name: "Studio Display", type: "Monitor", connectionType: "Thunderbolt 4", isActive: true),
-            DetailedDevice(name: "Audio Interface", type: "Audio", connectionType: "Thunderbolt 3", isActive: true)
-        ]
+        var usbDevices: [DetailedDevice] = []
+        var thunderboltDevices: [DetailedDevice] = []
+        var storageDevices: [DetailedDevice] = []
         
-        let bluetoothDevices = [
-            DetailedDevice(name: "AirPods Pro", type: "Audio", connectionType: "Bluetooth", isActive: true),
-            DetailedDevice(name: "iPhone", type: "Phone", connectionType: "Bluetooth", isActive: false)
-        ]
+        for device in devices {
+            let detailedDevice = DetailedDevice(
+                name: device.name,
+                type: getDeviceTypeString(device.type),
+                connectionType: getConnectionTypeString(device.type),
+                isActive: true
+            )
+            
+            switch device.type {
+            case .usb:
+                usbDevices.append(detailedDevice)
+            case .thunderbolt:
+                thunderboltDevices.append(detailedDevice)
+            case .storage:
+                storageDevices.append(detailedDevice)
+            case .display:
+                thunderboltDevices.append(detailedDevice)
+            case .other:
+                usbDevices.append(detailedDevice)
+            }
+        }
         
-        return [
-            DeviceCategory(name: "USB Devices", devices: usbDevices, icon: "usb.c"),
-            DeviceCategory(name: "Thunderbolt", devices: thunderboltDevices, icon: "bolt.horizontal"),
-            DeviceCategory(name: "Bluetooth", devices: bluetoothDevices, icon: "antenna.radiowaves.left.and.right")
-        ]
+        var categories: [DeviceCategory] = []
+        
+        if !usbDevices.isEmpty {
+            categories.append(DeviceCategory(name: "USB Devices", devices: usbDevices, icon: "usb.c"))
+        }
+        
+        if !thunderboltDevices.isEmpty {
+            categories.append(DeviceCategory(name: "Thunderbolt", devices: thunderboltDevices, icon: "bolt.horizontal"))
+        }
+        
+        if !storageDevices.isEmpty {
+            categories.append(DeviceCategory(name: "Storage", devices: storageDevices, icon: "externaldrive"))
+        }
+        
+        return categories
     }
     
     private var deviceSummary: DeviceSummary {
@@ -74,9 +94,6 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                     ForEach(categorizedDevices, id: \.name) { category in
                         deviceCategorySection(category: category)
                     }
-                    
-                    // System Information
-                    systemInfoSection
                     
                     // Remarks
                     RemarkView(remarks: MetricRemarkEngine.generateDeviceRemarks(for: metricData))
@@ -229,37 +246,41 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
         )
     }
     
+    private func getDeviceTypeString(_ deviceType: ConnectedDevice.DeviceType) -> String {
+        switch deviceType {
+        case .usb: return "USB Device"
+        case .thunderbolt: return "Thunderbolt"
+        case .storage: return "Storage"
+        case .display: return "Display"
+        case .other(let name): return name
+        }
+    }
+    
+    private func getConnectionTypeString(_ deviceType: ConnectedDevice.DeviceType) -> String {
+        switch deviceType {
+        case .usb: return "USB"
+        case .thunderbolt: return "Thunderbolt"
+        case .storage: return "Storage"
+        case .display: return "Display"
+        case .other: return "Unknown"
+        }
+    }
+    
     private func deviceTypeIcon(for type: String) -> String {
         switch type.lowercased() {
         case "keyboard": return "keyboard"
         case "mouse": return "computermouse"
         case "storage": return "externaldrive"
         case "camera": return "camera"
-        case "monitor": return "display"
+        case "monitor", "display": return "display"
         case "audio": return "speaker.wave.2"
         case "phone": return "iphone"
+        case "usb device": return "usb"
+        case "thunderbolt": return "bolt.horizontal"
         default: return "questionmark.circle"
         }
     }
     
-    private var systemInfoSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("System Information")
-                .font(.headline.weight(.semibold))
-            
-            VStack(spacing: 8) {
-                InfoRow(label: "USB Controller", value: "USB 3.2 Gen 2") // Simulated
-                InfoRow(label: "Thunderbolt Version", value: "Thunderbolt 4") // Simulated
-                InfoRow(label: "Bluetooth Version", value: "5.3") // Simulated
-                InfoRow(label: "Available USB Ports", value: "2") // Simulated
-                InfoRow(label: "Available TB Ports", value: "4") // Simulated
-                InfoRow(label: "Power Delivery", value: "Supported") // Simulated
-            }
-        }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
-    }
 }
 
 // MARK: - Supporting Data Structures

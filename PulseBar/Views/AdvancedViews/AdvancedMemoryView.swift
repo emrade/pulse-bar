@@ -372,7 +372,6 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 InfoRow(label: "Used Memory", value: metricData.formattedUsed)
                 InfoRow(label: "Available Memory", value: metricData.formattedAvailable)
                 InfoRow(label: "Cached Memory", value: ByteCountFormatter.string(fromByteCount: Int64(metricData.cachedBytes), countStyle: .memory))
-                InfoRow(label: "Swap Used", value: "0 bytes") // Simulated
                 InfoRow(label: "Memory Pressure", value: memoryPressure.level)
             }
         }

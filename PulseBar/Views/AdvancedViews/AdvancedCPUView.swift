@@ -40,9 +40,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
         metricData.perCoreUsage.enumerated().map { index, usage in
             CPUCoreData(
                 coreId: index,
-                usage: usage,
-                temperature: Double.random(in: 45...75), // Simulated temperature
-                frequency: Double.random(in: 2.0...3.8) // Simulated frequency in GHz
+                usage: usage
             )
         }
     }
@@ -208,18 +206,6 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                         }
                         .frame(height: 4)
                         
-                        // Additional core info
-                        HStack {
-                            Text(String(format: "%.1f°C", core.temperature))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            
-                            Spacer()
-                            
-                            Text(String(format: "%.1fGHz", core.frequency))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
                     }
                     .padding(8)
                     .background(Color(NSColor.quaternarySystemFill))
@@ -308,9 +294,6 @@ struct AdvancedCPUView: View, AdvancedMetricView {
             VStack(spacing: 8) {
                 InfoRow(label: "Current Usage", value: String(format: "%.1f%%", metricData.overallUsage * 100))
                 InfoRow(label: "Core Count", value: "\(cpuCoreData.count)")
-                InfoRow(label: "Architecture", value: "Apple Silicon") // Simulated
-                InfoRow(label: "Base Frequency", value: "3.2 GHz") // Simulated
-                InfoRow(label: "Max Frequency", value: "3.8 GHz") // Simulated
                 InfoRow(label: "Thermal State", value: thermalState.level)
                 
                 if let tempMetrics = temperatureMetrics {
@@ -335,8 +318,6 @@ struct CPUHistoryPoint {
 struct CPUCoreData {
     let coreId: Int
     let usage: Double
-    let temperature: Double
-    let frequency: Double
 }
 
 #Preview {
