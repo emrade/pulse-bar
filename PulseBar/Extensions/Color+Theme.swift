@@ -136,4 +136,109 @@ extension Color {
         }
         return Color.themedAccent
     }
+    
+    // MARK: - New Semantic Colors for Better Theme Support
+    
+    @MainActor
+    static var themedSurface: Color {
+        Color(hex: ThemeManager.shared.colors.computedSurface)
+    }
+    
+    @MainActor
+    static var themedOnSurface: Color {
+        Color(hex: ThemeManager.shared.colors.computedOnSurface)
+    }
+    
+    @MainActor
+    static var themedSurfaceVariant: Color {
+        Color(hex: ThemeManager.shared.colors.computedSurfaceVariant)
+    }
+    
+    @MainActor
+    static var themedOnSurfaceVariant: Color {
+        Color(hex: ThemeManager.shared.colors.computedOnSurfaceVariant)
+    }
+    
+    @MainActor
+    static var themedOutline: Color {
+        Color(hex: ThemeManager.shared.colors.computedOutline)
+    }
+    
+    // MARK: - Contrast-Aware Text Colors
+    
+    @MainActor
+    static func themedTextOnBackground(_ backgroundColor: Color) -> Color {
+        let luminance = backgroundColor.luminance
+        let colors = ThemeManager.shared.colors
+        
+        if colors.adaptiveText == true {
+            // Use smart contrast calculation
+            if colors.preferredContrast == "high" {
+                return luminance > 0.5 ? Color(hex: "#000000") : Color(hex: "#FFFFFF")
+            } else if colors.preferredContrast == "medium" {
+                return luminance > 0.5 ? Color(hex: "#1C1C1E") : Color(hex: "#F2F2F7")
+            }
+        }
+        
+        // Fallback to theme text colors
+        return luminance > 0.5 ? Color.themedOnSurface : Color.themedPrimaryText
+    }
+    
+    // MARK: - Theme-Aware Chart Colors
+    
+    @MainActor
+    static var themedChartPrimary: Color {
+        Color.themedAccent
+    }
+    
+    @MainActor
+    static var themedChartSecondary: Color {
+        Color.themedAccentSecondary
+    }
+    
+    @MainActor
+    static var themedChartSuccess: Color {
+        Color.themedSuccess
+    }
+    
+    @MainActor
+    static var themedChartWarning: Color {
+        Color.themedWarning
+    }
+    
+    @MainActor
+    static var themedChartError: Color {
+        Color.themedError
+    }
+    
+    @MainActor
+    static var themedChartNeutral: Color {
+        Color.themedOutline
+    }
+    
+    @MainActor
+    static var themedChartBackground: Color {
+        Color.themedOutline.opacity(0.3)
+    }
+    
+    // Chart color palette for multi-series data
+    @MainActor
+    static var themedChartPalette: [Color] {
+        [
+            .themedChartPrimary,      // Accent color
+            .themedChartSecondary,    // Secondary accent
+            .themedChartSuccess,      // Green
+            .themedChartWarning,      // Orange/Yellow
+            .themedChartError,        // Red
+            .themedAccent.opacity(0.7), // Lighter accent
+            .themedOnSurface.opacity(0.6) // Neutral
+        ]
+    }
+    
+    // Get chart color by index (cycles through palette)
+    @MainActor
+    static func themedChartColor(at index: Int) -> Color {
+        let palette = themedChartPalette
+        return palette[index % palette.count]
+    }
 }

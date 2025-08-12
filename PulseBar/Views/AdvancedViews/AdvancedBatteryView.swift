@@ -134,9 +134,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                     .foregroundColor(battery.isCharging ? .green : .secondary)
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private func batteryHealthSection(battery: BatteryMetrics) -> some View {
@@ -156,7 +154,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                         if let cycleCount = battery.cycleCount {
                             Text("Cycle Count: \(cycleCount)")
                                 .themedFont(.primary, size: .small)
-                                .foregroundColor(.secondary)
+                                .themedSurfaceVariantText()
                         }
                     }
                     
@@ -168,7 +166,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                     HStack {
                         Text("Maximum Capacity")
                             .themedFont(.primary, size: .small)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                         
                         Spacer()
                         
@@ -193,9 +191,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private func chargingInfoSection(battery: BatteryMetrics) -> some View {
@@ -241,9 +237,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private func batteryStatsSection(battery: BatteryMetrics) -> some View {
@@ -271,9 +265,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                 InfoRow(label: "Full Charge Capacity", value: formatCapacity(battery.maxCapacity))
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var noBatteryView: some View {
@@ -290,7 +282,7 @@ struct AdvancedBatteryView: View, AdvancedMetricView {
                 
                 Text("This device is running on external power")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
                     .multilineTextAlignment(.center)
             }
             

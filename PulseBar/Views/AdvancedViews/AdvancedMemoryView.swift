@@ -29,11 +29,11 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
         let freeBytes = Double(metricData.freeBytes)
         
         return [
-            ChartDataPoint(label: "Active Memory", value: activeBytes, color: .blue),
-            ChartDataPoint(label: "Wired Memory", value: wiredBytes, color: .orange),
-            ChartDataPoint(label: "Compressed", value: compressedBytes, color: .red),
-            ChartDataPoint(label: "Cached", value: cachedBytes, color: .green),
-            ChartDataPoint(label: "Free", value: freeBytes, color: .gray.opacity(0.3))
+            ChartDataPoint(label: "Active Memory", value: activeBytes, color: .themedChartColor(at: 0)),
+            ChartDataPoint(label: "Wired Memory", value: wiredBytes, color: .themedChartColor(at: 1)),
+            ChartDataPoint(label: "Compressed", value: compressedBytes, color: .themedChartColor(at: 2)),
+            ChartDataPoint(label: "Cached", value: cachedBytes, color: .themedChartColor(at: 3)),
+            ChartDataPoint(label: "Free", value: freeBytes, color: .themedChartBackground)
         ]
     }
     
@@ -112,7 +112,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                         .scaleEffect(0.8)
                     Text("Loading process data...")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                     Spacer()
                 }
                 .padding(.vertical, 20)
@@ -121,7 +121,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                     Spacer()
                     Text("No process data available")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                     Spacer()
                 }
                 .padding(.vertical, 20)
@@ -138,9 +138,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private func processRow(rank: Int, name: String, memory: UInt64, pid: Int32) -> some View {
@@ -163,14 +161,14 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 
                 Text("PID: \(pid)")
                     .themedFont(.primary, size: .small)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
             
             Spacer()
             
             Text(FormatterUtility.shared.formatMemorySize(UInt64(memory)))
                 .themedFont(.primary, size: .small)
-                .foregroundColor(.primary)
+                .themedSurfaceText()
         }
     }
     
@@ -192,42 +190,40 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 memoryUsageRow(
                     label: "Active Memory", 
                     amount: Double(metricData.activeBytes),
-                    color: .blue,
+                    color: .themedChartColor(at: 0),
                     description: "Applications and their data"
                 )
                 
                 memoryUsageRow(
                     label: "Wired Memory", 
                     amount: Double(metricData.wiredBytes),
-                    color: .orange,
+                    color: .themedChartColor(at: 1),
                     description: "System kernel and drivers"
                 )
                 
                 memoryUsageRow(
                     label: "Compressed", 
                     amount: Double(metricData.compressedBytes),
-                    color: .red,
+                    color: .themedChartColor(at: 2),
                     description: "Compressed inactive memory"
                 )
                 
                 memoryUsageRow(
                     label: "Cached Files", 
                     amount: Double(metricData.cachedBytes),
-                    color: .green,
+                    color: .themedChartColor(at: 3),
                     description: "File system cache"
                 )
                 
                 memoryUsageRow(
                     label: "Free Memory", 
                     amount: Double(metricData.freeBytes),
-                    color: .gray,
+                    color: .themedChartBackground,
                     description: "Available for new apps"
                 )
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private func memoryUsageRow(label: String, amount: Double, color: Color, description: String) -> some View {
@@ -250,7 +246,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 
                 Text(description)
                     .themedFont(.primary, size: .small)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
         }
     }
@@ -285,7 +281,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                                     .themedFont(.primary, size: .small)
                                 Text(FormatterUtility.shared.formatMemorySize(UInt64(item.value)))
                                     .themedFont(.primary, size: .small)
-                                    .foregroundColor(.secondary)
+                                    .themedSurfaceVariantText()
                             }
                             
                             Spacer()
@@ -296,9 +292,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 Spacer()
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var memoryPressureSection: some View {
@@ -317,7 +311,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                     
                     Text(memoryPressure.description)
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
                 
                 Spacer()
@@ -328,7 +322,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 HStack {
                     Text("Usage")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                     Spacer()
                     Text(String(format: "%.1f%%", metricData.usagePercentage * 100))
                         .themedFont(.primary, size: .small)
@@ -353,9 +347,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 .frame(height: 6)
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     
@@ -372,9 +364,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 InfoRow(label: "Memory Pressure", value: memoryPressure.level)
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
 }
 

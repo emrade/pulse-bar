@@ -210,6 +210,67 @@ extension View {
         return self.padding(.horizontal, paddingConfig.horizontal)
                   .padding(.vertical, paddingConfig.vertical)
     }
+    
+    // MARK: - New Semantic Themed Modifiers
+    
+    func themedSurface() -> some View {
+        self.background(Color.themedSurface)
+    }
+    
+    func themedSurfaceText() -> some View {
+        self.foregroundColor(.themedOnSurface)
+    }
+    
+    func themedSurfaceVariant() -> some View {
+        self.background(Color.themedSurfaceVariant)
+    }
+    
+    func themedSurfaceVariantText() -> some View {
+        self.foregroundColor(.themedOnSurfaceVariant)
+    }
+    
+    func themedAdvancedSection() -> some View {
+        self
+            .padding()
+            .background(Color.themedSurface)
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.themedOutline.opacity(0.2), lineWidth: 0.5)
+            )
+    }
+    
+    func themedAdvancedCard() -> some View {
+        self
+            .padding()
+            .background(Color.themedSurfaceVariant)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.themedOutline.opacity(0.1), lineWidth: 0.5)
+            )
+    }
+    
+    // MARK: - Contrast-Aware Text Modifiers
+    
+    func themedContrastText(on backgroundColor: Color) -> some View {
+        self.foregroundColor(Color.themedTextOnBackground(backgroundColor))
+    }
+    
+    func themedHighContrastText() -> some View {
+        let colors = ThemeManager.shared.colors
+        let textColor: Color
+        
+        if colors.preferredContrast == "high" {
+            // Use maximum contrast colors
+            let backgroundLuminance = Color.themedSurface.luminance
+            textColor = backgroundLuminance > 0.5 ? Color(hex: "#000000") : Color(hex: "#FFFFFF")
+        } else {
+            textColor = .themedOnSurface
+        }
+        
+        return self.foregroundColor(textColor)
+    }
 }
 
 // MARK: - Themed Button Style Enum

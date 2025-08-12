@@ -287,7 +287,7 @@ struct TappableMetricCardView: View {
                     
                     Text(title)
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(.primary)
+                        .themedSurfaceText()
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                     
@@ -367,7 +367,7 @@ struct TappableMetricRowView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.subheadline.weight(.medium))
-                        .foregroundColor(.primary)
+                        .themedSurfaceText()
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(value)
@@ -428,7 +428,7 @@ struct SystemInfoCardView: View {
                 
                 Text(systemInfo.computerName)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                 
                 Spacer()
             }
@@ -471,7 +471,7 @@ struct SystemInfoCardView: View {
             
             Text(value)
                 .font(.caption)
-                .foregroundColor(.primary)
+                .themedSurfaceText()
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }

@@ -27,7 +27,7 @@ struct AboutView: View {
                             Text("Back")
                                 .themedFont(.primary, size: .regular)
                         }
-                        .foregroundColor(.accentColor)
+                        .themedHighContrastText()
                     }
                     .buttonStyle(.plain)
                     
@@ -39,7 +39,7 @@ struct AboutView: View {
                     
                     Text("About")
                         .themedFont(.primary, size: .large)
-                        .foregroundColor(.primary)
+                        .themedSurfaceText()
                     
                     Spacer()
                     
@@ -79,15 +79,15 @@ struct AboutView: View {
                         VStack(spacing: 8) {
                             Text("PulseBar")
                                 .themedFont(.primary, size: .title)
-                                .foregroundColor(.primary)
+                                .themedSurfaceText()
                             
                             Text("System Performance Monitor")
                                 .themedFont(.primary, size: .regular)
-                                .foregroundColor(.secondary)
+                                .themedSurfaceVariantText()
                             
                             Text("Version \(appVersion) (\(buildNumber))")
                                 .themedFont(.primary, size: .extraSmall)
-                                .foregroundColor(.secondary)
+                                .themedSurfaceVariantText()
                         }
                     }
                     
@@ -169,11 +169,11 @@ struct AboutView: View {
                     VStack(spacing: 4) {
                         Text("© 2025 PulseBar")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                         
                         Text("Made with ❤️ for macOS")
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                     }
                     .padding(.top, 8)
                 }
@@ -306,7 +306,7 @@ extension AboutView {
             }
         }
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .themedSurfaceVariant()
         .cornerRadius(10)
     }
     
@@ -324,7 +324,7 @@ extension AboutView {
                 
                 Text(description)
                     .themedFont(.primary, size: .extraSmall)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
             
             Spacer()
@@ -336,7 +336,7 @@ extension AboutView {
         HStack {
             Text(label)
                 .themedFont(.primary, size: .regular)
-                .foregroundColor(.secondary)
+                .themedSurfaceVariantText()
             
             Spacer()
             
@@ -351,7 +351,7 @@ extension AboutView {
         HStack {
             Text(label)
                 .themedFont(.primary, size: .regular)
-                .foregroundColor(.secondary)
+                .themedSurfaceVariantText()
             
             Spacer()
             
@@ -383,7 +383,7 @@ extension AboutView {
                 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
             
             Spacer()

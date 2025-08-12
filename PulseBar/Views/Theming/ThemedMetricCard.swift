@@ -44,7 +44,7 @@ struct ThemedMetricCard: View {
                 
                 Text(title)
                     .themedFont(.primary, size: .extraSmall)
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 
@@ -55,7 +55,7 @@ struct ThemedMetricCard: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(value)
                     .themedFont(.primary, size: .extraSmall)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                     .minimumScaleFactor(0.8)
@@ -63,7 +63,7 @@ struct ThemedMetricCard: View {
                 if let detail = detail {
                     Text(detail)
                         .themedFont(.primary, size: .extraSmall)
-                        .foregroundColor(Color(NSColor.tertiaryLabelColor))
+                        .themedSurfaceVariantText()
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }

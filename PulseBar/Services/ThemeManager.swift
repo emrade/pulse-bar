@@ -471,4 +471,41 @@ extension Color {
             opacity: Double(a) / 255
         )
     }
+    
+    // MARK: - Luminance Calculation for Contrast Detection
+    
+    var luminance: Double {
+        guard let cgColor = self.cgColor,
+              let colorSpace = cgColor.colorSpace,
+              let components = cgColor.components else {
+            return 0.0
+        }
+        
+        // Convert to sRGB if needed
+        let sRGBColorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
+        guard let sRGBColor = cgColor.converted(to: sRGBColorSpace, intent: .defaultIntent, options: nil),
+              let sRGBComponents = sRGBColor.components else {
+            return 0.0
+        }
+        
+        let red = sRGBComponents[0]
+        let green = sRGBComponents[1] 
+        let blue = sRGBComponents[2]
+        
+        // Convert to linear RGB
+        func sRGBToLinear(_ component: CGFloat) -> CGFloat {
+            if component <= 0.03928 {
+                return component / 12.92
+            } else {
+                return pow((component + 0.055) / 1.055, 2.4)
+            }
+        }
+        
+        let linearRed = sRGBToLinear(red)
+        let linearGreen = sRGBToLinear(green)
+        let linearBlue = sRGBToLinear(blue)
+        
+        // Calculate relative luminance using ITU-R BT.709 coefficients
+        return 0.2126 * linearRed + 0.7152 * linearGreen + 0.0722 * linearBlue
+    }
 }

@@ -28,7 +28,7 @@ struct ThemePicker: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Theme Selection")
                         .font(.title2.weight(.semibold))
-                        .foregroundColor(.primary)
+                        .themedSurfaceText()
                     
                     Text("Choose a theme to customize PulseBar's appearance")
                         .font(.caption)
@@ -168,7 +168,7 @@ struct ThemePicker: View {
                 
                 Text(title)
                     .font(.headline.weight(.semibold))
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                 
                 Text("(\(themes.count))")
                     .font(.caption)

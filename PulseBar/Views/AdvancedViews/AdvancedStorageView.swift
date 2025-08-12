@@ -29,25 +29,25 @@ struct AdvancedStorageView: View, AdvancedMetricView {
         // If analysis is still loading, show loading state
         if isLoadingStorageAnalysis {
             return [
-                ChartDataPoint(label: "Analyzing...", value: Double(bootVolume.usedBytes), color: .gray),
-                ChartDataPoint(label: "Free Space", value: freeBytes, color: .gray.opacity(0.3))
+                ChartDataPoint(label: "Analyzing...", value: Double(bootVolume.usedBytes), color: .themedChartNeutral),
+                ChartDataPoint(label: "Free Space", value: freeBytes, color: .themedChartBackground)
             ]
         }
         
         // Use real storage categories if available (should be Applications and Other)
         var chartPoints: [ChartDataPoint] = []
         
-        for category in storageCategories {
+        for (index, category) in storageCategories.enumerated() {
             let color: Color = {
                 switch category.color.lowercased() {
-                case "blue": return .blue
-                case "green": return .green
-                case "red": return .red
-                case "orange": return .orange
-                case "purple": return .purple
-                case "yellow": return .yellow
-                case "gray", "grey": return .gray
-                default: return .blue // Default to blue instead of gray
+                case "blue": return .themedChartColor(at: 0)
+                case "green": return .themedChartSuccess
+                case "red": return .themedChartError
+                case "orange": return .themedChartWarning
+                case "purple": return .themedChartSecondary
+                case "yellow": return .themedChartWarning
+                case "gray", "grey": return .themedChartNeutral
+                default: return .themedChartColor(at: index)
                 }
             }()
             
@@ -62,7 +62,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
         chartPoints.append(ChartDataPoint(
             label: "Free Space",
             value: freeBytes,
-            color: .gray.opacity(0.3)
+            color: .themedChartBackground
         ))
         
         return chartPoints
@@ -75,11 +75,11 @@ struct AdvancedStorageView: View, AdvancedMetricView {
             let usagePercentage = metricData.bootVolume?.usagePercentage ?? 0
             
             if usagePercentage > 0.90 {
-                return ("Warning", .orange, "exclamationmark.triangle")
+                return ("Warning", .themedChartWarning, "exclamationmark.triangle")
             } else if usagePercentage > 0.95 {
-                return ("Critical", .red, "xmark.circle")
+                return ("Critical", .themedChartError, "xmark.circle")
             } else {
-                return ("Healthy", .green, "checkmark.circle")
+                return ("Healthy", .themedChartSuccess, "checkmark.circle")
             }
         }
         
@@ -89,9 +89,9 @@ struct AdvancedStorageView: View, AdvancedMetricView {
         }
         
         if smartStatus.isHealthy {
-            return ("Healthy", .green, "checkmark.circle")
+            return ("Healthy", .themedChartSuccess, "checkmark.circle")
         } else {
-            return ("Failing", .red, "xmark.circle")
+            return ("Failing", .themedChartError, "xmark.circle")
         }
     }
     
@@ -172,7 +172,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                                     .themedFont(.primary, size: .small)
                                 Text(FormatterUtility.shared.formatFileSize(UInt64(item.value)))
                                     .themedFont(.primary, size: .small)
-                                    .foregroundColor(.secondary)
+                                    .themedSurfaceVariantText()
                             }
                             
                             Spacer()
@@ -183,9 +183,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                 Spacer()
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var healthStatusSection: some View {
@@ -207,11 +205,11 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                         if smartStatus.isAvailable {
                             Text("Disk SMART data is available and \(smartStatus.isHealthy ? "healthy" : "indicating potential issues")")
                                 .themedFont(.primary, size: .small)
-                                .foregroundColor(.secondary)
+                                .themedSurfaceVariantText()
                         } else {
                             Text("SMART data not available for this drive")
                                 .themedFont(.primary, size: .small)
-                                .foregroundColor(.secondary)
+                                .themedSurfaceVariantText()
                         }
                     } else {
                         Text("SMART Status: Unknown")
@@ -219,7 +217,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                         
                         Text("Disk appears to be functioning normally")
                             .themedFont(.primary, size: .small)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                     }
                 }
                 
@@ -269,9 +267,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var volumeInfoSection: some View {
@@ -290,9 +286,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
 }
 
@@ -304,7 +298,7 @@ struct InfoRow: View {
         HStack {
             Text(label)
                 .themedFont(.primary, size: .small)
-                .foregroundColor(.secondary)
+                .themedSurfaceVariantText()
             
             Spacer()
             

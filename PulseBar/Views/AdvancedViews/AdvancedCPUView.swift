@@ -156,7 +156,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
             HStack {
                 Text("Current Usage:")
                     .themedFont(.primary, size: .small)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
                 
                 Spacer()
                 
@@ -165,9 +165,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                     .foregroundColor(metricData.overallUsage > 0.8 ? .red : .primary)
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var coreUsageSection: some View {
@@ -213,9 +211,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var thermalInfoSection: some View {
@@ -234,7 +230,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                     
                     Text(thermalState.description)
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
                 
                 Spacer()
@@ -257,7 +253,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                     } else {
                         Text("Loading...")
                             .themedFont(.primary, size: .small)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                     }
                 }
                 
@@ -276,14 +272,12 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                     } else {
                         Text("--")
                             .themedFont(.primary, size: .small)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                     }
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var cpuStatsSection: some View {
@@ -303,9 +297,7 @@ struct AdvancedCPUView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
 }
 

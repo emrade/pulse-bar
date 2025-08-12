@@ -40,6 +40,13 @@
     "warning": "#FFC107",
     "error": "#F44336",
     "divider": "#C8E6C9",
+    "surface": "#FFFFFF",
+    "onSurface": "#2D4A22",
+    "surfaceVariant": "#F1F8E9",
+    "onSurfaceVariant": "#5A7C4E",
+    "outline": "#C8E6C9",
+    "adaptiveText": false,
+    "preferredContrast": "medium",
     "gradient": {
       "primary": ["#4CAF50", "#81C784"],
       "secondary": ["#FF9800", "#FFB74D"],

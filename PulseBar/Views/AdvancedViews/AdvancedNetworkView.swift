@@ -152,7 +152,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Download")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .themedSurfaceVariantText()
                             
                             Text(formatSpeed(currentSpeedTest.downloadSpeed))
                                 .font(.title2.weight(.bold))
@@ -164,7 +164,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                         VStack(alignment: .trailing, spacing: 8) {
                             Text("Upload")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .themedSurfaceVariantText()
                             
                             Text(formatSpeed(currentSpeedTest.uploadSpeed))
                                 .font(.title2.weight(.bold))
@@ -176,7 +176,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                         HStack {
                             Text("Latency")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .themedSurfaceVariantText()
                             
                             Spacer()
                             
@@ -195,11 +195,11 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                     
                     Text("No Speed Test Results")
                         .themedFont(.primary, size: .regular)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                     
                     Text("Run a speed test to see current network performance")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                         .multilineTextAlignment(.center)
                 }
                 .frame(height: 120)
@@ -229,9 +229,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 .themedFont(.primary, size: .small)
                 .foregroundColor(Color(NSColor.tertiaryLabelColor))
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var signalQualitySection: some View {
@@ -250,7 +248,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                     
                     Text(signalQualityLevel.description)
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
                 
                 Spacer()
@@ -262,7 +260,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                     HStack {
                         Text("Signal Strength")
                             .themedFont(.primary, size: .small)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                         Spacer()
                         Text(rssiDisplayString)
                             .themedFont(.primary, size: .small)
@@ -291,9 +289,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var connectionDetailsSection: some View {
@@ -319,13 +315,11 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                     
                     Text("Not Connected to WiFi")
                         .themedFont(.primary, size: .regular)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var networkStatsSection: some View {
@@ -347,9 +341,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
 }
 

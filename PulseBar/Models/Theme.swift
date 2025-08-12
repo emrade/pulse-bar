@@ -81,6 +81,17 @@ struct ColorConfiguration: Codable {
     let error: String?
     let divider: String
     let gradient: GradientConfiguration?
+    
+    // NEW: Semantic colors for better light theme support
+    let surface: String?           // Card/tile backgrounds
+    let onSurface: String?         // Text on surface
+    let outline: String?           // Border/divider colors
+    let surfaceVariant: String?    // Secondary surfaces
+    let onSurfaceVariant: String?  // Text on surface variants
+    
+    // NEW: Smart contrast detection
+    let preferredContrast: String? // "high", "medium", "low" - for text visibility
+    let adaptiveText: Bool?        // Auto-calculate text colors based on background luminance
 }
 
 struct GradientConfiguration: Codable {
@@ -225,7 +236,14 @@ extension Theme {
                 warning: "#FF9F0A",
                 error: "#FF453A",
                 divider: "system.separatorColor",
-                gradient: nil
+                gradient: nil,
+                surface: nil,
+                onSurface: nil,
+                outline: nil,
+                surfaceVariant: nil,
+                onSurfaceVariant: nil,
+                preferredContrast: nil,
+                adaptiveText: nil
             ),
             fonts: FontConfiguration(
                 primary: FontStyleConfiguration(
@@ -355,4 +373,101 @@ enum ThemedFontSize {
 
 enum ThemedFontStyle {
     case primary, accent, monospace
+}
+
+// MARK: - ColorConfiguration Extensions
+
+extension ColorConfiguration {
+    var computedSurface: String {
+        return surface ?? cardBackground
+    }
+    
+    var computedOnSurface: String {
+        if let onSurface = onSurface {
+            return onSurface
+        }
+        
+        // Smart text color calculation based on surface luminance
+        if adaptiveText == true {
+            return calculateContrastingTextColor(for: computedSurface)
+        }
+        
+        return primaryText // Fallback to theme's primary text
+    }
+    
+    var computedSurfaceVariant: String {
+        return surfaceVariant ?? secondaryBackground
+    }
+    
+    var computedOnSurfaceVariant: String {
+        if let onSurfaceVariant = onSurfaceVariant {
+            return onSurfaceVariant
+        }
+        
+        if adaptiveText == true {
+            return calculateContrastingTextColor(for: computedSurfaceVariant)
+        }
+        
+        return secondaryText
+    }
+    
+    var computedOutline: String {
+        return outline ?? divider
+    }
+    
+    private func calculateContrastingTextColor(for backgroundHex: String) -> String {
+        let backgroundLuminance = calculateLuminance(from: backgroundHex)
+        
+        // Use WCAG contrast guidelines
+        // For high contrast preference, use pure black/white
+        if preferredContrast == "high" {
+            return backgroundLuminance > 0.5 ? "#000000" : "#FFFFFF"
+        }
+        
+        // For medium contrast, use slightly softer colors
+        if preferredContrast == "medium" {
+            return backgroundLuminance > 0.5 ? "#1C1C1E" : "#F2F2F7"
+        }
+        
+        // For low contrast or default, use theme colors
+        return backgroundLuminance > 0.5 ? primaryText : "#FFFFFF"
+    }
+    
+    private func calculateLuminance(from hexString: String) -> Double {
+        let hex = hexString.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        
+        let r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (r, g, b) = ((int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (r, g, b) = (int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (r, g, b) = (int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            return 0.0
+        }
+        
+        let red = Double(r) / 255.0
+        let green = Double(g) / 255.0
+        let blue = Double(b) / 255.0
+        
+        // Convert to linear RGB
+        func sRGBToLinear(_ component: Double) -> Double {
+            if component <= 0.03928 {
+                return component / 12.92
+            } else {
+                return pow((component + 0.055) / 1.055, 2.4)
+            }
+        }
+        
+        let linearRed = sRGBToLinear(red)
+        let linearGreen = sRGBToLinear(green)
+        let linearBlue = sRGBToLinear(blue)
+        
+        // Calculate relative luminance using ITU-R BT.709 coefficients
+        return 0.2126 * linearRed + 0.7152 * linearGreen + 0.0722 * linearBlue
+    }
 }

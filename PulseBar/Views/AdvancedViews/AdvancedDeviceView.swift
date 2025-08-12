@@ -118,7 +118,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                     
                     Text("Active")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
                 
                 Spacer()
@@ -127,11 +127,11 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                 VStack(spacing: 4) {
                     Text("\(deviceSummary.totalDevices)")
                         .font(.title.weight(.bold))
-                        .foregroundColor(.primary)
+                        .themedSurfaceText()
                     
                     Text("Total")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
                 
                 Spacer()
@@ -139,20 +139,18 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                 // Connection types breakdown
                 VStack(spacing: 6) {
                     HStack(spacing: 12) {
-                        connectionTypeIndicator(count: deviceSummary.usbDevices, color: .blue, label: "USB")
-                        connectionTypeIndicator(count: deviceSummary.thunderboltDevices, color: .purple, label: "⚡")
-                        connectionTypeIndicator(count: deviceSummary.bluetoothDevices, color: .orange, label: "BT")
+                        connectionTypeIndicator(count: deviceSummary.usbDevices, color: .themedChartColor(at: 0), label: "USB")
+                        connectionTypeIndicator(count: deviceSummary.thunderboltDevices, color: .themedChartColor(at: 1), label: "⚡")
+                        connectionTypeIndicator(count: deviceSummary.bluetoothDevices, color: .themedChartColor(at: 2), label: "BT")
                     }
                     
                     Text("Connection Types")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private func connectionTypeIndicator(count: Int, color: Color, label: String) -> some View {
@@ -163,7 +161,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
             
             Text(label)
                 .themedFont(.primary, size: .small)
-                .foregroundColor(.secondary)
+                .themedSurfaceVariantText()
         }
     }
     
@@ -180,7 +178,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                 
                 Text("\(category.devices.count)")
                     .themedFont(.primary, size: .small)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
             
             if category.devices.isEmpty {
@@ -191,7 +189,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                     
                     Text("No devices connected")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
@@ -203,9 +201,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private func deviceRow(device: DetailedDevice) -> some View {
@@ -222,7 +218,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                 
                 Text(device.connectionType)
                     .themedFont(.primary, size: .small)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
             
             Spacer()
@@ -235,7 +231,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                 
                 Text(device.isActive ? "Active" : "Idle")
                     .themedFont(.primary, size: .small)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
         }
         .padding(.vertical, 4)

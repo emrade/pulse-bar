@@ -40,6 +40,13 @@
     "warning": "#ED8936",
     "error": "#F56565",
     "divider": "#FFFFFF",
+    "surface": "#FFFFFF",
+    "onSurface": "#2C3E50",
+    "surfaceVariant": "#F8F9FA",
+    "onSurfaceVariant": "#4A5568",
+    "outline": "rgba(255,255,255,0.3)",
+    "adaptiveText": true,
+    "preferredContrast": "high",
     "gradient": {
       "primary": ["#667EEA", "#764BA2"],
       "secondary": ["#F093FB", "#F5576C"],

@@ -31,7 +31,7 @@ struct SettingsView: View {
                             Text("Back")
                                 .themedFont(.primary, size: .regular)
                         }
-                        .foregroundColor(.accentColor)
+                        .themedHighContrastText()
                     }
                     .buttonStyle(.plain)
                     
@@ -43,7 +43,7 @@ struct SettingsView: View {
                     
                     Text("Settings")
                         .themedFont(.primary, size: .large)
-                        .foregroundColor(.primary)
+                        .themedSurfaceText()
                     
                     Spacer()
                     
@@ -137,13 +137,13 @@ struct SettingsView: View {
                             HStack {
                                 Text("Current Theme:")
                                     .font(.subheadline)
-                                    .foregroundColor(.secondary)
+                                    .themedSurfaceVariantText()
                                 
                                 Spacer()
                                 
                                 Text(themeManager.currentTheme.name)
                                     .font(.subheadline.weight(.medium))
-                                    .foregroundColor(.primary)
+                                    .themedSurfaceText()
                             }
                             
                             // Quick theme selection
@@ -154,7 +154,7 @@ struct SettingsView: View {
                                         .scaleEffect(0.8)
                                     Text("Loading themes...")
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .themedSurfaceVariantText()
                                     Spacer()
                                 }
                                 .frame(height: 30)
@@ -356,7 +356,7 @@ extension SettingsView {
                 
                 Text(title)
                     .themedFont(.primary, size: .large)
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
             }
             
             VStack(spacing: 0) {
@@ -364,7 +364,7 @@ extension SettingsView {
             }
         }
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .themedSurfaceVariant()
         .cornerRadius(10)
     }
     
@@ -408,11 +408,11 @@ extension SettingsView {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline)
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
             
             Spacer()
@@ -443,13 +443,13 @@ extension SettingsView {
                 
                 Text(title)
                     .font(.subheadline)
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                 
                 Spacer()
                 
                 Text(formatter(value.wrappedValue))
                     .font(.caption.weight(.medium))
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
             
             Slider(value: value, in: range)
@@ -476,11 +476,11 @@ extension SettingsView {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline)
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
             
             Spacer()

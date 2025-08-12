@@ -34,7 +34,7 @@ struct AdvancedViewHeader: View {
                     Text("Back")
                         .themedFont(.primary, size: .small)
                 }
-                .foregroundColor(.accentColor)
+                .themedHighContrastText()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 6)
@@ -63,6 +63,7 @@ struct AdvancedViewHeader: View {
                     .foregroundColor(.accentColor)
                 Text(title)
                     .themedFont(.primary, size: .large)
+                    .themedSurfaceText()
             }
             
             Spacer()
@@ -84,7 +85,7 @@ struct RemarkView: View {
                         .font(.themedSmall)
                     Text("Insights")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
                 
                 VStack(alignment: .leading, spacing: 6) {
@@ -96,7 +97,7 @@ struct RemarkView: View {
                                 .padding(.top, 6)
                             Text(remark)
                                 .themedFont(.primary, size: .small)
-                                .foregroundColor(.secondary)
+                                .themedSurfaceVariantText()
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }

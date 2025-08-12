@@ -39,7 +39,14 @@
     "success": "#34C759",
     "warning": "#FF9500",
     "error": "#FF3B30",
-    "divider": "#E5E5E7"
+    "divider": "#E5E5E7",
+    "surface": "#F8F9FA",
+    "onSurface": "#1C1C1E",
+    "surfaceVariant": "#F2F2F7",
+    "onSurfaceVariant": "#48484A",
+    "outline": "#C6C6C8",
+    "adaptiveText": false,
+    "preferredContrast": "high"
   },
   
   "fonts": {

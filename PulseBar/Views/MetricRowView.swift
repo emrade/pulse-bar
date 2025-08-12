@@ -28,12 +28,12 @@ struct MetricRowView: View {
                 // Icon
                 Image(systemName: icon)
                     .frame(width: 20, height: 20)
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                 
                 // Title
                 Text(title)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                 
                 // Info button (if enabled)
                 if showInfoButton {

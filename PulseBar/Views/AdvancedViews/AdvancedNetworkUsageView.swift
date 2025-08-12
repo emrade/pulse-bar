@@ -64,7 +64,7 @@ struct AdvancedNetworkUsageView: View {
                 VStack(spacing: 8) {
                     Text("Downloaded")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                     
                     VStack(spacing: 4) {
                         Text(formatBytes(metricData.downloaded))
@@ -82,7 +82,7 @@ struct AdvancedNetworkUsageView: View {
                 VStack(spacing: 8) {
                     Text("Uploaded")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                     
                     VStack(spacing: 4) {
                         Text(formatBytes(metricData.uploaded))
@@ -100,12 +100,12 @@ struct AdvancedNetworkUsageView: View {
                 VStack(spacing: 8) {
                     Text("Total")
                         .themedFont(.primary, size: .small)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                     
                     VStack(spacing: 4) {
                         Text(formatBytes(metricData.downloaded + metricData.uploaded))
                             .font(.title2.weight(.bold))
-                            .foregroundColor(.primary)
+                            .themedSurfaceText()
                         
                         Image(systemName: "arrow.up.arrow.down.circle.fill")
                             .font(.themedSmall)
@@ -114,9 +114,7 @@ struct AdvancedNetworkUsageView: View {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var usageChartSection: some View {
@@ -180,9 +178,7 @@ struct AdvancedNetworkUsageView: View {
                 .themedFont(.primary, size: .small)
                 .foregroundColor(Color(NSColor.tertiaryLabelColor))
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var usageBreakdownSection: some View {
@@ -199,9 +195,7 @@ struct AdvancedNetworkUsageView: View {
                 InfoRow(label: "Last Reset", value: "Today at 12:00 AM")
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private var resetDataSection: some View {
@@ -212,7 +206,7 @@ struct AdvancedNetworkUsageView: View {
             VStack(spacing: 8) {
                 Text("Reset today's data usage counters to zero. This action cannot be undone.")
                     .themedFont(.primary, size: .small)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
                     .multilineTextAlignment(.leading)
                 
                 HStack {
@@ -237,9 +231,7 @@ struct AdvancedNetworkUsageView: View {
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+        .themedAdvancedSection()
     }
     
     private func formatBytes(_ bytes: UInt64) -> String {
