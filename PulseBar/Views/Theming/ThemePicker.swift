@@ -30,6 +30,7 @@ struct ThemePicker: View {
                 Text("Choose a theme to customize PulseBar's appearance")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                
             }
             
             ScrollView {
@@ -153,6 +154,10 @@ struct ThemePicker: View {
                 Text(title)
                     .font(.headline.weight(.semibold))
                     .foregroundColor(.primary)
+                
+                Text("(\(themes.count))")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             
             // Theme grid

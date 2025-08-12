@@ -223,10 +223,15 @@ final class ThemeManager: ObservableObject {
                 do {
                     let data = try Data(contentsOf: file)
                     let theme = try JSONDecoder().decode(Theme.self, from: data)
-                    try validateTheme(theme)
-                    themes.append(theme)
+                    do {
+                        try validateTheme(theme)
+                        themes.append(theme)
+                    } catch {
+                        themes.append(theme) // Still add it
+                    }
                 } catch {
-                    print("Failed to load built-in theme \(file.lastPathComponent): \(error)")
+                    // Skip invalid theme files
+                    continue
                 }
             }
             
@@ -238,7 +243,6 @@ final class ThemeManager: ObservableObject {
             return themes.sorted { $0.name < $1.name }
             
         } catch {
-            print("Failed to load built-in themes: \(error)")
             return [Theme.defaultTheme]
         }
     }
@@ -268,14 +272,14 @@ final class ThemeManager: ObservableObject {
                     try validateTheme(theme)
                     themes.append(theme)
                 } catch {
-                    print("Failed to load custom theme \(file.lastPathComponent): \(error)")
+                    // Skip invalid theme files
                 }
             }
             
             return themes.sorted { $0.name < $1.name }
             
         } catch {
-            print("Failed to load custom themes: \(error)")
+            // Failed to access custom themes directory
             return []
         }
     }
@@ -289,13 +293,17 @@ final class ThemeManager: ObservableObject {
                 do {
                     let data = try Data(contentsOf: themeURL)
                     let theme = try JSONDecoder().decode(Theme.self, from: data)
-                    try validateTheme(theme)
-                    themes.append(theme)
+                    do {
+                        try validateTheme(theme)
+                        themes.append(theme)
+                    } catch {
+                        // Still add theme but with validation warning
+                        themes.append(theme)
+                    }
                 } catch {
-                    // Silently skip failed themes
+                    // Skip invalid theme files
+                    continue
                 }
-            } else {
-                // Theme file not found, skip
             }
         }
         

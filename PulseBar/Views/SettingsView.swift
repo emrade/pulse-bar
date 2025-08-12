@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var exportedText = ""
     @State private var importText = ""
     @State private var showingResetConfirmation = false
+    @State private var showingThemePicker = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -175,7 +176,7 @@ struct SettingsView: View {
                             
                             // Full theme picker button
                             Button("More Themes...") {
-                                // This could open a sheet with the full ThemePicker
+                                showingThemePicker = true
                             }
                             .font(.caption)
                             .foregroundColor(.accentColor)
@@ -323,6 +324,11 @@ struct SettingsView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("This will restore all settings to their default values. This action cannot be undone.")
+        }
+        .sheet(isPresented: $showingThemePicker) {
+            ThemePicker()
+                .environmentObject(themeManager)
+                .frame(width: 500, height: 600)
         }
     }
     
