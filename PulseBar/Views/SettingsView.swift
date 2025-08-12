@@ -326,9 +326,11 @@ struct SettingsView: View {
             Text("This will restore all settings to their default values. This action cannot be undone.")
         }
         .sheet(isPresented: $showingThemePicker) {
-            ThemePicker()
-                .environmentObject(themeManager)
-                .frame(width: 500, height: 600)
+            ThemePicker(onClose: {
+                showingThemePicker = false
+            })
+            .environmentObject(themeManager)
+            .frame(width: 500, height: 600)
         }
     }
     

@@ -14,23 +14,38 @@ struct ThemePicker: View {
     @State private var showingFileImporter = false
     @State private var showingErrorAlert = false
     @State private var errorMessage = ""
+    let onClose: (() -> Void)?
     
-    init() {
+    init(onClose: (() -> Void)? = nil) {
+        self.onClose = onClose
         _selectedTheme = State(initialValue: ThemeManager.shared.currentTheme)
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             // Header
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Theme Selection")
-                    .font(.title2.weight(.semibold))
-                    .foregroundColor(.primary)
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Theme Selection")
+                        .font(.title2.weight(.semibold))
+                        .foregroundColor(.primary)
+                    
+                    Text("Choose a theme to customize PulseBar's appearance")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
                 
-                Text("Choose a theme to customize PulseBar's appearance")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Spacer()
                 
+                if let onClose = onClose {
+                    Button(action: onClose) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Close")
+                }
             }
             
             ScrollView {
@@ -306,7 +321,7 @@ struct ThemePicker: View {
 // MARK: - Preview
 
 #Preview {
-    ThemePicker()
+    ThemePicker(onClose: {})
         .environmentObject(ThemeManager.shared)
         .frame(width: 400, height: 600)
 }
