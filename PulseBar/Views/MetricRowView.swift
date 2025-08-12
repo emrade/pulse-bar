@@ -42,7 +42,7 @@ struct MetricRowView: View {
                     }) {
                         Image(systemName: "info.circle")
                             .font(.system(size: 11))
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                     }
                     .buttonStyle(.plain)
                     .popover(isPresented: $showingInfoPopover) {
@@ -64,7 +64,7 @@ struct MetricRowView: View {
                 if let detail = detail {
                     Text(detail)
                         .font(.system(size: 11))
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
             }
             
@@ -95,7 +95,7 @@ struct MetricRowView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(value)
                             .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
                         

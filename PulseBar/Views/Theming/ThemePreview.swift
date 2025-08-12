@@ -28,7 +28,7 @@ struct ThemePreview: View {
             // Theme description
             Text(theme.description)
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .themedSurfaceVariantText()
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
         }

@@ -32,7 +32,7 @@ struct ThemePicker: View {
                     
                     Text("Choose a theme to customize PulseBar's appearance")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                 }
                 
                 Spacer()
@@ -41,7 +41,7 @@ struct ThemePicker: View {
                     Button(action: onClose) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                     }
                     .buttonStyle(.plain)
                     .help("Close")
@@ -86,7 +86,7 @@ struct ThemePicker: View {
                             Text("Import Theme...")
                                 .font(.subheadline.weight(.medium))
                         }
-                        .foregroundColor(.white)
+                        .themedHighContrastText()
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         .background(Color.accentColor)
@@ -107,7 +107,7 @@ struct ThemePicker: View {
                             Text("Reset")
                                 .font(.caption.weight(.medium))
                         }
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                     }
                     .buttonStyle(.plain)
                 }
@@ -119,7 +119,7 @@ struct ThemePicker: View {
                             .scaleEffect(0.8)
                         Text("Loading themes...")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                     }
                 }
                 
@@ -130,7 +130,7 @@ struct ThemePicker: View {
                             .foregroundColor(.orange)
                         Text(error.localizedDescription)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
@@ -140,6 +140,7 @@ struct ThemePicker: View {
             }
         }
         .padding()
+        .themedSurface()
         .fileImporter(
             isPresented: $showingFileImporter,
             allowedContentTypes: [UTType.json],
@@ -172,7 +173,7 @@ struct ThemePicker: View {
                 
                 Text("(\(themes.count))")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
             }
             
             // Theme grid

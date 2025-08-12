@@ -179,7 +179,7 @@ struct SettingsView: View {
                                 showingThemePicker = true
                             }
                             .font(.caption)
-                            .foregroundColor(.accentColor)
+                            .themedHighContrastText()
                         }
                     }
                     
@@ -382,7 +382,7 @@ extension SettingsView {
             
             Text(title)
                 .themedFont(.primary, size: .regular)
-                .foregroundColor(.primary)
+                .themedSurfaceText()
             
             Spacer()
             
@@ -488,7 +488,7 @@ extension SettingsView {
             Button(action: action) {
                 Text(buttonTitle)
                     .font(.caption.weight(.medium))
-                    .foregroundColor(.white)
+                    .themedHighContrastText()
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(buttonColor)

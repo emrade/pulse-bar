@@ -151,7 +151,7 @@ struct AdvancedMemoryView: View, AdvancedMetricView {
                 
                 Text("\(rank)")
                     .themedFont(.primary, size: .small)
-                    .foregroundColor(.white)
+                    .themedHighContrastText()
             }
             
             VStack(alignment: .leading, spacing: 2) {

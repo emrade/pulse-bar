@@ -145,6 +145,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
         VStack(alignment: .leading, spacing: 12) {
             Text("Storage Breakdown")
                 .themedFont(.primary, size: .large)
+                .themedSurfaceText()
             
             HStack(spacing: 20) {
                 // Donut Chart
@@ -170,6 +171,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.label)
                                     .themedFont(.primary, size: .small)
+                                    .themedSurfaceText()
                                 Text(FormatterUtility.shared.formatFileSize(UInt64(item.value)))
                                     .themedFont(.primary, size: .small)
                                     .themedSurfaceVariantText()
@@ -190,6 +192,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
         VStack(alignment: .leading, spacing: 12) {
             Text("Disk Health")
                 .themedFont(.primary, size: .large)
+                .themedSurfaceText()
             
             HStack(spacing: 12) {
                 Image(systemName: healthStatus.icon)
@@ -201,6 +204,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                        let smartStatus = bootVolume.smartStatus {
                         Text("SMART Status: \(smartStatus.overallHealth)")
                             .themedFont(.primary, size: .regular)
+                            .themedSurfaceText()
                         
                         if smartStatus.isAvailable {
                             Text("Disk SMART data is available and \(smartStatus.isHealthy ? "healthy" : "indicating potential issues")")
@@ -214,6 +218,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                     } else {
                         Text("SMART Status: Unknown")
                             .themedFont(.primary, size: .regular)
+                            .themedSurfaceText()
                         
                         Text("Disk appears to be functioning normally")
                             .themedFont(.primary, size: .small)
@@ -234,6 +239,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                    let temperature = smartStatus.formattedTemperature {
                     Text("Temperature: \(temperature)")
                         .themedFont(.primary, size: .small)
+                        .themedSurfaceText()
                     
                     Spacer()
                     
@@ -258,6 +264,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                 } else {
                     Text("Temperature: \(FormatterUtility.shared.formatTemperature(38.0))")
                         .themedFont(.primary, size: .small)
+                        .themedSurfaceText()
                     
                     Spacer()
                     
@@ -274,6 +281,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
         VStack(alignment: .leading, spacing: 12) {
             Text("Volume Information")
                 .themedFont(.primary, size: .large)
+                .themedSurfaceText()
             
             if let bootVolume = metricData.bootVolume {
                 VStack(spacing: 8) {
@@ -304,6 +312,7 @@ struct InfoRow: View {
             
             Text(value)
                 .themedFont(.primary, size: .small)
+                .themedSurfaceText()
         }
     }
 }

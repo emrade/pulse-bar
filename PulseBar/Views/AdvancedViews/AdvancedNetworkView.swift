@@ -211,7 +211,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 Button(action: handleSpeedTest) {
                     Text(speedTestButtonText)
                         .themedFont(.primary, size: .regular)
-                        .foregroundColor(.white)
+                        .themedHighContrastText()
                         .padding(.horizontal, 20)
                         .padding(.vertical, 8)
                         .background(

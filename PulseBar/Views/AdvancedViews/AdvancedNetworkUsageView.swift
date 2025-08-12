@@ -218,7 +218,7 @@ struct AdvancedNetworkUsageView: View {
                             Text("Reset Usage Data")
                                 .themedFont(.primary, size: .small)
                         }
-                        .foregroundColor(.white)
+                        .themedHighContrastText()
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         .background(

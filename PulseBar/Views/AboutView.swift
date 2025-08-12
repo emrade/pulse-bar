@@ -298,7 +298,7 @@ extension AboutView {
                 
                 Text(title)
                     .themedFont(.primary, size: .large)
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
             }
             
             VStack(spacing: 8) {
@@ -320,7 +320,7 @@ extension AboutView {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .themedFont(.primary, size: .regular)
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                 
                 Text(description)
                     .themedFont(.primary, size: .extraSmall)
@@ -342,7 +342,7 @@ extension AboutView {
             
             Text(value)
                 .themedFont(.primary, size: .regular)
-                .foregroundColor(.primary)
+                .themedSurfaceText()
         }
         .padding(.vertical, 4)
     }
@@ -357,7 +357,7 @@ extension AboutView {
             
             Text(value)
                 .themedFont(.primary, size: .extraSmall)
-                .foregroundColor(.primary)
+                .themedSurfaceText()
         }
         .padding(.vertical, 4)
     }
@@ -379,7 +379,7 @@ extension AboutView {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(.primary)
+                    .themedSurfaceText()
                 
                 Text(subtitle)
                     .font(.caption)
@@ -391,7 +391,7 @@ extension AboutView {
             Button(action: action) {
                 Text(buttonTitle)
                     .font(.caption.weight(.medium))
-                    .foregroundColor(.white)
+                    .themedHighContrastText()
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(buttonColor)

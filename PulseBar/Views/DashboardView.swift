@@ -224,7 +224,7 @@ struct DashboardView: View {
                         Text("Settings")
                             .font(.caption.weight(.medium))
                     }
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
                 }
                 .buttonStyle(.plain)
                 
@@ -237,7 +237,7 @@ struct DashboardView: View {
                         Text("About")
                             .font(.caption.weight(.medium))
                     }
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
                 }
                 .buttonStyle(.plain)
                 
@@ -250,7 +250,7 @@ struct DashboardView: View {
                         Text("Quit")
                             .font(.caption.weight(.medium))
                     }
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
                 }
                 .buttonStyle(.plain)
             }
@@ -298,7 +298,7 @@ struct TappableMetricCardView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(value)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .themedSurfaceVariantText()
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                         .minimumScaleFactor(0.8)
@@ -372,7 +372,7 @@ struct TappableMetricRowView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(value)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .themedSurfaceVariantText()
                             .lineLimit(1)
                         
                         if let detail = detail {
@@ -388,7 +388,7 @@ struct TappableMetricRowView: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .themedSurfaceVariantText()
                     .frame(maxHeight: .infinity, alignment: .center)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -467,7 +467,7 @@ struct SystemInfoCardView: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .themedSurfaceVariantText()
             
             Text(value)
                 .font(.caption)
