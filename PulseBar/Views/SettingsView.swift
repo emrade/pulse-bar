@@ -179,14 +179,14 @@ struct SettingsView: View {
                                 showingThemePicker = true
                             }
                             .font(.caption)
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(.themedAccent)
                             .buttonStyle(.plain)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(
                                 RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.accentColor.opacity(0.1))
-                                    .stroke(Color.accentColor.opacity(0.3), lineWidth: 0.5)
+                                    .fill(Color.themedAccent.opacity(0.1))
+                                    .stroke(Color.themedAccent.opacity(0.3), lineWidth: 0.5)
                             )
                         }
                     }
