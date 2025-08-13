@@ -56,12 +56,11 @@ struct SettingsView: View {
                     }
                     .opacity(0)
                 }
-                .padding(.horizontal, 16)
                 .padding(.top, 16)
             }
             
             ScrollView {
-                VStack(spacing: 20) {
+                LazyVStack(spacing: 20) {
                     // Performance Section
                     settingsSection(
                         title: "Performance",
@@ -106,7 +105,6 @@ struct SettingsView: View {
                                     settingsManager.saveSettings()
                                 }
                             )
-                            .frame(minWidth: 140)
                         }
                         
                         settingRow(
@@ -123,7 +121,6 @@ struct SettingsView: View {
                                     settingsManager.saveSettings()
                                 }
                             )
-                            .frame(minWidth: 180)
                         }
                     }
                     
@@ -312,9 +309,10 @@ struct SettingsView: View {
                         }
                     }
                 }
-                .padding(16)
+                .padding(.vertical, 16)
             }
         }
+        .padding(.horizontal, 16)
         .standardWindowFrame()
         .alert("Settings Exported", isPresented: $showingExportAlert) {
             Button("Copy to Clipboard") {
@@ -371,9 +369,13 @@ extension SettingsView {
                 content()
             }
         }
-        .padding()
-        .themedSurfaceVariant()
-        .cornerRadius(10)
+        .padding(.vertical, 16)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.themedSurfaceVariant)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
     
     private func settingRow<Content: View>(
