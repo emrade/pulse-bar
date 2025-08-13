@@ -44,18 +44,18 @@
   
   "fonts": {
     "primary": {
-      "family": "SF Pro Display",
-      "weight": "medium",
+      "family": "system",
+      "weight": "semibold",
       "size": {
         "extraSmall": 12,
         "small": 11,
-        "regular": 13,
-        "large": 16,
-        "title": 18
+        "regular": 15,
+        "large": 17,
+        "title": 28
       }
     },
     "monospace": {
-      "family": "SF Mono",
+      "family": "system-monospace",
       "weight": "regular",
       "size": {
         "extraSmall": 11,

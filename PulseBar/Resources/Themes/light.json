@@ -52,7 +52,7 @@
   "fonts": {
     "primary": {
       "family": "SF Pro Display",
-      "weight": "regular",
+      "weight": "semibold",
       "size": {
         "extraSmall": 12,
         "small": 11,

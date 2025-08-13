@@ -14,7 +14,7 @@ extension Font {
     static func themed(_ style: ThemedFontStyle, size: ThemedFontSize = .regular) -> Font {
         let themeManager = ThemeManager.shared
         
-        // Use system fonts for Basic theme
+        // Use system fonts for Basic theme (with JSON weight override capability)
         if themeManager.currentTheme.id == "basic" {
             return systemFont(for: size, style: style)
         }
@@ -32,9 +32,16 @@ extension Font {
         let fontSize = fontConfig.size.value(for: size)
         let weight = fontConfig.swiftUIWeight
         
-        // Use FontLoader to ensure bundled fonts are available
-        let actualFamily = FontLoader.shared.getFontFamilyName(for: fontConfig.family)
-        return .custom(actualFamily, size: fontSize).weight(weight)
+        // Handle system fonts vs custom fonts
+        if fontConfig.family.lowercased() == "system" {
+            return .system(size: fontSize, weight: weight, design: .default)
+        } else if fontConfig.family.lowercased() == "system-monospace" {
+            return .system(size: fontSize, weight: weight, design: .monospaced)
+        } else {
+            // Use FontLoader to ensure bundled fonts are available
+            let actualFamily = FontLoader.shared.getFontFamilyName(for: fontConfig.family)
+            return .custom(actualFamily, size: fontSize).weight(weight)
+        }
     }
     
     @MainActor
