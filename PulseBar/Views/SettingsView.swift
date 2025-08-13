@@ -261,7 +261,7 @@ struct SettingsView: View {
                                 range: 0.5...0.95,
                                 formatter: { String(format: "%.0f%%", $0 * 100) }
                             )
-                            .onChange(of: settingsManager.settings.cpuWarningThreshold) { _ in
+                            .onChange(of: settingsManager.settings.cpuWarningThreshold) {
                                 settingsManager.saveSettings()
                             }
                             
@@ -273,7 +273,7 @@ struct SettingsView: View {
                                 range: 0.5...0.95,
                                 formatter: { String(format: "%.0f%%", $0 * 100) }
                             )
-                            .onChange(of: settingsManager.settings.memoryWarningThreshold) { _ in
+                            .onChange(of: settingsManager.settings.memoryWarningThreshold) {
                                 settingsManager.saveSettings()
                             }
                         }
@@ -429,7 +429,7 @@ extension SettingsView {
             
             Toggle("", isOn: isOn)
                 .toggleStyle(SwitchToggleStyle())
-                .onChange(of: isOn.wrappedValue) { _ in
+                .onChange(of: isOn.wrappedValue) {
                     action()
                 }
         }
