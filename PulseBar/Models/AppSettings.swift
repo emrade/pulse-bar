@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import ServiceManagement
 
 // MARK: - Settings Model
 struct AppSettings: Codable {
@@ -136,29 +137,34 @@ class SettingsManager: ObservableObject {
     }
     
     private func setLaunchAtLogin(_ enabled: Bool) {
-        // Implementation would go here for macOS launch services
-        // This is a simplified version
-        if Bundle.main.bundleIdentifier != nil {
-            let task = Process()
-            task.launchPath = "/usr/bin/osascript"
-            
-            if enabled {
-                task.arguments = [
-                    "-e",
-                    "tell application \"System Events\" to make login item at end with properties {path:\"\(Bundle.main.bundlePath)\", hidden:false}"
-                ]
+        guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
+            print("Failed to get bundle identifier for launch at login configuration")
+            return
+        }
+        
+        // Use ServiceManagement framework for secure login item management
+        do {
+            if #available(macOS 13.0, *) {
+                // Use modern SMAppService API for macOS 13+
+                let service = SMAppService.mainApp
+                if enabled {
+                    if service.status == .notRegistered {
+                        try service.register()
+                    }
+                } else {
+                    if service.status == .enabled {
+                        try service.unregister()
+                    }
+                }
             } else {
-                task.arguments = [
-                    "-e",
-                    "tell application \"System Events\" to delete login items whose name is \"PulseBar\""
-                ]
+                // Fallback to SMLoginItemSetEnabled for older macOS versions
+                let success = SMLoginItemSetEnabled(bundleIdentifier as CFString, enabled)
+                if !success {
+                    print("Failed to \(enabled ? "enable" : "disable") launch at login using SMLoginItemSetEnabled")
+                }
             }
-            
-            do {
-                try task.run()
-            } catch {
-                print("Failed to set launch at login: \(error)")
-            }
+        } catch {
+            print("Failed to configure launch at login: \(error.localizedDescription)")
         }
     }
     

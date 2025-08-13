@@ -491,31 +491,104 @@ final class DiskService: DiskServiceProtocol, @unchecked Sendable {
     }
     
     private func getSMARTDataFromSmartctl() -> [String: Any]? {
-        // Try to use smartctl if available (requires Homebrew or manual installation)
+        // Secure execution of smartctl with proper path validation
+        let validSmartctlPaths = [
+            "/opt/homebrew/bin/smartctl",
+            "/usr/local/bin/smartctl",
+            "/usr/bin/smartctl"
+        ]
+        
+        guard let smartctlPath = findValidExecutable(paths: validSmartctlPaths) else {
+            print("🔍 SMART: smartctl binary not found in any valid location")
+            return nil
+        }
+        
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/smartctl")
-        process.arguments = ["-a", "/dev/disk0", "--json"]
+        process.executableURL = URL(fileURLWithPath: smartctlPath)
+        
+        // Validate and sanitize arguments to prevent injection
+        let safeArguments = ["-a", "/dev/disk0", "--json"]
+        process.arguments = safeArguments
         
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = Pipe()
         
+        // Set timeout and security environment
+        process.environment = [:]  // Clear environment variables for security
+        
         do {
             try process.run()
+            
+            // Set a reasonable timeout (10 seconds)
+            let timeoutTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
+                if process.isRunning {
+                    process.terminate()
+                }
+            }
+            
             process.waitUntilExit()
+            timeoutTimer.invalidate()
+            
+            // Check if process completed successfully
+            guard process.terminationStatus == 0 else {
+                print("🔍 SMART: smartctl terminated with status \(process.terminationStatus)")
+                return nil
+            }
             
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             if let output = String(data: data, encoding: .utf8) {
                 print("🔍 SMART: smartctl output: \(output.prefix(500))...")
                 
-                // Try to parse JSON output
+                // Try to parse JSON output with size limits for security
+                guard output.count < 1_000_000 else { // Limit to 1MB
+                    print("🔍 SMART: smartctl output too large, potential security issue")
+                    return nil
+                }
+                
                 if let jsonData = output.data(using: .utf8),
                    let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
                     return json
                 }
             }
         } catch {
-            print("🔍 SMART: smartctl not available or failed: \(error)")
+            print("🔍 SMART: smartctl execution failed: \(error)")
+        }
+        
+        return nil
+    }
+    
+    private func findValidExecutable(paths: [String]) -> String? {
+        let fileManager = FileManager.default
+        
+        for path in paths {
+            // Verify the path exists and is executable
+            guard fileManager.fileExists(atPath: path) else {
+                continue
+            }
+            
+            // Additional security checks
+            do {
+                let attributes = try fileManager.attributesOfItem(atPath: path)
+                
+                // Ensure it's a regular file (not a symlink or directory)
+                guard let fileType = attributes[.type] as? FileAttributeType,
+                      fileType == .typeRegular else {
+                    print("🔍 SMART: \(path) is not a regular file")
+                    continue
+                }
+                
+                // Check if file is executable
+                guard fileManager.isExecutableFile(atPath: path) else {
+                    print("🔍 SMART: \(path) is not executable")
+                    continue
+                }
+                
+                return path
+            } catch {
+                print("🔍 SMART: Failed to check attributes for \(path): \(error)")
+                continue
+            }
         }
         
         return nil
