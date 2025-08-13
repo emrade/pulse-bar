@@ -73,16 +73,16 @@ struct SettingsView: View {
                             icon: "arrow.clockwise",
                             iconColor: .blue
                         ) {
-                            Picker("Refresh Rate", selection: $settingsManager.settings.refreshInterval) {
-                                ForEach(RefreshInterval.allCases, id: \.self) { interval in
-                                    Text(interval.displayName).tag(interval)
+                            ThemedDropdown(
+                                title: "Refresh Rate",
+                                selection: $settingsManager.settings.refreshInterval,
+                                options: Array(RefreshInterval.allCases),
+                                displayName: { $0.displayName },
+                                onSelectionChanged: { _ in
+                                    settingsManager.saveSettings()
                                 }
-                            }
-                            .pickerStyle(MenuPickerStyle())
+                            )
                             .frame(minWidth: 120)
-                        }
-                        .onChange(of: settingsManager.settings.refreshInterval) { _ in
-                            settingsManager.saveSettings()
                         }
                     }
                     
@@ -97,16 +97,16 @@ struct SettingsView: View {
                             icon: "thermometer",
                             iconColor: .orange
                         ) {
-                            Picker("Temperature", selection: $settingsManager.settings.temperatureUnit) {
-                                ForEach(TemperatureUnit.allCases, id: \.self) { unit in
-                                    Text(unit.displayName).tag(unit)
+                            ThemedDropdown(
+                                title: "Temperature Unit",
+                                selection: $settingsManager.settings.temperatureUnit,
+                                options: Array(TemperatureUnit.allCases),
+                                displayName: { $0.displayName },
+                                onSelectionChanged: { _ in
+                                    settingsManager.saveSettings()
                                 }
-                            }
-                            .pickerStyle(MenuPickerStyle())
+                            )
                             .frame(minWidth: 140)
-                        }
-                        .onChange(of: settingsManager.settings.temperatureUnit) { _ in
-                            settingsManager.saveSettings()
                         }
                         
                         settingRow(
@@ -114,16 +114,16 @@ struct SettingsView: View {
                             icon: "memorychip",
                             iconColor: .green
                         ) {
-                            Picker("Memory Unit", selection: $settingsManager.settings.memoryUnit) {
-                                ForEach(MemoryUnit.allCases, id: \.self) { unit in
-                                    Text(unit.displayName).tag(unit)
+                            ThemedDropdown(
+                                title: "Memory Unit",
+                                selection: $settingsManager.settings.memoryUnit,
+                                options: Array(MemoryUnit.allCases),
+                                displayName: { $0.displayName },
+                                onSelectionChanged: { _ in
+                                    settingsManager.saveSettings()
                                 }
-                            }
-                            .pickerStyle(MenuPickerStyle())
+                            )
                             .frame(minWidth: 180)
-                        }
-                        .onChange(of: settingsManager.settings.memoryUnit) { _ in
-                            settingsManager.saveSettings()
                         }
                     }
                     
