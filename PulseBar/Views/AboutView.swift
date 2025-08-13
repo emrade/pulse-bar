@@ -25,7 +25,7 @@ struct AboutView: View {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 14, weight: .medium))
                             Text("Back")
-                                .themedFont(.primary, size: .regular)
+                                .themedFont(.body)
                         }
                         .themedHighContrastText()
                     }
@@ -38,7 +38,7 @@ struct AboutView: View {
                         .foregroundColor(.accentColor)
                     
                     Text("About")
-                        .themedFont(.primary, size: .large)
+                        .themedFont(.headline)
                         .themedSurfaceText()
                     
                     Spacer()
@@ -78,15 +78,15 @@ struct AboutView: View {
                         // App Details
                         VStack(spacing: 8) {
                             Text("PulseBar")
-                                .themedFont(.primary, size: .title)
+                                .themedFont(.title)
                                 .themedSurfaceText()
                             
                             Text("System Performance Monitor")
-                                .themedFont(.primary, size: .regular)
+                                .themedFont(.body)
                                 .themedSurfaceVariantText()
                             
                             Text("Version \(appVersion) (\(buildNumber))")
-                                .themedFont(.primary, size: .extraSmall)
+                                .themedFont(.footnote)
                                 .themedSurfaceVariantText()
                         }
                     }
@@ -294,10 +294,10 @@ extension AboutView {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .foregroundColor(iconColor)
-                    .font(.themedLarge)
+                    .font(.themedHeadline)
                 
                 Text(title)
-                    .themedFont(.primary, size: .large)
+                    .themedFont(.headline)
                     .themedSurfaceText()
             }
             
@@ -314,16 +314,16 @@ extension AboutView {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .foregroundColor(.accentColor)
-                .font(.themedRegular)
+                .font(.themedBody)
                 .frame(width: 20)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .themedFont(.primary, size: .regular)
+                    .themedFont(.body)
                     .themedSurfaceText()
                 
                 Text(description)
-                    .themedFont(.primary, size: .extraSmall)
+                    .themedFont(.footnote)
                     .themedSurfaceVariantText()
             }
             
@@ -335,13 +335,13 @@ extension AboutView {
     private func systemInfoRow(label: String, value: String) -> some View {
         HStack {
             Text(label)
-                .themedFont(.primary, size: .regular)
+                .themedFont(.body)
                 .themedSurfaceVariantText()
             
             Spacer()
             
             Text(value)
-                .themedFont(.primary, size: .regular)
+                .themedFont(.body)
                 .themedSurfaceText()
         }
         .padding(.vertical, 4)
@@ -350,13 +350,13 @@ extension AboutView {
     private func techRow(label: String, value: String) -> some View {
         HStack {
             Text(label)
-                .themedFont(.primary, size: .regular)
+                .themedFont(.body)
                 .themedSurfaceVariantText()
             
             Spacer()
             
             Text(value)
-                .themedFont(.primary, size: .extraSmall)
+                .themedFont(.footnote)
                 .themedSurfaceText()
         }
         .padding(.vertical, 4)

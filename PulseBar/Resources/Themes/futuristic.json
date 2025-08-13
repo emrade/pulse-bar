@@ -48,38 +48,40 @@
   },
 
   "fonts": {
-    "primary": {
-      "family": "Rajdhani",
-      "weight": "medium",
-      "size": {
-        "extraSmall": 13,
-        "small": 12,
-        "regular": 14,
-        "large": 17,
-        "title": 20
-      }
-    },
-    "accent": {
+    "headline": {
       "family": "Orbitron",
       "weight": "bold",
-      "size": {
-        "extraSmall": 12,
-        "small": 11,
-        "regular": 13,
-        "large": 16,
-        "title": 19
-      }
+      "size": 14
+    },
+    "subheadline": {
+      "family": "Rajdhani", 
+      "weight": "semibold",
+      "size": 13
+    },
+    "title": {
+      "family": "Orbitron",
+      "weight": "bold",
+      "size": 18
+    },
+    "body": {
+      "family": "Rajdhani",
+      "weight": "medium",
+      "size": 13
+    },
+    "caption": {
+      "family": "Rajdhani",
+      "weight": "regular",
+      "size": 11
+    },
+    "footnote": {
+      "family": "Rajdhani",
+      "weight": "regular",
+      "size": 10
     },
     "monospace": {
       "family": "Monaco",
       "weight": "regular",
-      "size": {
-        "extraSmall": 11,
-        "small": 10,
-        "regular": 12,
-        "large": 14,
-        "title": 16
-      }
+      "size": 11
     }
   },
 

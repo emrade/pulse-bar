@@ -38,12 +38,12 @@ struct ThemedMetricCard: View {
             // Icon and title row - exact match to original
             HStack(alignment: .center, spacing: 8) {
                 Image(systemName: icon)
-                    .font(.themedLarge)
+                    .font(.themedHeadline)
                     .foregroundColor(.accentColor)
                     .frame(width: 20, height: 20, alignment: .center)
                 
                 Text(title)
-                    .themedFont(.primary, size: .extraSmall)
+                    .themedFont(.footnote)
                     .themedSurfaceText()
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
@@ -54,7 +54,7 @@ struct ThemedMetricCard: View {
             // Value and detail - exact match to original
             VStack(alignment: .leading, spacing: 2) {
                 Text(value)
-                    .themedFont(.primary, size: .extraSmall)
+                    .themedFont(.footnote)
                     .themedSurfaceVariantText()
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
@@ -62,7 +62,7 @@ struct ThemedMetricCard: View {
                 
                 if let detail = detail {
                     Text(detail)
-                        .themedFont(.primary, size: .extraSmall)
+                        .themedFont(.footnote)
                         .themedSurfaceVariantText()
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)

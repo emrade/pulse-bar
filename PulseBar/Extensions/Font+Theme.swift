@@ -7,29 +7,44 @@
 
 import SwiftUI
 
+// MARK: - Semantic Font Styles
+enum SemanticFontStyle {
+    case headline      // Large, bold text for headings (17pt, semibold)
+    case subheadline   // Smaller headings (15pt, regular)
+    case title         // Main titles (28pt, regular)
+    case body          // Regular body text (17pt, regular)
+    case caption       // Small text, labels (12pt, regular)
+    case footnote      // Very small text (13pt, regular)
+    case monospace     // Code/monospace text
+}
+
 extension Font {
-    // MARK: - Themed Font Accessors
+    // MARK: - Semantic Font System
     
     @MainActor
-    static func themed(_ style: ThemedFontStyle, size: ThemedFontSize = .regular) -> Font {
+    static func themed(_ style: SemanticFontStyle) -> Font {
         let themeManager = ThemeManager.shared
         
-        // Use system fonts for Basic theme (with JSON weight override capability)
-        if themeManager.currentTheme.id == "basic" {
-            return systemFont(for: size, style: style)
-        }
-        
-        let fontConfig: FontStyleConfiguration
+        // Get the semantic font configuration
+        let fontConfig: SemanticFontConfiguration
         switch style {
-        case .primary:
-            fontConfig = themeManager.fonts.primary
-        case .accent:
-            fontConfig = themeManager.fonts.accent ?? themeManager.fonts.primary
+        case .headline:
+            fontConfig = themeManager.fonts.headline
+        case .subheadline:
+            fontConfig = themeManager.fonts.subheadline
+        case .title:
+            fontConfig = themeManager.fonts.title
+        case .body:
+            fontConfig = themeManager.fonts.body
+        case .caption:
+            fontConfig = themeManager.fonts.caption
+        case .footnote:
+            fontConfig = themeManager.fonts.footnote
         case .monospace:
-            fontConfig = themeManager.fonts.monospace ?? themeManager.fonts.primary
+            fontConfig = themeManager.fonts.monospace ?? themeManager.fonts.body
         }
         
-        let fontSize = fontConfig.size.value(for: size)
+        let fontSize = fontConfig.size
         let weight = fontConfig.swiftUIWeight
         
         // Handle system fonts vs custom fonts
@@ -44,91 +59,49 @@ extension Font {
         }
     }
     
+    // MARK: - Semantic Font Convenience Properties
+    
     @MainActor
-    private static func systemFont(for size: ThemedFontSize, style: ThemedFontStyle) -> Font {
-        switch size {
-        case .extraSmall:
-            if style == .monospace { return Font.system(size: 10, design: .monospaced) }
-            if style == .accent { return .caption.weight(.semibold) }
-            return .caption
-        case .small:
-            if style == .monospace { return Font.system(size: 11, design: .monospaced) }
-            if style == .accent { return .caption2.weight(.semibold) }
-            return .caption2
-        case .regular:
-            if style == .monospace { return Font.system(size: 13, design: .monospaced) }
-            if style == .accent { return .subheadline.weight(.semibold) }
-            return .subheadline
-        case .large:
-            if style == .monospace { return Font.system(size: 16, design: .monospaced) }
-            if style == .accent { return .headline.weight(.bold) }
-            return .headline
-        case .title:
-            if style == .monospace { return Font.system(size: 18, design: .monospaced) }
-            if style == .accent { return .title.weight(.bold) }
-            return .title
-        }
+    static var themedHeadline: Font {
+        Font.themed(.headline)
     }
     
-    // MARK: - Common Themed Fonts
+    @MainActor
+    static var themedSubheadline: Font {
+        Font.themed(.subheadline)
+    }
     
     @MainActor
     static var themedTitle: Font {
-        Font.themed(.primary, size: .title)
+        Font.themed(.title)
     }
     
     @MainActor
-    static var themedLarge: Font {
-        Font.themed(.primary, size: .large)
+    static var themedBody: Font {
+        Font.themed(.body)
     }
     
     @MainActor
-    static var themedRegular: Font {
-        Font.themed(.primary, size: .regular)
+    static var themedCaption: Font {
+        Font.themed(.caption)
     }
     
     @MainActor
-    static var themedSmall: Font {
-        Font.themed(.primary, size: .small)
+    static var themedFootnote: Font {
+        Font.themed(.footnote)
     }
     
     @MainActor
-    static var themedExtraSmall: Font {
-        Font.themed(.primary, size: .extraSmall)
-    }
-    
-    @MainActor
-    static var themedMonoRegular: Font {
-        Font.themed(.monospace, size: .regular)
-    }
-    
-    @MainActor
-    static var themedMonoSmall: Font {
-        Font.themed(.monospace, size: .small)
-    }
-    
-    @MainActor
-    static var themedAccentTitle: Font {
-        Font.themed(.accent, size: .title)
-    }
-    
-    @MainActor
-    static var themedAccentLarge: Font {
-        Font.themed(.accent, size: .large)
-    }
-    
-    @MainActor
-    static var themedAccentRegular: Font {
-        Font.themed(.accent, size: .regular)
+    static var themedMonospace: Font {
+        Font.themed(.monospace)
     }
     
     // MARK: - Dynamic Font Sizing
     
     @MainActor
-    static func themedDynamic(_ style: ThemedFontStyle, 
-                             size: ThemedFontSize = .regular,
+    static func themedDynamic(_ style: SemanticFontStyle, 
                              relativeTo textStyle: Font.TextStyle = .body) -> Font {
-        let baseFont = Font.themed(style, size: size)
+        let baseFont = Font.themed(style)
         return baseFont.font(relativeTo: textStyle)
     }
 }
@@ -142,12 +115,24 @@ extension Font {
     }
 }
 
-// MARK: - Text Extensions for Themed Fonts
+// MARK: - Text Extensions for Semantic Fonts
 
 extension Text {
+    // MARK: - Semantic Font Text Extensions
+    
     @MainActor
-    func themedFont(_ style: ThemedFontStyle, size: ThemedFontSize = .regular) -> Text {
-        return self.font(.themed(style, size: size))
+    func themedFont(_ style: SemanticFontStyle) -> Text {
+        return self.font(.themed(style))
+    }
+    
+    @MainActor
+    func themedHeadline() -> Text {
+        return self.font(.themedHeadline)
+    }
+    
+    @MainActor
+    func themedSubheadline() -> Text {
+        return self.font(.themedSubheadline)
     }
     
     @MainActor
@@ -156,33 +141,23 @@ extension Text {
     }
     
     @MainActor
-    func themedLarge() -> Text {
-        return self.font(.themedLarge)
+    func themedBody() -> Text {
+        return self.font(.themedBody)
     }
     
     @MainActor
-    func themedRegular() -> Text {
-        return self.font(.themedRegular)
+    func themedCaption() -> Text {
+        return self.font(.themedCaption)
     }
     
     @MainActor
-    func themedSmall() -> Text {
-        return self.font(.themedSmall)
+    func themedFootnote() -> Text {
+        return self.font(.themedFootnote)
     }
     
     @MainActor
-    func themedExtraSmall() -> Text {
-        return self.font(.themedExtraSmall)
-    }
-    
-    @MainActor
-    func themedMono(_ size: ThemedFontSize = .regular) -> Text {
-        return self.font(.themed(.monospace, size: size))
-    }
-    
-    @MainActor
-    func themedAccent(_ size: ThemedFontSize = .regular) -> Text {
-        return self.font(.themed(.accent, size: size))
+    func themedMonospace() -> Text {
+        return self.font(.themedMonospace)
     }
 }
 

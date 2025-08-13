@@ -143,7 +143,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
     private var networkSpeedChartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Network Speed Test")
-                .themedFont(.primary, size: .large)
+                .themedFont(.headline)
             
             if hasSpeedTestResults {
                 // Show current speed test results
@@ -181,7 +181,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                             Spacer()
                             
                             Text(String(format: "%.0f ms", latency))
-                                .themedFont(.primary, size: .regular)
+                                .themedFont(.body)
                                 .foregroundColor(.orange)
                         }
                     }
@@ -194,11 +194,11 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                         .foregroundColor(.gray)
                     
                     Text("No Speed Test Results")
-                        .themedFont(.primary, size: .regular)
+                        .themedFont(.body)
                         .themedSurfaceVariantText()
                     
                     Text("Run a speed test to see current network performance")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .themedSurfaceVariantText()
                         .multilineTextAlignment(.center)
                 }
@@ -210,7 +210,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 Spacer()
                 Button(action: handleSpeedTest) {
                     Text(speedTestButtonText)
-                        .themedFont(.primary, size: .regular)
+                        .themedFont(.body)
                         .themedHighContrastText()
                         .padding(.horizontal, 20)
                         .padding(.vertical, 8)
@@ -226,7 +226,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
             .padding(.top, 8)
             
             Text("Real-time network speed testing • Results are current measurements")
-                .themedFont(.primary, size: .small)
+                .themedFont(.caption)
                 .foregroundColor(Color(NSColor.tertiaryLabelColor))
         }
         .themedAdvancedSection()
@@ -235,7 +235,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
     private var signalQualitySection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Signal Quality")
-                .themedFont(.primary, size: .large)
+                .themedFont(.headline)
             
             HStack(spacing: 12) {
                 Circle()
@@ -244,10 +244,10 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(signalQualityLevel.level)
-                        .themedFont(.primary, size: .regular)
+                        .themedFont(.body)
                     
                     Text(signalQualityLevel.description)
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .themedSurfaceVariantText()
                 }
                 
@@ -259,11 +259,11 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text("Signal Strength")
-                            .themedFont(.primary, size: .small)
+                            .themedFont(.caption)
                             .themedSurfaceVariantText()
                         Spacer()
                         Text(rssiDisplayString)
-                            .themedFont(.primary, size: .small)
+                            .themedFont(.caption)
                     }
                     
                     GeometryReader { geometry in
@@ -295,7 +295,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
     private var connectionDetailsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Connection Details")
-                .themedFont(.primary, size: .large)
+                .themedFont(.headline)
             
             if metricData.isConnected {
                 VStack(spacing: 8) {
@@ -314,7 +314,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
                         .foregroundColor(.gray)
                     
                     Text("Not Connected to WiFi")
-                        .themedFont(.primary, size: .regular)
+                        .themedFont(.body)
                         .themedSurfaceVariantText()
                 }
             }
@@ -325,7 +325,7 @@ struct AdvancedNetworkView: View, AdvancedMetricView {
     private var networkStatsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Network Statistics")
-                .themedFont(.primary, size: .large)
+                .themedFont(.headline)
             
             VStack(spacing: 8) {
                 InfoRow(label: "Status", value: metricData.isConnected ? "Connected" : "Disconnected")

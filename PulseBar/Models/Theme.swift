@@ -101,23 +101,20 @@ struct GradientConfiguration: Codable {
 }
 
 struct FontConfiguration: Codable {
-    let primary: FontStyleConfiguration
-    let accent: FontStyleConfiguration?
-    let monospace: FontStyleConfiguration?
+    // Semantic font styles (matches SwiftUI text styles)
+    let headline: SemanticFontConfiguration         // Large, bold text for headings
+    let subheadline: SemanticFontConfiguration      // Smaller headings
+    let title: SemanticFontConfiguration            // Main titles
+    let body: SemanticFontConfiguration             // Regular body text
+    let caption: SemanticFontConfiguration          // Small text, labels
+    let footnote: SemanticFontConfiguration         // Very small text
+    let monospace: SemanticFontConfiguration?       // Code/monospace text
 }
 
-struct FontStyleConfiguration: Codable {
+struct SemanticFontConfiguration: Codable {
     let family: String
     let weight: String
-    let size: FontSizeConfiguration
-}
-
-struct FontSizeConfiguration: Codable {
-    let extraSmall: CGFloat
-    let small: CGFloat
-    let regular: CGFloat
-    let large: CGFloat
-    let title: CGFloat
+    let size: CGFloat
 }
 
 struct IconConfiguration: Codable {
@@ -246,29 +243,13 @@ extension Theme {
                 adaptiveText: nil
             ),
             fonts: FontConfiguration(
-                primary: FontStyleConfiguration(
-                    family: "SF Pro Display",
-                    weight: "medium",
-                    size: FontSizeConfiguration(
-                        extraSmall: 12,
-                        small: 11,
-                        regular: 13,
-                        large: 16,
-                        title: 18
-                    )
-                ),
-                accent: nil,
-                monospace: FontStyleConfiguration(
-                    family: "SF Mono",
-                    weight: "regular",
-                    size: FontSizeConfiguration(
-                        extraSmall: 11,
-                        small: 10,
-                        regular: 12,
-                        large: 14,
-                        title: 16
-                    )
-                )
+                headline: SemanticFontConfiguration(family: "system", weight: "semibold", size: 17),
+                subheadline: SemanticFontConfiguration(family: "system", weight: "regular", size: 15),
+                title: SemanticFontConfiguration(family: "system", weight: "regular", size: 28),
+                body: SemanticFontConfiguration(family: "system", weight: "regular", size: 17),
+                caption: SemanticFontConfiguration(family: "system", weight: "regular", size: 12),
+                footnote: SemanticFontConfiguration(family: "system", weight: "regular", size: 13),
+                monospace: SemanticFontConfiguration(family: "system-monospace", weight: "regular", size: 13)
             ),
             icons: IconConfiguration(
                 style: "fill",
@@ -338,7 +319,7 @@ extension Theme {
 
 // MARK: - Helper Extensions
 
-extension FontStyleConfiguration {
+extension SemanticFontConfiguration {
     var swiftUIWeight: Font.Weight {
         switch weight.lowercased() {
         case "ultralight": return .ultraLight
@@ -353,26 +334,6 @@ extension FontStyleConfiguration {
         default: return .medium
         }
     }
-}
-
-extension FontSizeConfiguration {
-    func value(for size: ThemedFontSize) -> CGFloat {
-        switch size {
-        case .extraSmall: return extraSmall
-        case .small: return small
-        case .regular: return regular
-        case .large: return large
-        case .title: return title
-        }
-    }
-}
-
-enum ThemedFontSize {
-    case extraSmall, small, regular, large, title
-}
-
-enum ThemedFontStyle {
-    case primary, accent, monospace
 }
 
 // MARK: - ColorConfiguration Extensions

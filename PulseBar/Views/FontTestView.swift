@@ -18,32 +18,32 @@ struct FontTestView: View {
             
             Group {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Primary Font (Themed)")
-                        .themedFont(.primary, size: .regular)
+                    Text("Headline Font (Themed)")
+                        .themedFont(.headline)
                         .themedSecondaryText()
                     
-                    Text("This is the primary font for the current theme")
-                        .themedFont(.primary, size: .large)
+                    Text("This is the headline font for the current theme")
+                        .themedFont(.title)
                         .themedPrimaryText()
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Accent Font (Themed)")
-                        .themedFont(.accent, size: .regular)
+                    Text("Subheadline Font (Themed)")
+                        .themedFont(.subheadline)
                         .themedSecondaryText()
                     
-                    Text("This is the accent font for titles and headers")
-                        .themedFont(.accent, size: .large)
+                    Text("This is the subheadline font for headers")
+                        .themedFont(.body)
                         .themedPrimaryText()
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Monospace Font (Themed)")
-                        .themedFont(.monospace, size: .regular)
+                        .themedFont(.caption)
                         .themedSecondaryText()
                     
                     Text("This is monospace: 1234567890")
-                        .themedFont(.monospace, size: .regular)
+                        .themedFont(.monospace)
                         .themedPrimaryText()
                 }
             }
@@ -85,14 +85,17 @@ struct FontTestView: View {
                 Text("Current Theme: \(themeManager.currentTheme.name)")
                     .font(.caption)
                 
-                Text("Primary Font: \(themeManager.fonts.primary.family)")
+                Text("Headline Font: \(themeManager.fonts.headline.family)")
                     .font(.caption)
                 
-                if let accentFont = themeManager.fonts.accent {
-                    Text("Accent Font: \(accentFont.family)")
+                Text("Body Font: \(themeManager.fonts.body.family)")
+                    .font(.caption)
+                
+                if let monospaceFont = themeManager.fonts.monospace {
+                    Text("Monospace Font: \(monospaceFont.family)")
                         .font(.caption)
                 } else {
-                    Text("Accent Font: None (using primary)")
+                    Text("Monospace Font: None (using body)")
                         .font(.caption)
                 }
                 

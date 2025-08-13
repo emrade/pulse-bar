@@ -50,27 +50,40 @@
   },
   
   "fonts": {
-    "primary": {
-      "family": "SF Pro Display",
+    "headline": {
+      "family": "system",
       "weight": "semibold",
-      "size": {
-        "extraSmall": 12,
-        "small": 11,
-        "regular": 13,
-        "large": 16,
-        "title": 18
-      }
+      "size": 14
+    },
+    "subheadline": {
+      "family": "system", 
+      "weight": "regular",
+      "size": 13
+    },
+    "title": {
+      "family": "system",
+      "weight": "regular", 
+      "size": 18
+    },
+    "body": {
+      "family": "system",
+      "weight": "regular",
+      "size": 13
+    },
+    "caption": {
+      "family": "system",
+      "weight": "regular",
+      "size": 11
+    },
+    "footnote": {
+      "family": "system",
+      "weight": "regular",
+      "size": 10
     },
     "monospace": {
-      "family": "SF Mono",
+      "family": "system-monospace",
       "weight": "regular",
-      "size": {
-        "extraSmall": 11,
-        "small": 10,
-        "regular": 12,
-        "large": 14,
-        "title": 16
-      }
+      "size": 11
     }
   },
   

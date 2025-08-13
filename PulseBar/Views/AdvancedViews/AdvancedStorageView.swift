@@ -144,7 +144,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
     private var storageBreakdownSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Storage Breakdown")
-                .themedFont(.primary, size: .large)
+                .themedFont(.headline)
                 .themedSurfaceText()
             
             HStack(spacing: 20) {
@@ -170,10 +170,10 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.label)
-                                    .themedFont(.primary, size: .small)
+                                    .themedFont(.caption)
                                     .themedSurfaceText()
                                 Text(FormatterUtility.shared.formatFileSize(UInt64(item.value)))
-                                    .themedFont(.primary, size: .small)
+                                    .themedFont(.caption)
                                     .themedSurfaceVariantText()
                             }
                             
@@ -191,7 +191,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
     private var healthStatusSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Disk Health")
-                .themedFont(.primary, size: .large)
+                .themedFont(.headline)
                 .themedSurfaceText()
             
             HStack(spacing: 12) {
@@ -203,25 +203,25 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                     if let bootVolume = metricData.bootVolume,
                        let smartStatus = bootVolume.smartStatus {
                         Text("SMART Status: \(smartStatus.overallHealth)")
-                            .themedFont(.primary, size: .regular)
+                            .themedFont(.body)
                             .themedSurfaceText()
                         
                         if smartStatus.isAvailable {
                             Text("Disk SMART data is available and \(smartStatus.isHealthy ? "healthy" : "indicating potential issues")")
-                                .themedFont(.primary, size: .small)
+                                .themedFont(.caption)
                                 .themedSurfaceVariantText()
                         } else {
                             Text("SMART data not available for this drive")
-                                .themedFont(.primary, size: .small)
+                                .themedFont(.caption)
                                 .themedSurfaceVariantText()
                         }
                     } else {
                         Text("SMART Status: Unknown")
-                            .themedFont(.primary, size: .regular)
+                            .themedFont(.body)
                             .themedSurfaceText()
                         
                         Text("Disk appears to be functioning normally")
-                            .themedFont(.primary, size: .small)
+                            .themedFont(.caption)
                             .themedSurfaceVariantText()
                     }
                 }
@@ -238,7 +238,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                    let smartStatus = bootVolume.smartStatus,
                    let temperature = smartStatus.formattedTemperature {
                     Text("Temperature: \(temperature)")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .themedSurfaceText()
                     
                     Spacer()
@@ -259,17 +259,17 @@ struct AdvancedStorageView: View, AdvancedMetricView {
                     }()
                     
                     Text(tempStatus)
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .foregroundColor(tempColor)
                 } else {
                     Text("Temperature: \(FormatterUtility.shared.formatTemperature(38.0))")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .themedSurfaceText()
                     
                     Spacer()
                     
                     Text("Normal")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .foregroundColor(.green)
                 }
             }
@@ -280,7 +280,7 @@ struct AdvancedStorageView: View, AdvancedMetricView {
     private var volumeInfoSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Volume Information")
-                .themedFont(.primary, size: .large)
+                .themedFont(.headline)
                 .themedSurfaceText()
             
             if let bootVolume = metricData.bootVolume {
@@ -305,13 +305,13 @@ struct InfoRow: View {
     var body: some View {
         HStack {
             Text(label)
-                .themedFont(.primary, size: .small)
+                .themedFont(.caption)
                 .themedSurfaceVariantText()
             
             Spacer()
             
             Text(value)
-                .themedFont(.primary, size: .small)
+                .themedFont(.caption)
                 .themedSurfaceText()
         }
     }

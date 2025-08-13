@@ -107,7 +107,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
     private var deviceSummarySection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Device Summary")
-                .themedFont(.primary, size: .large)
+                .themedFont(.headline)
             
             HStack(spacing: 20) {
                 // Active devices indicator
@@ -117,7 +117,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                         .foregroundColor(.green)
                     
                     Text("Active")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .themedSurfaceVariantText()
                 }
                 
@@ -130,7 +130,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                         .themedSurfaceText()
                     
                     Text("Total")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .themedSurfaceVariantText()
                 }
                 
@@ -145,7 +145,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                     }
                     
                     Text("Connection Types")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .themedSurfaceVariantText()
                 }
             }
@@ -160,7 +160,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                 .foregroundColor(color)
             
             Text(label)
-                .themedFont(.primary, size: .small)
+                .themedFont(.caption)
                 .themedSurfaceVariantText()
         }
     }
@@ -172,12 +172,12 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                     .foregroundColor(.accentColor)
                 
                 Text(category.name)
-                    .themedFont(.primary, size: .large)
+                    .themedFont(.headline)
                 
                 Spacer()
                 
                 Text("\(category.devices.count)")
-                    .themedFont(.primary, size: .small)
+                    .themedFont(.caption)
                     .themedSurfaceVariantText()
             }
             
@@ -188,7 +188,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                         .foregroundColor(.gray)
                     
                     Text("No devices connected")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .themedSurfaceVariantText()
                 }
                 .frame(maxWidth: .infinity)
@@ -213,11 +213,11 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(device.name)
-                    .themedFont(.primary, size: .regular)
+                    .themedFont(.body)
                     .foregroundColor(device.isActive ? .primary : .secondary)
                 
                 Text(device.connectionType)
-                    .themedFont(.primary, size: .small)
+                    .themedFont(.caption)
                     .themedSurfaceVariantText()
             }
             
@@ -230,7 +230,7 @@ struct AdvancedDeviceView: View, AdvancedMetricView {
                     .frame(width: 6, height: 6)
                 
                 Text(device.isActive ? "Active" : "Idle")
-                    .themedFont(.primary, size: .small)
+                    .themedFont(.caption)
                     .themedSurfaceVariantText()
             }
         }

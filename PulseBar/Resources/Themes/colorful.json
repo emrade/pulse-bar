@@ -55,38 +55,40 @@
   },
 
   "fonts": {
-    "primary": {
-      "family": "Nunito Sans",
-      "weight": "regular",
-      "size": {
-        "extraSmall": 12,
-        "small": 11,
-        "regular": 13,
-        "large": 16,
-        "title": 19
-      }
-    },
-    "accent": {
+    "headline": {
       "family": "Baloo 2",
       "weight": "bold",
-      "size": {
-        "extraSmall": 13,
-        "small": 12,
-        "regular": 14,
-        "large": 17,
-        "title": 21
-      }
+      "size": 14
+    },
+    "subheadline": {
+      "family": "Nunito Sans", 
+      "weight": "semibold",
+      "size": 13
+    },
+    "title": {
+      "family": "Baloo 2",
+      "weight": "bold",
+      "size": 18
+    },
+    "body": {
+      "family": "Nunito Sans",
+      "weight": "regular",
+      "size": 13
+    },
+    "caption": {
+      "family": "Nunito Sans",
+      "weight": "regular",
+      "size": 11
+    },
+    "footnote": {
+      "family": "Nunito Sans",
+      "weight": "regular",
+      "size": 10
     },
     "monospace": {
       "family": "SF Mono",
       "weight": "regular",
-      "size": {
-        "extraSmall": 11,
-        "small": 10,
-        "regular": 12,
-        "large": 14,
-        "title": 16
-      }
+      "size": 11
     }
   },
 

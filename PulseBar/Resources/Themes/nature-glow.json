@@ -55,38 +55,40 @@
   },
 
   "fonts": {
-    "primary": {
-      "family": "Lato",
-      "weight": "regular",
-      "size": {
-        "extraSmall": 12,
-        "small": 11,
-        "regular": 13,
-        "large": 16,
-        "title": 18
-      }
-    },
-    "accent": {
+    "headline": {
       "family": "Merriweather Sans",
       "weight": "bold",
-      "size": {
-        "extraSmall": 12,
-        "small": 11,
-        "regular": 13,
-        "large": 16,
-        "title": 19
-      }
+      "size": 14
+    },
+    "subheadline": {
+      "family": "Lato", 
+      "weight": "semibold",
+      "size": 13
+    },
+    "title": {
+      "family": "Merriweather Sans",
+      "weight": "bold",
+      "size": 18
+    },
+    "body": {
+      "family": "Lato",
+      "weight": "regular",
+      "size": 13
+    },
+    "caption": {
+      "family": "Lato",
+      "weight": "regular",
+      "size": 11
+    },
+    "footnote": {
+      "family": "Lato",
+      "weight": "regular",
+      "size": 10
     },
     "monospace": {
       "family": "SF Mono",
       "weight": "regular",
-      "size": {
-        "extraSmall": 11,
-        "small": 10,
-        "regular": 12,
-        "large": 14,
-        "title": 16
-      }
+      "size": 11
     }
   },
 

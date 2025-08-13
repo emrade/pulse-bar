@@ -148,7 +148,7 @@ struct ThemedHeader: View {
                 .themedIcon(size: .small)
             
             Text("PulseBar")
-                .themedFont(.primary, size: .large)
+                .themedFont(.headline)
                 .themedPrimaryText()
             
             Spacer()
@@ -207,7 +207,7 @@ struct FooterButton: View {
                     .themedIcon(size: .small)
                 
                 Text(title)
-                    .themedFont(.primary, size: .small)
+                    .themedFont(.caption)
             }
             .themedSecondaryText()
         }

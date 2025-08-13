@@ -30,9 +30,9 @@ struct AdvancedViewHeader: View {
             Button(action: onBack) {
                 HStack(spacing: 4) {
                     Image(systemName: "chevron.left")
-                        .font(.themedSmall)
+                        .font(.themedCaption)
                     Text("Back")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                 }
                 .themedHighContrastText()
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -62,7 +62,7 @@ struct AdvancedViewHeader: View {
                 Image(systemName: icon)
                     .foregroundColor(.accentColor)
                 Text(title)
-                    .themedFont(.primary, size: .large)
+                    .themedFont(.headline)
                     .themedSurfaceText()
             }
             
@@ -82,9 +82,9 @@ struct RemarkView: View {
                 HStack {
                     Image(systemName: "lightbulb")
                         .foregroundColor(.orange)
-                        .font(.themedSmall)
+                        .font(.themedCaption)
                     Text("Insights")
-                        .themedFont(.primary, size: .small)
+                        .themedFont(.caption)
                         .themedSurfaceVariantText()
                 }
                 
@@ -96,7 +96,7 @@ struct RemarkView: View {
                                 .frame(width: 4, height: 4)
                                 .padding(.top, 6)
                             Text(remark)
-                                .themedFont(.primary, size: .small)
+                                .themedFont(.caption)
                                 .themedSurfaceVariantText()
                                 .fixedSize(horizontal: false, vertical: true)
                         }

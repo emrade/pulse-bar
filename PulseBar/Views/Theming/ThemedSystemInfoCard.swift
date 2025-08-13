@@ -20,7 +20,7 @@ struct ThemedSystemInfoCard: View {
                         .themedIcon(size: .regular)
                     
                     Text(systemInfo.computerName)
-                        .themedFont(.primary, size: .large)
+                        .themedFont(.headline)
                         .themedPrimaryText()
                     
                     Spacer()
@@ -52,11 +52,11 @@ struct ThemedSystemInfoCard: View {
     private func systemInfoRow(label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
-                .themedFont(.primary, size: .regular)
+                .themedFont(.body)
                 .themedSecondaryText()
             
             Text(value)
-                .themedFont(.primary, size: .regular)
+                .themedFont(.body)
                 .themedPrimaryText()
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
