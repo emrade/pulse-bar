@@ -35,10 +35,11 @@ rm -rf DerivedData
 rm -rf *.app
 rm -rf *.zip
 
-# Build and test locally
+# Build and test locally (using custom DerivedData path)
 xcodebuild -project PulseBar.xcodeproj \
   -scheme PulseBar \
   -configuration Release \
+  -derivedDataPath ./DerivedData \
   clean build
 
 # Test the app launches and works correctly
