@@ -52,18 +52,33 @@ PulseBar brings essential system metrics directly to your macOS menu bar with a 
 
 **Important**: Since PulseBar is distributed outside the App Store, macOS will show a security warning. This is normal for open source apps that aren't notarized by Apple.
 
-**If you see "Apple could not verify PulseBar.app is free of malware":**
+**If you see "Apple could not verify PulseBar.app is free of malware" or only "Done/Move to Trash" options:**
 
-**Method 1 (Recommended):**
+**Method 1 (Most Reliable):**
+1. Try to open the app normally (it will be blocked)
+2. Click **"Done"** (don't move to trash)
+3. Go to **System Settings → Privacy & Security → Security** (or **System Preferences → Security & Privacy → General** on older macOS)
+4. Look for a message about PulseBar being blocked 
+5. Click **"Open Anyway"** button next to the PulseBar warning
+6. Confirm by clicking **"Open"** in the new dialog
+
+**Method 2 (Right-click):**
 1. **Right-click** on `PulseBar.app` → Select **"Open"**
-2. Click **"Open"** in the security dialog that appears
+2. Click **"Open"** in the security dialog (if this option appears)
 3. The app will launch and be trusted for future use
 
-**Method 2 (Alternative):**
-1. Try to open the app normally (it will be blocked)
-2. Go to **System Preferences → Security & Privacy → General**  
-3. Click **"Open Anyway"** next to the PulseBar warning
-4. Confirm by clicking **"Open"**
+**Method 3 (Advanced - Terminal):**
+If neither method works, you can remove the quarantine flag:
+```bash
+# Navigate to Applications folder
+cd /Applications
+
+# Remove quarantine flag
+sudo xattr -rd com.apple.quarantine PulseBar.app
+
+# Open the app
+open PulseBar.app
+```
 
 **After successful launch:**
 - Grant permissions when prompted:
@@ -126,8 +141,9 @@ Switch themes instantly from the Settings page.
 
 ### App Won't Open / Security Warning
 - **"Cannot verify PulseBar.app is free of malware"**: This is normal for open source apps
-- **Solution**: **Right-click → Open** instead of double-clicking
-- **Alternative**: Check **System Preferences → Security & Privacy → General** for "Open Anyway" button
+- **Solution**: Try to open normally, click "Done", then go to **System Settings → Privacy & Security → Security** 
+- **Look for**: "Open Anyway" button next to PulseBar warning
+- **Alternative**: **Right-click → Open** (may not always work)
 - **Still blocked?**: Ensure you're running **macOS 12.0+** and try restarting your Mac
 
 ### Missing Data
