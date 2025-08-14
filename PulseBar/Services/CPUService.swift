@@ -7,9 +7,11 @@
 
 import Foundation
 import Combine
+import os
 
 final class CPUService: CPUServiceProtocol, @unchecked Sendable {
     private let metricsSubject = CurrentValueSubject<CPUMetrics, Never>(CPUMetrics())
+    private let logger = PulseBarLogger.shared
     
     var metricsPublisher: AnyPublisher<CPUMetrics, Never> {
         metricsSubject.eraseToAnyPublisher()
@@ -60,7 +62,7 @@ final class CPUService: CPUServiceProtocol, @unchecked Sendable {
                 metricsSubject.send(cpuMetrics)
             }
         } catch {
-            print("CPU Service Error: \(error)")
+            logger.logSystemError("CPU Service Error", error: error)
             let errorMetrics = CPUMetrics(
                 overallUsage: 0.0,
                 perCoreUsage: [],

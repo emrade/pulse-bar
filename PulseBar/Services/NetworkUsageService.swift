@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import Darwin
 import SystemConfiguration
+import os
 
 struct NetworkUsagePoint: Codable {
     let timestamp: Date
@@ -25,6 +26,7 @@ protocol NetworkUsageServiceProtocol {
 
 final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendable {
     private let metricsSubject = CurrentValueSubject<NetworkUsageMetrics, Never>(NetworkUsageMetrics())
+    private let logger = PulseBarLogger.shared
     
     var metricsPublisher: AnyPublisher<NetworkUsageMetrics, Never> {
         metricsSubject.eraseToAnyPublisher()
@@ -65,8 +67,8 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
         
         if !Calendar.current.isDate(today, inSameDayAs: lastUpdateDate) {
             // New day detected, reset daily counters and system baseline
-            print("NetworkUsageService: New day detected. Last update: \(lastUpdateDate), Today: \(today)")
-            print("NetworkUsageService: Resetting daily usage from \(dailyDownloaded) bytes down, \(dailyUploaded) bytes up")
+            logger.logNetworkInfo("New day detected. Last update: \(lastUpdateDate), Today: \(today)")
+            logger.logNetworkInfo("Resetting daily usage from \(dailyDownloaded) bytes down, \(dailyUploaded) bytes up")
             
             dailyDownloaded = 0
             dailyUploaded = 0
@@ -78,7 +80,7 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
             userDefaults.set(currentSystemUsage.bytesIn, forKey: lastSystemBytesInKey)
             userDefaults.set(currentSystemUsage.bytesOut, forKey: lastSystemBytesOutKey)
             
-            print("NetworkUsageService: Daily usage reset completed")
+            logger.logNetworkInfo("Daily usage reset completed")
             
             // Update the local variables to reflect the reset baseline
             let resetMetrics = NetworkUsageMetrics(downloaded: 0, uploaded: 0, isLoading: false, error: nil)
@@ -133,48 +135,113 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
     
     private func getNetworkUsage() -> (bytesIn: UInt64, bytesOut: UInt64) {
         let primaryInterface = getPrimaryNetworkInterface()
+        logger.logNetworkInfo("Starting network interface enumeration, primary interface: \(primaryInterface ?? "none")")
 
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
         var bytesIn: UInt64 = 0
         var bytesOut: UInt64 = 0
         
         guard getifaddrs(&ifaddr) == 0 else {
+            logger.logNetworkError("Failed to enumerate network interfaces - getifaddrs returned error")
+            logger.logNetworkInterfaceAccess(interfaceName: nil, success: false, bytesIn: nil, bytesOut: nil)
             return (0, 0)
         }
         
+        defer {
+            freeifaddrs(ifaddr)
+        }
+        
+        var processedInterfaces: Set<String> = []
         var ptr = ifaddr
+        
         while ptr != nil {
             defer { ptr = ptr?.pointee.ifa_next }
             
-            let interface = ptr?.pointee
-            let addr = interface?.ifa_addr.pointee
-            let name = String(cString: (interface?.ifa_name)!)
+            guard let interface = ptr?.pointee,
+                  let interfaceName = interface.ifa_name else {
+                logger.logNetworkWarning("Encountered null interface during enumeration")
+                continue
+            }
             
-            if addr?.sa_family == UInt8(AF_LINK) {
-                if primaryInterface == nil || name == primaryInterface { // If primary interface is nil, count all interfaces
-                    if let data = interface?.ifa_data {
+            let name = String(cString: interfaceName)
+            
+            // Validate interface name to prevent buffer overflow attacks
+            guard isValidInterfaceName(name) else {
+                logger.logSecurityWarning("Invalid interface name detected: \(name)")
+                continue
+            }
+            
+            // Prevent processing duplicate interfaces
+            guard !processedInterfaces.contains(name) else {
+                continue
+            }
+            processedInterfaces.insert(name)
+            
+            guard let addr = interface.ifa_addr?.pointee else {
+                continue
+            }
+            
+            if addr.sa_family == UInt8(AF_LINK) {
+                if primaryInterface == nil || name == primaryInterface {
+                    if let data = interface.ifa_data {
                         let networkData = data.assumingMemoryBound(to: if_data.self)
-                        bytesIn += UInt64(networkData.pointee.ifi_ibytes)
-                        bytesOut += UInt64(networkData.pointee.ifi_obytes)
+                        let interfaceBytesIn = UInt64(networkData.pointee.ifi_ibytes)
+                        let interfaceBytesOut = UInt64(networkData.pointee.ifi_obytes)
+                        
+                        // Bounds checking to prevent integer overflow
+                        guard validateNetworkBytes(interfaceBytesIn, interfaceBytesOut) else {
+                            logger.logSecurityWarning("Network bytes validation failed for interface \(name): in=\(interfaceBytesIn), out=\(interfaceBytesOut)")
+                            continue
+                        }
+                        
+                        // Safe addition with overflow protection
+                        let (newBytesIn, inOverflow) = bytesIn.addingReportingOverflow(interfaceBytesIn)
+                        let (newBytesOut, outOverflow) = bytesOut.addingReportingOverflow(interfaceBytesOut)
+                        
+                        if inOverflow || outOverflow {
+                            logger.logSecurityError("Integer overflow detected when adding network bytes for interface \(name)")
+                            continue
+                        }
+                        
+                        bytesIn = newBytesIn
+                        bytesOut = newBytesOut
+                        
+                        logger.logNetworkInfo("Processed interface \(name): +\(interfaceBytesIn) bytes in, +\(interfaceBytesOut) bytes out")
                     }
                 }
             }
         }
         
-        freeifaddrs(ifaddr)
+        logger.logNetworkInterfaceAccess(interfaceName: primaryInterface, success: true, bytesIn: bytesIn, bytesOut: bytesOut)
+        logger.logNetworkInfo("Network enumeration completed. Total: \(bytesIn) bytes in, \(bytesOut) bytes out")
+        
         return (bytesIn, bytesOut)
     }
 
     private func getPrimaryNetworkInterface() -> String? {
         guard let store = SCDynamicStoreCreate(nil, "getPrimaryInterface" as CFString, nil, nil) else {
+            logger.logNetworkError("Failed to create SCDynamicStore for primary interface detection")
             return nil
         }
 
         guard let globalState = SCDynamicStoreCopyValue(store, "State:/Network/Global/IPv4" as CFString) as? [String: Any] else {
+            logger.logNetworkWarning("Failed to retrieve network global state - no primary interface available")
             return nil
         }
 
-        return globalState["PrimaryInterface"] as? String
+        guard let primaryInterface = globalState["PrimaryInterface"] as? String else {
+            logger.logNetworkWarning("Primary interface not found in global state")
+            return nil
+        }
+        
+        // Validate the primary interface name
+        guard isValidInterfaceName(primaryInterface) else {
+            logger.logSecurityError("Invalid primary interface name: \(primaryInterface)")
+            return nil
+        }
+        
+        logger.logNetworkInfo("Primary network interface detected: \(primaryInterface)")
+        return primaryInterface
     }
     
     func getHourlyUsageHistory() -> [NetworkUsagePoint] {
@@ -193,7 +260,7 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
                 Calendar.current.isDate(point.timestamp, inSameDayAs: today)
             }
         } catch {
-            print("Failed to decode hourly usage history: \(error)")
+            logger.logNetworkError("Failed to decode hourly usage history", error: error)
             return []
         }
     }
@@ -239,7 +306,7 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
             let data = try encoder.encode(hourlyHistory)
             userDefaults.set(data, forKey: hourlyUsageKey)
         } catch {
-            print("Failed to encode hourly usage history: \(error)")
+            logger.logNetworkError("Failed to encode hourly usage history", error: error)
         }
     }
     
@@ -251,13 +318,13 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
         
         // Get next midnight
         guard let nextMidnight = calendar.nextDate(after: now, matching: DateComponents(hour: 0, minute: 0, second: 0), matchingPolicy: .nextTime) else {
-            print("Failed to calculate next midnight")
+            logger.logNetworkError("Failed to calculate next midnight for auto-reset timer")
             return
         }
         
         let timeUntilMidnight = nextMidnight.timeIntervalSince(now)
         
-        print("NetworkUsageService: Next automatic reset in \(Int(timeUntilMidnight)) seconds (\(nextMidnight))")
+        logger.logNetworkInfo("Next automatic reset in \(Int(timeUntilMidnight)) seconds (\(nextMidnight))")
         
         // Set up timer to fire at midnight
         DispatchQueue.main.async { [weak self] in
@@ -271,17 +338,53 @@ final class NetworkUsageService: NetworkUsageServiceProtocol, @unchecked Sendabl
     
     @MainActor
     private func performAutomaticMidnightReset() async {
-        print("NetworkUsageService: Performing automatic midnight reset")
+        logger.logNetworkInfo("Performing automatic midnight reset")
         
         // Check if auto-reset is enabled in settings
         if SettingsAccessor.getCurrentSettings().autoResetDailyData {
             // Reset the daily usage
             await resetDailyUsage()
         } else {
-            print("NetworkUsageService: Auto-reset disabled in settings")
+            logger.logNetworkInfo("Auto-reset disabled in settings")
         }
         
         // Schedule the next midnight reset (24 hours from now)
         setupMidnightResetTimer()
+    }
+    
+    // MARK: - Security Validation Methods
+    
+    /// Validates network interface names to prevent injection attacks
+    private func isValidInterfaceName(_ name: String) -> Bool {
+        // Interface names should be reasonable length and contain only safe characters
+        guard name.count <= 16,  // Standard max interface name length
+              !name.isEmpty,
+              name.allSatisfy({ $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-" || $0 == "_") }) else {
+            return false
+        }
+        
+        // Reject interface names that could be used for path traversal or injection
+        let dangerousPatterns = ["..", "/", "\\", ";", "&", "|", "`", "$", "(", ")"]
+        for pattern in dangerousPatterns {
+            if name.contains(pattern) {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    /// Validates network byte values to prevent integer overflow and unrealistic values
+    private func validateNetworkBytes(_ bytesIn: UInt64, _ bytesOut: UInt64) -> Bool {
+        // Check for unrealistic byte counts that might indicate corrupted data or attack
+        let maxReasonableBytes: UInt64 = 1_000_000_000_000_000 // 1 PB - extremely generous upper bound
+        
+        guard bytesIn <= maxReasonableBytes,
+              bytesOut <= maxReasonableBytes else {
+            logger.logSecurityError("Network bytes exceed reasonable bounds: in=\(bytesIn), out=\(bytesOut)")
+            return false
+        }
+        
+        return true
     }
 }

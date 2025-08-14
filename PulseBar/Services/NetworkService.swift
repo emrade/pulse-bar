@@ -128,28 +128,48 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
             "https://github.com/favicon.ico" // Another fallback
         ]
         
+        // Validate endpoints before use
+        let validatedEndpoints = testEndpoints.compactMap { endpoint in
+            validateAndSanitizeURL(endpoint)
+        }
+        
+        guard !validatedEndpoints.isEmpty else {
+            throw NetworkSpeedTestError.allEndpointsFailed
+        }
+        
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForRequest = 30 // Increased for security
         configuration.timeoutIntervalForResource = 30
         configuration.urlCache = nil // Disable caching for accurate measurement
-        let session = URLSession(configuration: configuration)
+        
+        // Enhanced security settings
+        configuration.tlsMinimumSupportedProtocolVersion = .TLSv12
+        configuration.httpMaximumConnectionsPerHost = 1
+        configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        
+        let session = URLSession(configuration: configuration, delegate: SecureURLSessionDelegate(), delegateQueue: nil)
         
         var bestSpeed: Double = 0.0
         var successfulTests = 0
         let maxTestDuration: TimeInterval = 10.0 // Maximum time per test
         
-        for (index, endpoint) in testEndpoints.enumerated() {
-            guard let url = URL(string: endpoint) else { continue }
+        for (index, endpoint) in validatedEndpoints.enumerated() {
             guard !Task.isCancelled else { throw CancellationError() }
             
             do {
-                print("Speed Test Debug: Testing endpoint \(index + 1)/\(testEndpoints.count): \(endpoint)")
+                print("Speed Test Debug: Testing endpoint \(index + 1)/\(validatedEndpoints.count): \(endpoint)")
+                
+                // Create secure request
+                var request = URLRequest(url: endpoint)
+                request.timeoutInterval = 30
+                request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+                request.setValue("PulseBar/1.0", forHTTPHeaderField: "User-Agent")
                 
                 let startTime = CFAbsoluteTimeGetCurrent()
                 
-                // Create a task with timeout
+                // Create a task with timeout and size limits
                 let downloadTask = Task {
-                    return try await session.data(from: url)
+                    return try await performSecureDownload(session: session, request: request, maxSize: 50_000_000) // 50MB limit
                 }
                 
                 let timeoutTask = Task {
@@ -167,8 +187,9 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
                 guard let httpResponse = response as? HTTPURLResponse,
                       httpResponse.statusCode == 200,
                       duration > 0.1, // Minimum duration for meaningful measurement
-                      data.count > 1000 else { // Minimum data size
-                    print("Speed Test Debug: Endpoint \(endpoint) - Invalid response or too fast")
+                      data.count > 1000, // Minimum data size
+                      data.count <= 50_000_000 else { // Maximum data size
+                    print("Speed Test Debug: Endpoint \(endpoint.absoluteString) - Invalid response, too fast, or size violation")
                     continue
                 }
                 
@@ -176,24 +197,24 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
                 let bytesPerSecond = Double(data.count) / duration
                 let mbps = (bytesPerSecond * 8) / 1_000_000 // Convert to Mbps
                 
-                print("Speed Test Debug: Endpoint \(endpoint) - Downloaded \(data.count) bytes in \(duration)s = \(mbps) Mbps")
+                print("Speed Test Debug: Endpoint \(endpoint.absoluteString) - Downloaded \(data.count) bytes in \(duration)s = \(mbps) Mbps")
                 
                 bestSpeed = max(bestSpeed, mbps)
                 successfulTests += 1
                 
                 // Update progress
                 await MainActor.run {
-                    let progress = 0.1 + (Double(index + 1) / Double(testEndpoints.count)) * 0.5
+                    let progress = 0.1 + (Double(index + 1) / Double(validatedEndpoints.count)) * 0.5
                     speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: progress))
                 }
                 
                 // If we get a good speed from Cloudflare, prioritize it
-                if endpoint.contains("cloudflare") && mbps > 1.0 {
+                if endpoint.absoluteString.contains("cloudflare") && mbps > 1.0 {
                     break
                 }
                 
             } catch {
-                print("Speed Test Debug: Endpoint \(endpoint) failed: \(error)")
+                print("Speed Test Debug: Endpoint \(endpoint.absoluteString) failed: \(error)")
                 continue
             }
         }
@@ -218,14 +239,27 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
             "https://httpbingo.org/post" // Another testing service
         ]
         
+        // Validate endpoints before use
+        let validatedEndpoints = uploadEndpoints.compactMap { endpoint in
+            validateAndSanitizeURL(endpoint)
+        }
+        
+        guard !validatedEndpoints.isEmpty else {
+            throw NetworkSpeedTestError.allEndpointsFailed
+        }
+        
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 20
+        configuration.timeoutIntervalForRequest = 30 // Increased for security
         configuration.timeoutIntervalForResource = 30
         configuration.urlCache = nil
-        // Optimize for upload performance
+        
+        // Enhanced security settings
+        configuration.tlsMinimumSupportedProtocolVersion = .TLSv12
+        configuration.httpMaximumConnectionsPerHost = 1
         configuration.allowsCellularAccess = true
         configuration.waitsForConnectivity = false
-        let session = URLSession(configuration: configuration)
+        
+        let session = URLSession(configuration: configuration, delegate: SecureURLSessionDelegate(), delegateQueue: nil)
         
         var bestSpeed: Double = 0.0
         var successfulTests = 0
@@ -239,19 +273,19 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
             arc4random_buf(bytes.baseAddress, testDataSize)
         }
         
-        for (index, endpoint) in uploadEndpoints.enumerated() {
-            guard let url = URL(string: endpoint) else { continue }
+        for (index, endpoint) in validatedEndpoints.enumerated() {
             guard !Task.isCancelled else { throw CancellationError() }
             
             do {
-                print("Speed Test Debug: Testing upload to \(endpoint)")
+                print("Speed Test Debug: Testing upload to \(endpoint.absoluteString)")
                 
-                var request = URLRequest(url: url)
+                var request = URLRequest(url: endpoint)
                 request.httpMethod = "POST"
                 request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+                request.setValue("PulseBar/1.0", forHTTPHeaderField: "User-Agent")
                 request.setValue("\(testDataSize)", forHTTPHeaderField: "Content-Length")
                 request.httpBody = testData
-                request.timeoutInterval = 20
+                request.timeoutInterval = 30
                 
                 // Measure upload time more precisely - start timing just before upload
                 let startTime = CFAbsoluteTimeGetCurrent()
@@ -278,25 +312,25 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
                 let bytesPerSecond = Double(testDataSize) / adjustedDuration
                 let mbps = (bytesPerSecond * 8) / 1_000_000 // Convert to Mbps
                 
-                print("Speed Test Debug: Upload to \(endpoint) - Uploaded \(testDataSize) bytes in \(duration)s (adjusted: \(adjustedDuration)s) = \(mbps) Mbps, response size: \(responseData.count) bytes")
+                print("Speed Test Debug: Upload to \(endpoint.absoluteString) - Uploaded \(testDataSize) bytes in \(duration)s (adjusted: \(adjustedDuration)s) = \(mbps) Mbps, response size: \(responseData.count) bytes")
                 
                 bestSpeed = max(bestSpeed, mbps)
                 successfulTests += 1
                 
                 // Update progress
                 await MainActor.run {
-                    let progress = 0.7 + (Double(index + 1) / Double(uploadEndpoints.count)) * 0.3
+                    let progress = 0.7 + (Double(index + 1) / Double(validatedEndpoints.count)) * 0.3
                     speedTestSubject.send(NetworkSpeedTest(isRunning: true, progress: progress))
                 }
                 
                 // If we get a reasonable upload speed from the first endpoint, use it
                 // Don't require high speeds since upload is typically much slower than download
-                if mbps > 0.5 && endpoint.contains("httpbin") {
+                if mbps > 0.5 && endpoint.absoluteString.contains("httpbin") {
                     break
                 }
                 
             } catch {
-                print("Speed Test Debug: Upload to \(endpoint) failed: \(error)")
+                print("Speed Test Debug: Upload to \(endpoint.absoluteString) failed: \(error)")
                 continue
             }
         }
@@ -321,28 +355,44 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
             "https://www.apple.com"
         ]
         
+        // Validate endpoints before use
+        let validatedEndpoints = latencyEndpoints.compactMap { endpoint in
+            validateAndSanitizeURL(endpoint)
+        }
+        
+        guard !validatedEndpoints.isEmpty else {
+            throw NetworkSpeedTestError.allEndpointsFailed
+        }
+        
+        // Create secure session configuration
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 10
+        configuration.timeoutIntervalForResource = 10
+        configuration.tlsMinimumSupportedProtocolVersion = .TLSv12
+        
+        let session = URLSession(configuration: configuration, delegate: SecureURLSessionDelegate(), delegateQueue: nil)
+        
         var bestLatency: Double = Double.infinity
         var successfulTests = 0
         
-        for endpoint in latencyEndpoints {
-            guard let url = URL(string: endpoint) else { continue }
-            
+        for endpoint in validatedEndpoints {
             do {
                 let startTime = CFAbsoluteTimeGetCurrent()
                 
                 // Create a simple HEAD request to minimize data transfer
-                var request = URLRequest(url: url)
+                var request = URLRequest(url: endpoint)
                 request.httpMethod = "HEAD"
-                request.timeoutInterval = 5
+                request.timeoutInterval = 10
                 request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+                request.setValue("PulseBar/1.0", forHTTPHeaderField: "User-Agent")
                 
-                let (_, response) = try await URLSession.shared.data(for: request)
+                let (_, response) = try await session.data(for: request)
                 let endTime = CFAbsoluteTimeGetCurrent()
                 
                 if let httpResponse = response as? HTTPURLResponse, 
                    httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
                     let latency = (endTime - startTime) * 1000 // Convert to ms
-                    print("Speed Test Debug: Latency to \(endpoint): \(latency) ms")
+                    print("Speed Test Debug: Latency to \(endpoint.absoluteString): \(latency) ms")
                     
                     bestLatency = min(bestLatency, latency)
                     successfulTests += 1
@@ -353,7 +403,7 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
                     }
                 }
             } catch {
-                print("Speed Test Debug: Latency test to \(endpoint) failed: \(error)")
+                print("Speed Test Debug: Latency test to \(endpoint.absoluteString) failed: \(error)")
                 continue
             }
         }
@@ -368,6 +418,136 @@ final class NetworkService: NetworkServiceProtocol, @unchecked Sendable {
         
         return boundedLatency
     }
+    
+    // MARK: - Security Helper Methods
+    
+    private func validateAndSanitizeURL(_ urlString: String) -> URL? {
+        // Remove any dangerous characters
+        let sanitized = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: " ", with: "")
+        
+        // Validate URL format
+        guard let url = URL(string: sanitized),
+              let scheme = url.scheme?.lowercased(),
+              scheme == "https", // Only allow HTTPS
+              let host = url.host else {
+            print("NetworkService: Invalid or insecure URL: \(urlString)")
+            return nil
+        }
+        
+        // Whitelist allowed domains
+        let allowedDomains = [
+            "speed.cloudflare.com",
+            "www.google.com",
+            "httpbin.org",
+            "github.com",
+            "postman-echo.com",
+            "httpbingo.org",
+            "www.cloudflare.com",
+            "www.apple.com"
+        ]
+        
+        guard allowedDomains.contains(host) else {
+            print("NetworkService: Domain not in whitelist: \(host)")
+            return nil
+        }
+        
+        return url
+    }
+    
+    private func performSecureDownload(session: URLSession, request: URLRequest, maxSize: Int) async throws -> (Data, URLResponse) {
+        var downloadedData = Data()
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            var dataTask: URLSessionDataTask?
+            
+            dataTask = session.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                
+                guard let response = response else {
+                    continuation.resume(throwing: NetworkSpeedTestError.allEndpointsFailed)
+                    return
+                }
+                
+                if let data = data {
+                    downloadedData.append(data)
+                    
+                    // Check size limit
+                    if downloadedData.count > maxSize {
+                        dataTask?.cancel()
+                        continuation.resume(throwing: NetworkSecurityError.responseSizeExceeded)
+                        return
+                    }
+                }
+                
+                continuation.resume(returning: (downloadedData, response))
+            }
+            
+            dataTask?.resume()
+        }
+    }
+}
+
+// MARK: - Security Classes and Extensions
+
+class SecureURLSessionDelegate: NSObject, URLSessionDelegate {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        
+        // Only allow server trust authentication
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+        
+        // Get server trust
+        guard let serverTrust = challenge.protectionSpace.serverTrust else {
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+        
+        // Validate the certificate chain
+        let policy = SecPolicyCreateSSL(true, challenge.protectionSpace.host as CFString)
+        SecTrustSetPolicies(serverTrust, policy)
+        
+        var error: CFError?
+        let isValid = SecTrustEvaluateWithError(serverTrust, &error)
+        
+        // Check if the certificate is valid
+        if isValid && error == nil {
+            // Additional check for known good certificates
+            if isKnownGoodCertificate(serverTrust: serverTrust, host: challenge.protectionSpace.host) {
+                let credential = URLCredential(trust: serverTrust)
+                completionHandler(.useCredential, credential)
+            } else {
+                completionHandler(.cancelAuthenticationChallenge, nil)
+            }
+        } else {
+            print("NetworkService: SSL certificate validation failed for host: \(challenge.protectionSpace.host)")
+            completionHandler(.cancelAuthenticationChallenge, nil)
+        }
+    }
+    
+    private func isKnownGoodCertificate(serverTrust: SecTrust, host: String) -> Bool {
+        // For production, you might want to implement certificate pinning here
+        // For now, we rely on the system's certificate validation
+        
+        // Additional check: ensure the host matches what we expect
+        let trustedHosts = [
+            "speed.cloudflare.com",
+            "www.google.com",
+            "httpbin.org",
+            "github.com",
+            "postman-echo.com",
+            "httpbingo.org",
+            "www.cloudflare.com",
+            "www.apple.com"
+        ]
+        
+        return trustedHosts.contains(host)
+    }
 }
 
 enum NetworkSpeedTestError: Error, LocalizedError {
@@ -377,6 +557,23 @@ enum NetworkSpeedTestError: Error, LocalizedError {
         switch self {
         case .allEndpointsFailed:
             return "Unable to connect to speed test servers"
+        }
+    }
+}
+
+enum NetworkSecurityError: Error, LocalizedError {
+    case responseSizeExceeded
+    case untrustedDomain
+    case insecureConnection
+    
+    var errorDescription: String? {
+        switch self {
+        case .responseSizeExceeded:
+            return "Response size exceeded security limit"
+        case .untrustedDomain:
+            return "Domain not in trusted whitelist"
+        case .insecureConnection:
+            return "Insecure connection attempted"
         }
     }
 }

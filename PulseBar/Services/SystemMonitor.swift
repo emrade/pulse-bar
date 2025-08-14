@@ -357,16 +357,34 @@ class SystemMonitor: ObservableObject {
     private func getEthernetInterfaces() async throws -> [String] {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/sbin/networksetup")
-        process.arguments = ["-listallhardwareports"]
+        
+        // Validate and sanitize arguments
+        let sanitizedArguments = sanitizeNetworkArguments(["-listallhardwareports"])
+        process.arguments = sanitizedArguments
+        
+        // Set secure environment
+        process.environment = createSecureNetworkEnvironment()
         
         let pipe = Pipe()
         process.standardOutput = pipe
+        process.standardError = Pipe() // Capture errors
         
         try process.run()
-        process.waitUntilExit()
         
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        guard let output = String(data: data, encoding: .utf8) else { return [] }
+        // Implement timeout mechanism
+        let timeoutResult = try await waitForNetworkProcessWithTimeout(task: process, pipe: pipe, timeout: 10.0)
+        
+        guard timeoutResult.success && process.terminationStatus == 0 else {
+            if !timeoutResult.success {
+                print("SystemMonitor: networksetup process timed out")
+                process.terminate()
+            }
+            throw NetworkProcessError.processTimeout
+        }
+        
+        guard let output = String(data: timeoutResult.data, encoding: .utf8) else { 
+            throw NetworkProcessError.invalidOutput
+        }
         
         var ethernetInterfaces: [String] = []
         let lines = output.components(separatedBy: .newlines)
@@ -377,7 +395,10 @@ class SystemMonitor: ObservableObject {
                 let deviceLine = lines[i + 1].trimmingCharacters(in: .whitespacesAndNewlines)
                 if deviceLine.hasPrefix("Device:") {
                     let device = deviceLine.replacingOccurrences(of: "Device:", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-                    ethernetInterfaces.append(device)
+                    // Validate device name format
+                    if isValidInterfaceName(device) {
+                        ethernetInterfaces.append(device)
+                    }
                 }
             }
         }
@@ -386,18 +407,42 @@ class SystemMonitor: ObservableObject {
     }
     
     private func checkInterfaceStatus(_ interface: String) async throws -> Bool {
+        // Validate interface name before using it
+        guard isValidInterfaceName(interface) else {
+            print("SystemMonitor: Invalid interface name: \(interface)")
+            return false
+        }
+        
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/sbin/ifconfig")
-        process.arguments = [interface]
+        
+        // Validate and sanitize arguments
+        let sanitizedArguments = sanitizeNetworkArguments([interface])
+        process.arguments = sanitizedArguments
+        
+        // Set secure environment
+        process.environment = createSecureNetworkEnvironment()
         
         let pipe = Pipe()
         process.standardOutput = pipe
+        process.standardError = Pipe() // Capture errors
         
         try process.run()
-        process.waitUntilExit()
         
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        guard let output = String(data: data, encoding: .utf8) else { return false }
+        // Implement timeout mechanism
+        let timeoutResult = try await waitForNetworkProcessWithTimeout(task: process, pipe: pipe, timeout: 5.0)
+        
+        guard timeoutResult.success && process.terminationStatus == 0 else {
+            if !timeoutResult.success {
+                print("SystemMonitor: ifconfig process timed out for interface: \(interface)")
+                process.terminate()
+            }
+            return false
+        }
+        
+        guard let output = String(data: timeoutResult.data, encoding: .utf8) else { 
+            return false
+        }
         
         // Check if interface is up and has an IP address
         return output.contains("status: active") || (output.contains("UP") && output.contains("inet "))
@@ -453,5 +498,145 @@ class SystemMonitor: ObservableObject {
     
     func stop() {
         stopPolling()
+    }
+    
+    // MARK: - Security Helper Methods
+    
+    private func sanitizeNetworkArguments(_ arguments: [String]) -> [String] {
+        return arguments.compactMap { arg in
+            // Remove any potentially dangerous characters
+            let sanitized = arg.replacingOccurrences(of: ";", with: "")
+                              .replacingOccurrences(of: "|", with: "")
+                              .replacingOccurrences(of: "&", with: "")
+                              .replacingOccurrences(of: "$", with: "")
+                              .replacingOccurrences(of: "`", with: "")
+                              .replacingOccurrences(of: ">", with: "")
+                              .replacingOccurrences(of: "<", with: "")
+                              .replacingOccurrences(of: "(", with: "")
+                              .replacingOccurrences(of: ")", with: "")
+            
+            // Validate argument format
+            if sanitized.hasPrefix("-") {
+                // Whitelist allowed networksetup options
+                let validOptions = ["-listallhardwareports", "-getinfo", "-listnetworkserviceorder"]
+                guard validOptions.contains(sanitized) else {
+                    print("SystemMonitor: Invalid network option: \(sanitized)")
+                    return nil
+                }
+            } else {
+                // For interface names, validate format
+                guard isValidInterfaceName(sanitized) else {
+                    print("SystemMonitor: Invalid interface name: \(sanitized)")
+                    return nil
+                }
+            }
+            
+            return sanitized.isEmpty ? nil : sanitized
+        }
+    }
+    
+    private func isValidInterfaceName(_ name: String) -> Bool {
+        // Validate interface name format (e.g., en0, en1, eth0, etc.)
+        let interfacePattern = "^[a-zA-Z]+[0-9]+$"
+        let regex = try? NSRegularExpression(pattern: interfacePattern)
+        let range = NSRange(location: 0, length: name.count)
+        
+        // Check against common valid interface prefixes
+        let validPrefixes = ["en", "eth", "lo", "utun", "awdl", "llw", "anpi", "ipsec"]
+        let hasValidPrefix = validPrefixes.contains { name.hasPrefix($0) }
+        
+        return hasValidPrefix && 
+               name.count <= 10 && // Reasonable length limit
+               regex?.firstMatch(in: name, options: [], range: range) != nil
+    }
+    
+    private func createSecureNetworkEnvironment() -> [String: String] {
+        // Create minimal, secure environment for network commands
+        var secureEnv: [String: String] = [:]
+        
+        // Only include essential environment variables
+        let allowedKeys = ["PATH", "HOME", "USER"]
+        
+        for key in allowedKeys {
+            if let value = ProcessInfo.processInfo.environment[key] {
+                // Sanitize environment values
+                let sanitizedValue = value.replacingOccurrences(of: ";", with: "")
+                                         .replacingOccurrences(of: "|", with: "")
+                                         .replacingOccurrences(of: "&", with: "")
+                                         .replacingOccurrences(of: "$", with: "")
+                                         .replacingOccurrences(of: "`", with: "")
+                
+                secureEnv[key] = sanitizedValue
+            }
+        }
+        
+        // Override PATH to only include system directories
+        secureEnv["PATH"] = "/bin:/usr/bin:/sbin:/usr/sbin"
+        
+        return secureEnv
+    }
+    
+    private func waitForNetworkProcessWithTimeout(task: Process, pipe: Pipe, timeout: TimeInterval) async throws -> (success: Bool, data: Data) {
+        return try await withCheckedThrowingContinuation { continuation in
+            let semaphore = DispatchSemaphore(value: 0)
+            var processData = Data()
+            var processCompleted = false
+            var hasResumed = false
+            
+            // Read data asynchronously
+            DispatchQueue.global().async {
+                processData = pipe.fileHandleForReading.readDataToEndOfFile()
+                task.waitUntilExit()
+                processCompleted = true
+                semaphore.signal()
+            }
+            
+            // Set up timeout
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout) {
+                semaphore.signal()
+            }
+            
+            // Wait for completion or timeout
+            DispatchQueue.global().async {
+                semaphore.wait()
+                
+                if !hasResumed {
+                    hasResumed = true
+                    if processCompleted {
+                        continuation.resume(returning: (success: true, data: processData))
+                    } else {
+                        // Timeout occurred
+                        if task.isRunning {
+                            task.terminate()
+                            DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
+                                if task.isRunning {
+                                    task.interrupt()
+                                }
+                            }
+                        }
+                        continuation.resume(returning: (success: false, data: Data()))
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Network Process Errors
+
+enum NetworkProcessError: Error, LocalizedError {
+    case processTimeout
+    case invalidOutput
+    case invalidInterface
+    
+    var errorDescription: String? {
+        switch self {
+        case .processTimeout:
+            return "Network process timed out"
+        case .invalidOutput:
+            return "Invalid network process output"
+        case .invalidInterface:
+            return "Invalid network interface name"
+        }
     }
 }

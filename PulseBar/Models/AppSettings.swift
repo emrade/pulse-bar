@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import ServiceManagement
+import os
 
 // MARK: - Settings Model
 struct AppSettings: Codable {
@@ -103,6 +104,7 @@ struct SettingsAccessor {
 @MainActor
 class SettingsManager: ObservableObject {
     @Published var settings = AppSettings()
+    private let logger = PulseBarLogger.shared
     
     private let userDefaults = UserDefaults.standard
     private let settingsKey = "PulseBarSettings"
@@ -138,7 +140,7 @@ class SettingsManager: ObservableObject {
     
     private func setLaunchAtLogin(_ enabled: Bool) {
         guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
-            print("Failed to get bundle identifier for launch at login configuration")
+            logger.logSystemError("Failed to get bundle identifier for launch at login configuration")
             return
         }
         
@@ -160,11 +162,11 @@ class SettingsManager: ObservableObject {
                 // Fallback to SMLoginItemSetEnabled for older macOS versions
                 let success = SMLoginItemSetEnabled(bundleIdentifier as CFString, enabled)
                 if !success {
-                    print("Failed to \(enabled ? "enable" : "disable") launch at login using SMLoginItemSetEnabled")
+                    logger.logSystemError("Failed to \(enabled ? "enable" : "disable") launch at login using SMLoginItemSetEnabled")
                 }
             }
         } catch {
-            print("Failed to configure launch at login: \(error.localizedDescription)")
+            logger.logSystemError("Failed to configure launch at login", error: error)
         }
     }
     
