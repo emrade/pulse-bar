@@ -126,7 +126,7 @@ open PulseBar.app
 
 ### 5. Post-Release Tasks 📢
 
-#### 5.1 Merge to Main (optional)
+#### 5.1 Merge to Main
 ```bash
 # If you maintain a main branch for releases
 git checkout main
